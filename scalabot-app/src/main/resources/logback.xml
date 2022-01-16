@@ -1,0 +1,37 @@
+<configuration scan="false" debug="false">
+    <appender name="STD_OUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{HH:mm:ss.SSS} %5level][%logger{36}][%thread]: %msg%n</pattern>
+        </encoder>
+        <filter class="net.lamgc.scalabot.util.StdOutFilter">
+
+        </filter>
+    </appender>
+
+    <appender name="STD_ERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>%red([%d{HH:mm:ss.SSS} %5level][%logger{36}][%thread]: %msg%n)</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <appender name="FILE_OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>data/logs/latest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>data/logs/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%d{HH:mm:ss.SSS} %5level][%logger{36}][%thread]: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="FILE_OUT"/>
+        <appender-ref ref="STD_ERR" additivity="false"/>
+        <appender-ref ref="STD_OUT"/>
+    </root>
+</configuration>
