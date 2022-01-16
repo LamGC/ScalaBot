@@ -8,10 +8,8 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 internal object BotDBMaker {
-
-    private val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
-
     fun getBotMaker(botAccount: BotAccount): DBContext {
+        val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
         val digestBytes = digest.digest(botAccount.token.toByteArray(StandardCharsets.UTF_8))
         val dbPath = AppPaths.DATA_DB.path + "${digestBytes.toHaxString()}.db"
         val db = DBMaker.fileDB(dbPath)

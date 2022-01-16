@@ -8,7 +8,8 @@ final class ByteUtils {
     public static String bytesToHexString(byte[] bytes) {
         StringBuilder builder = new StringBuilder();
         for (byte aByte : bytes) {
-            builder.append(Integer.toHexString(aByte));
+            String hexBit = Integer.toHexString(aByte & 0xFF);
+            builder.append(hexBit.length() == 1 ? "0" + hexBit : hexBit);
         }
         return builder.toString();
     }
