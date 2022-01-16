@@ -8,7 +8,8 @@ import java.io.File;
 /**
  * 该接口用于为指定的 {@link BaseAbilityBot} 创建扩展.
  *
- * <p> 由于 AbilityExtension 无法直接获取 {@link BaseAbilityBot} 所属的 {@link org.telegram.abilitybots.api.db.DBContext} 对象,
+ * <p> 由于 AbilityExtension 无法直接获取 {@link BaseAbilityBot} 的
+ * 数据库对象 {@link org.telegram.abilitybots.api.db.DBContext},
  * 所以将通过该接口工厂来创建扩展对象.
  *
  * @author LamGC
