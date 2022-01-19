@@ -11,6 +11,17 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+tasks.withType<Javadoc> {
+    options {
+        encoding = "UTF-8"
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 tasks.test {
     useJUnitPlatform()
 }
