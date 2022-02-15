@@ -356,15 +356,27 @@ internal object MavenMetaInformationFinder : ExtensionPackageFinder {
 /**
  * 扩展包专属的类加载器.
  *
- * 通过为每个扩展包提供专门的加载器, 可防止意外使用其他扩展的类(希望如此).
+ * 通过为每个扩展包提供专有的加载器, 可防止意外使用其他扩展的类(希望如此).
+ * @param urls 扩展包资源 Url.
  */
-internal class ExtensionClassLoader(extensionFile: File) :
-    URLClassLoader(arrayOf(URL("file:///${extensionFile.canonicalPath}"))) {
+internal class ExtensionClassLoader(vararg urls: URL) :
+    URLClassLoader(urls) {
+
+    /**
+     * 指定扩展包 File 来创建 ClassLoader.
+     * @param extensionFile 扩展包文件.
+     */
+    constructor(extensionFile: File) :
+            this(URL(getUrlString(extensionFile)))
 
     val serviceLoader: ServiceLoader<BotExtensionFactory> = ServiceLoader.load(BotExtensionFactory::class.java, this)
 
+    companion object {
+        private fun getUrlString(extensionFile: File, defaultScheme: String = "file:///"): String {
+            return when (extensionFile.extension.lowercase()) {
+                "jar" -> "jar:file:///${extensionFile.canonicalPath}!/"
+                else -> defaultScheme + extensionFile.canonicalPath
+            }
+        }
+    }
 }
-
-
-
-
