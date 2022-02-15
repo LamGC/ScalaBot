@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import net.lamgc.scalabot.extension.BotExtensionFactory
 import net.lamgc.scalabot.util.deepListFiles
 import net.lamgc.scalabot.util.equalsArtifact
+import net.lamgc.scalabot.util.getPriority
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.jdom2.Document
@@ -40,20 +41,49 @@ internal class ExtensionLoader(
         for (extensionArtifact in bot.extensions) {
             val extensionFilesMap = findExtensionPackageFile(extensionArtifact)
             val foundedNumber = allFoundedPackageNumber(extensionFilesMap)
-            if (foundedNumber > 1) {
+            if (checkConflict(extensionFilesMap)) {
                 printExtensionFileConflictError(extensionArtifact, extensionFilesMap)
                 continue
             } else if (foundedNumber == 0) {
                 log.warn { "[Bot ${bot.botUsername}] 找不到符合的扩展包文件: $extensionArtifact" }
                 continue
             }
-            val files = loadFoundExtensionPackage(extensionFilesMap)
+
+            val files = getExtensionFiles(filterHighPriorityResult(extensionFilesMap))
             extensionEntries.addAll(getExtensionFactories(extensionArtifact, files.first()))
         }
         return extensionEntries.toSet()
     }
 
-    private fun loadFoundExtensionPackage(packageMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Set<File> {
+    /**
+     * 检查是否发生冲突.
+     * @return 如果出现冲突, 返回 `true`.
+     */
+    private fun checkConflict(foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Boolean {
+        if (foundResult.isEmpty()) {
+            return false
+        }
+
+        val highPriorityFinders = filterHighPriorityResult(foundResult).keys
+        if (highPriorityFinders.size > 1) {
+            return true
+        } else {
+            val finder = highPriorityFinders.firstOrNull() ?: return false
+            return foundResult[finder]!!.size > 1
+        }
+    }
+
+    private fun filterHighPriorityResult(foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>)
+            : Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
+        val finders: List<ExtensionPackageFinder> = foundResult.keys
+            .filter { checkExtensionPackageFinder(it) && (foundResult[it]?.size ?: 0) != 0 }
+            .sortedBy { it.getPriority() }
+
+        val highPriority = finders.first().getPriority()
+        return foundResult.filterKeys { it.getPriority() == highPriority }
+    }
+
+    private fun getExtensionFiles(packageMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Set<File> {
         val files = mutableSetOf<File>()
         for (set in packageMap.values) {
             for (foundedExtensionPackage in set) {
@@ -90,6 +120,9 @@ internal class ExtensionLoader(
     ): Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
         val result = mutableMapOf<ExtensionPackageFinder, Set<FoundExtensionPackage>>()
         for (finder in finders) {
+            if (!checkExtensionPackageFinder(finder)) {
+                continue
+            }
             val artifacts = finder.findByArtifact(extensionArtifact, extensionsPath)
             if (artifacts.isNotEmpty()) {
                 result[finder] = artifacts
@@ -97,6 +130,9 @@ internal class ExtensionLoader(
         }
         return result
     }
+
+    private fun checkExtensionPackageFinder(finder: ExtensionPackageFinder): Boolean =
+        finder::class.java.getDeclaredAnnotation(FinderRules::class.java) != null
 
     private fun printExtensionFileConflictError(
         extensionArtifact: Artifact,
@@ -109,7 +145,9 @@ internal class ExtensionLoader(
         ).append('\n')
 
         foundResult.forEach { (finder, files) ->
-            errMessage.append("\t- 搜索器 `").append(finder::class.simpleName).append("` 找到了以下扩展包: \n")
+            errMessage.append("\t- 搜索器 `").append(finder::class.simpleName).append("`")
+                .append("(Priority: ${finder.getPriority()})")
+                .append(" 找到了以下扩展包: \n")
             for (file in files) {
                 errMessage.append("\t\t* ")
                     .append(URLDecoder.decode(file.getRawUrl().toString(), StandardCharsets.UTF_8)).append('\n')
@@ -226,6 +264,11 @@ internal interface FoundExtensionPackage {
      */
     fun loadExtension(): File
 
+    /**
+     *
+     */
+    fun getExtensionPackageFinder(): ExtensionPackageFinder
+
 }
 
 /**
@@ -233,8 +276,11 @@ internal interface FoundExtensionPackage {
  * @param artifact 扩展包构件坐标.
  * @param file 已找到的扩展包文件.
  */
-internal class FileFoundExtensionPackage(private val artifact: Artifact, private val file: File) :
-    FoundExtensionPackage {
+internal class FileFoundExtensionPackage(
+    private val artifact: Artifact,
+    private val file: File,
+    private val finder: ExtensionPackageFinder
+) : FoundExtensionPackage {
 
     init {
         if (!file.exists()) {
@@ -247,6 +293,8 @@ internal class FileFoundExtensionPackage(private val artifact: Artifact, private
     override fun getRawUrl(): URL = file.canonicalFile.toURI().toURL()
 
     override fun loadExtension(): File = file
+
+    override fun getExtensionPackageFinder(): ExtensionPackageFinder = finder
 }
 
 /**
@@ -255,6 +303,7 @@ internal class FileFoundExtensionPackage(private val artifact: Artifact, private
  * 将搜索文件名(不带扩展包名)结尾为 `${groupId}_${artifactId}_${version}` 的文件.
  * 比如说 `(Example Extension) org.example_scalabot-example_v1.0.0-SNAPSHOT.jar` 是可以的
  */
+@FinderRules(priority = FinderPriority.LOCAL)
 internal object FileNameFinder : ExtensionPackageFinder {
 
     override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage> {
@@ -265,7 +314,7 @@ internal object FileNameFinder : ExtensionPackageFinder {
 
         val extensionPackage = mutableSetOf<FoundExtensionPackage>()
         for (file in files) {
-            extensionPackage.add(FileFoundExtensionPackage(extensionArtifact, file))
+            extensionPackage.add(FileFoundExtensionPackage(extensionArtifact, file, this))
         }
         return if (extensionPackage.isEmpty()) emptySet() else extensionPackage
     }
@@ -278,6 +327,7 @@ internal object FileNameFinder : ExtensionPackageFinder {
 /**
  * 通过检查 Maven 在发布构件时打包进去的元信息(包括 POM 文件)来获取构件坐标.
  */
+@FinderRules(priority = FinderPriority.LOCAL)
 internal object MavenMetaInformationFinder : ExtensionPackageFinder {
 
     private const val MAVEN_META_XML = "pom.xml"
@@ -297,12 +347,12 @@ internal object MavenMetaInformationFinder : ExtensionPackageFinder {
                     else -> null
                 }
                 if (foundArtifact != null && extensionArtifact.equalsArtifact(foundArtifact)) {
-                    result.add(FileFoundExtensionPackage(extensionArtifact, file))
+                    result.add(FileFoundExtensionPackage(extensionArtifact, file, this))
                 }
             } else if (file.isDirectory) {
                 val foundArtifact = getArtifactCoordinateFromArtifactDirectory(file)
                 if (foundArtifact != null && extensionArtifact.equalsArtifact(foundArtifact)) {
-                    result.add(FileFoundExtensionPackage(extensionArtifact, file))
+                    result.add(FileFoundExtensionPackage(extensionArtifact, file, this))
                 }
             }
         }
@@ -454,4 +504,36 @@ internal class ExtensionClassLoader(vararg urls: URL) :
             }
         }
     }
+}
+
+/**
+ * 搜索器规则.
+ * @property priority 搜索器优先级. 优先级从 0 (最高)开始, 相同构件坐标下将使用优先级最高的搜索器所找到的文件.
+ */
+annotation class FinderRules(
+    val priority: Int
+)
+
+/**
+ * **建议**的搜索器优先级常量.
+ */
+class FinderPriority private constructor() {
+
+    companion object {
+        /**
+         * 本地扩展包.
+         */
+        const val LOCAL = 100
+
+        /**
+         * 远端扩展包.
+         */
+        const val REMOTE = 200
+
+        /**
+         * 替补的扩展包.
+         */
+        const val ALTERNATE = 500
+    }
+
 }

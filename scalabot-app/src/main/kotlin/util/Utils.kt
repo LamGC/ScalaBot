@@ -1,5 +1,7 @@
 package net.lamgc.scalabot.util
 
+import net.lamgc.scalabot.ExtensionPackageFinder
+import net.lamgc.scalabot.FinderRules
 import org.eclipse.aether.artifact.Artifact
 import java.io.File
 import java.io.FileFilter
@@ -53,3 +55,11 @@ internal fun File.deepListFiles(
     return result.toTypedArray()
 }
 
+/**
+ * 从 Finder 的 [FinderRules] 注解中获取优先级.
+ * @return 获取 Finder 的优先级.
+ * @throws NoSuchFieldException 如果 Finder 没有添加 [FinderRules] 注解时抛出该异常.
+ */
+internal fun ExtensionPackageFinder.getPriority() =
+    this::class.java.getDeclaredAnnotation(FinderRules::class.java)?.priority
+        ?: throw NoSuchFieldException("Finder did not add `FinderRules` annotation")
