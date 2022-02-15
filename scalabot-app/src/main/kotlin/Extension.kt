@@ -12,9 +12,12 @@ import org.jdom2.input.SAXBuilder
 import org.jdom2.xpath.XPathFactory
 import org.telegram.abilitybots.api.util.AbilityExtension
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.net.URL
 import java.net.URLClassLoader
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.JarEntry
@@ -32,48 +35,60 @@ internal class ExtensionLoader(
         MavenMetaInformationFinder
     )
 
-    fun getExtensions(): Set<ExtensionEntry> {
-        val extensionEntries = mutableSetOf<ExtensionEntry>()
+    fun getExtensions(): Set<LoadedExtensionEntry> {
+        val extensionEntries = mutableSetOf<LoadedExtensionEntry>()
         for (extensionArtifact in bot.extensions) {
             val extensionFilesMap = findExtensionPackageFile(extensionArtifact)
-            val extensionFiles = filesMapToSet(extensionFilesMap)
-            if (extensionFiles.size > 1) {
+            val foundedNumber = allFoundedPackageNumber(extensionFilesMap)
+            if (foundedNumber > 1) {
                 printExtensionFileConflictError(extensionArtifact, extensionFilesMap)
                 continue
-            } else if (extensionFiles.isEmpty()) {
+            } else if (foundedNumber == 0) {
                 log.warn { "[Bot ${bot.botUsername}] 找不到符合的扩展包文件: $extensionArtifact" }
                 continue
             }
-            extensionEntries.addAll(getExtensionFactories(extensionArtifact, extensionFiles.first()))
+            val files = loadFoundExtensionPackage(extensionFilesMap)
+            extensionEntries.addAll(getExtensionFactories(extensionArtifact, files.first()))
         }
         return extensionEntries.toSet()
     }
 
-    private fun getExtensionFactories(extensionArtifact: Artifact, extensionFile: File): Set<ExtensionEntry> {
+    private fun loadFoundExtensionPackage(packageMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Set<File> {
+        val files = mutableSetOf<File>()
+        for (set in packageMap.values) {
+            for (foundedExtensionPackage in set) {
+                files.add(foundedExtensionPackage.loadExtension())
+            }
+        }
+        return files
+    }
+
+    private fun getExtensionFactories(extensionArtifact: Artifact, extensionFile: File): Set<LoadedExtensionEntry> {
         val extClassLoader =
             ExtensionClassLoaderCleaner.getOrCreateExtensionClassLoader(extensionArtifact, extensionFile)
-        val factories = mutableSetOf<ExtensionEntry>()
+        val factories = mutableSetOf<LoadedExtensionEntry>()
         for (factory in extClassLoader.serviceLoader) {
             val extension =
                 factory.createExtensionInstance(bot, getExtensionDataFolder(extensionArtifact))
-            factories.add(ExtensionEntry(extensionArtifact, factory::class.java, extension))
+            factories.add(LoadedExtensionEntry(extensionArtifact, factory::class.java, extension))
         }
         return factories.toSet()
     }
 
-    private fun filesMapToSet(filesMap: Map<ExtensionPackageFinder, Set<File>>): MutableSet<File> {
-        val result: MutableSet<File> = mutableSetOf()
+    private fun allFoundedPackageNumber(filesMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Int {
+        val result = mutableSetOf<URL>()
         for (files in filesMap.values) {
-            result.addAll(files)
+            for (file in files) {
+                result.add(file.getRawUrl())
+            }
         }
-        return result
+        return result.size
     }
 
     private fun findExtensionPackageFile(
         extensionArtifact: Artifact,
-        extensionsPath: File = AppPaths.EXTENSIONS.file
-    ): Map<ExtensionPackageFinder, Set<File>> {
-        val result = mutableMapOf<ExtensionPackageFinder, Set<File>>()
+    ): Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
+        val result = mutableMapOf<ExtensionPackageFinder, Set<FoundExtensionPackage>>()
         for (finder in finders) {
             val artifacts = finder.findByArtifact(extensionArtifact, extensionsPath)
             if (artifacts.isNotEmpty()) {
@@ -85,17 +100,19 @@ internal class ExtensionLoader(
 
     private fun printExtensionFileConflictError(
         extensionArtifact: Artifact,
-        foundResult: Map<ExtensionPackageFinder, Set<File>>
+        foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>
     ) {
         val errMessage = StringBuilder(
             """
             [Bot ${bot.botUsername}] 扩展包 $extensionArtifact 存在多个文件, 为防止安全问题, 已禁止加载该扩展包:
         """.trimIndent()
         ).append('\n')
+
         foundResult.forEach { (finder, files) ->
             errMessage.append("\t- 搜索器 `").append(finder::class.simpleName).append("` 找到了以下扩展包: \n")
             for (file in files) {
-                errMessage.append("\t\t* ").append(file.canonicalPath).append('\n')
+                errMessage.append("\t\t* ")
+                    .append(URLDecoder.decode(file.getRawUrl().toString(), StandardCharsets.UTF_8)).append('\n')
             }
         }
         log.error { errMessage }
@@ -110,8 +127,7 @@ internal class ExtensionLoader(
         return dataFolder
     }
 
-
-    data class ExtensionEntry(
+    data class LoadedExtensionEntry(
         val extensionArtifact: Artifact,
         val factoryClass: Class<out BotExtensionFactory>,
         val extension: AbilityExtension
@@ -180,22 +196,78 @@ internal interface ExtensionPackageFinder {
      * @param extensionsPath 建议的搜索路径, 如搜索器希望通过网络来获取也可以.
      * @return 返回按搜索器的方式可以找到的所有与构件坐标有关的扩展包路径.
      */
-    fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<File>
+    fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage>
+}
+
+/**
+ * 已找到的扩展包信息.
+ * 通过实现该接口, 以寻找远端文件的 [ExtensionPackageFinder]
+ * 可以在适当的时候将扩展包下载到本地, 而无需在搜索阶段下载扩展包.
+ */
+internal interface FoundExtensionPackage {
+
+    /**
+     * 获取扩展包的构件坐标.
+     * @return 返回扩展包的构件坐标.
+     */
+    fun getExtensionArtifact(): Artifact
+
+    /**
+     * 获取原始的扩展 Url.
+     * @return 返回扩展包所在的 Url.
+     */
+    fun getRawUrl(): URL
+
+    /**
+     * 获取扩展包并返回扩展包在本地的 File 对象.
+     *
+     * 当调用本方法时, Finder 可以将扩展包下载到本地(如果扩展包在远端服务器的话).
+     * @return 返回扩展包在本地存储时指向扩展包文件的 File 对象.
+     */
+    fun loadExtension(): File
+
+}
+
+/**
+ * 已找到的扩展包文件.
+ * @param artifact 扩展包构件坐标.
+ * @param file 已找到的扩展包文件.
+ */
+internal class FileFoundExtensionPackage(private val artifact: Artifact, private val file: File) :
+    FoundExtensionPackage {
+
+    init {
+        if (!file.exists()) {
+            throw FileNotFoundException(file.canonicalPath)
+        }
+    }
+
+    override fun getExtensionArtifact(): Artifact = artifact
+
+    override fun getRawUrl(): URL = file.canonicalFile.toURI().toURL()
+
+    override fun loadExtension(): File = file
 }
 
 /**
  * 基于文件名的搜索器.
  *
- * 将搜索文件名(不带扩展包名)结尾为 `${groupId}-${artifactId}-${version}` 的文件.
+ * 将搜索文件名(不带扩展包名)结尾为 `${groupId}_${artifactId}_${version}` 的文件.
+ * 比如说 `(Example Extension) org.example_scalabot-example_v1.0.0-SNAPSHOT.jar` 是可以的
  */
 internal object FileNameFinder : ExtensionPackageFinder {
 
-    override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<File> {
+    override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage> {
         val focusName = getExtensionFilename(extensionArtifact)
         val files = extensionsPath.listFiles { file ->
             file.nameWithoutExtension.endsWith(focusName)
+        } ?: return emptySet()
+
+        val extensionPackage = mutableSetOf<FoundExtensionPackage>()
+        for (file in files) {
+            extensionPackage.add(FileFoundExtensionPackage(extensionArtifact, file))
         }
-        return files?.toSet() ?: emptySet()
+        return if (extensionPackage.isEmpty()) emptySet() else extensionPackage
     }
 
     private fun getExtensionFilename(extensionArtifact: Artifact) =
@@ -203,14 +275,17 @@ internal object FileNameFinder : ExtensionPackageFinder {
 
 }
 
+/**
+ * 通过检查 Maven 在发布构件时打包进去的元信息(包括 POM 文件)来获取构件坐标.
+ */
 internal object MavenMetaInformationFinder : ExtensionPackageFinder {
 
     private const val MAVEN_META_XML = "pom.xml"
     private const val MAVEN_META_PROPERTIES = "pom.properties"
 
-    override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<File> {
+    override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage> {
         val files = extensionsPath.listFiles() ?: return emptySet()
-        val result = mutableSetOf<File>()
+        val result = mutableSetOf<FoundExtensionPackage>()
         for (file in files) {
             if (file.isFile) {
                 val foundArtifact = when (file.extension) {
@@ -222,12 +297,12 @@ internal object MavenMetaInformationFinder : ExtensionPackageFinder {
                     else -> null
                 }
                 if (foundArtifact != null && extensionArtifact.equalsArtifact(foundArtifact)) {
-                    result.add(file)
+                    result.add(FileFoundExtensionPackage(extensionArtifact, file))
                 }
             } else if (file.isDirectory) {
                 val foundArtifact = getArtifactCoordinateFromArtifactDirectory(file)
                 if (foundArtifact != null && extensionArtifact.equalsArtifact(foundArtifact)) {
-                    result.add(file)
+                    result.add(FileFoundExtensionPackage(extensionArtifact, file))
                 }
             }
         }
