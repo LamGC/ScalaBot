@@ -20,8 +20,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.JarEntry
 import java.util.jar.JarInputStream
 
-internal class ExtensionLoader(private val bot: ScalaBot) {
-
+internal class ExtensionLoader(
+    private val bot: ScalaBot,
+    private val extensionsDataFolder: File = AppPaths.DATA_EXTENSIONS.file,
+    private val extensionsPath: File = AppPaths.EXTENSIONS.file
+) {
     private val log = KotlinLogging.logger { }
 
     private val finders: Set<ExtensionPackageFinder> = setOf(
@@ -100,7 +103,7 @@ internal class ExtensionLoader(private val bot: ScalaBot) {
 
     private fun getExtensionDataFolder(extensionArtifact: Artifact): File {
         val dataFolder =
-            File(AppPaths.DATA_EXTENSIONS.file, "${extensionArtifact.groupId}/${extensionArtifact.artifactId}")
+            File(extensionsDataFolder, "${extensionArtifact.groupId}/${extensionArtifact.artifactId}")
         if (!dataFolder.exists()) {
             dataFolder.mkdirs()
         }
