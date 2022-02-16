@@ -31,7 +31,7 @@
 
     <root level="INFO">
         <appender-ref ref="FILE_OUT"/>
-        <appender-ref ref="STD_ERR" additivity="false"/>
+        <appender-ref ref="STD_ERR"/>
         <appender-ref ref="STD_OUT"/>
     </root>
 </configuration>
