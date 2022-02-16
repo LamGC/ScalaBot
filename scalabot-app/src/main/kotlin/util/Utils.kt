@@ -1,5 +1,6 @@
 package net.lamgc.scalabot.util
 
+import mu.KotlinLogging
 import net.lamgc.scalabot.ExtensionPackageFinder
 import net.lamgc.scalabot.FinderRules
 import org.eclipse.aether.artifact.Artifact
@@ -63,3 +64,33 @@ internal fun File.deepListFiles(
 internal fun ExtensionPackageFinder.getPriority() =
     this::class.java.getDeclaredAnnotation(FinderRules::class.java)?.priority
         ?: throw NoSuchFieldException("Finder did not add `FinderRules` annotation")
+
+/**
+ * 为 [AutoCloseable] 对象注册 Jvm Shutdown 钩子.
+ * @return 返回对象本身, 方便进行链式调用.
+ */
+fun <T : AutoCloseable> T.registerShutdownHook(): T {
+    UtilsInternal.autoCloseableSet.add(this)
+    return this
+}
+
+private val log = KotlinLogging.logger { }
+
+private object UtilsInternal {
+
+    val autoCloseableSet = mutableSetOf<AutoCloseable>()
+
+    init {
+        Runtime.getRuntime().addShutdownHook(Thread({
+            log.debug { "Closing registered hook resources..." }
+            autoCloseableSet.forEach {
+                try {
+                    it.close()
+                } catch (e: Exception) {
+                    log.error(e) { "An exception occurred while closing the resource. (Resource: `$it`)" }
+                }
+            }
+            log.debug { "All registered hook resources have been closed." }
+        }, "Shutdown-AutoCloseable"))
+    }
+}

@@ -2,6 +2,7 @@ package net.lamgc.scalabot
 
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import net.lamgc.scalabot.util.registerShutdownHook
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.generics.BotSession
@@ -11,6 +12,7 @@ import kotlin.system.exitProcess
 private val log = KotlinLogging.logger { }
 
 private val launcher = Launcher()
+    .registerShutdownHook()
 
 fun main(args: Array<String>): Unit = runBlocking {
     log.info { "ScalaBot 正在启动中..." }
@@ -21,7 +23,7 @@ fun main(args: Array<String>): Unit = runBlocking {
     }
 }
 
-internal class Launcher {
+internal class Launcher : AutoCloseable {
 
     companion object {
         @JvmStatic
@@ -31,6 +33,7 @@ internal class Launcher {
     private val botApi = TelegramBotsApi(DefaultBotSession::class.java)
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
 
+    @Synchronized
     fun launch(): Boolean {
         val botConfigs = loadBotConfig()
         if (botConfigs.isEmpty()) {
@@ -83,6 +86,14 @@ internal class Launcher {
         log.info { "机器人 `${bot.botUsername}` 已启动." }
     }
 
+    @Synchronized
+    override fun close() {
+        botSessionMap.forEach {
+            log.info { "正在关闭机器人 `${it.key.botUsername}` ..." }
+            it.value.stop()
+            log.info { "已关闭机器人 `${it.key.botUsername}`." }
+        }
+    }
 
 }
 
