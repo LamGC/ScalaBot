@@ -509,6 +509,7 @@ internal class ExtensionClassLoader(vararg urls: URL) :
 /**
  * 搜索器规则.
  * @property priority 搜索器优先级. 优先级从 0 (最高)开始, 相同构件坐标下将使用优先级最高的搜索器所找到的文件.
+ * 如无特殊需求, 建议使用 [FinderPriority] 中已定义好的优先级.
  */
 annotation class FinderRules(
     val priority: Int
