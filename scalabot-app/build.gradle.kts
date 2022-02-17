@@ -9,14 +9,14 @@ plugins {
 dependencies {
     implementation(project(":scalabot-extension"))
 
-    implementation("org.slf4j:slf4j-api:1.7.33")
+    implementation("org.slf4j:slf4j-api:1.7.35")
     implementation("io.github.microutils:kotlin-logging:2.1.21")
     implementation("ch.qos.logback:logback-classic:1.2.10")
 
     implementation("org.eclipse.aether:aether-api:1.1.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.google.code.gson:gson:2.9.0")
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
