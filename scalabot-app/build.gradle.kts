@@ -41,3 +41,7 @@ tasks.withType<KotlinCompile> {
 application {
     mainClass.set("net.lamgc.scalabot.AppMainKt")
 }
+
+tasks.jar.configure {
+    exclude("**/logback-test.xml")
+}
