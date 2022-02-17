@@ -1,5 +1,6 @@
 package net.lamgc.scalabot
 
+import io.prometheus.client.exporter.HTTPServer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.lamgc.scalabot.util.registerShutdownHook
@@ -18,9 +19,28 @@ fun main(args: Array<String>): Unit = runBlocking {
     log.info { "ScalaBot 正在启动中..." }
     log.debug { "启动参数: ${args.joinToString(prefix = "[", postfix = "]")}" }
     initialFiles()
+    if (Const.config.metrics.enable) {
+        startMetricsServer()
+    }
     if (!launcher.launch()) {
         exitProcess(1)
     }
+}
+
+/**
+ * 启动运行指标服务器.
+ * 使用 Prometheus 指标格式.
+ */
+fun startMetricsServer() {
+    val builder = HTTPServer.Builder()
+        .withDaemonThreads(true)
+        .withPort(Const.config.metrics.port)
+        .withHostname(Const.config.metrics.bindAddress)
+
+    val httpServer = builder
+        .build()
+        .registerShutdownHook()
+    log.info { "运行指标服务器已启动. (Port: ${httpServer.port})" }
 }
 
 internal class Launcher : AutoCloseable {

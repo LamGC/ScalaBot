@@ -23,6 +23,9 @@ dependencies {
     implementation("org.telegram:telegrambots-abilities:5.6.0")
     implementation("org.telegram:telegrambots:5.6.0")
 
+    implementation("io.prometheus:simpleclient:0.15.0")
+    implementation("io.prometheus:simpleclient_httpserver:0.15.0")
+
     testImplementation(kotlin("test"))
 }
 

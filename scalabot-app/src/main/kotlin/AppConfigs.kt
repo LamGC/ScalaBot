@@ -60,6 +60,12 @@ internal data class ProxyConfig(
     val port: Int = 1080
 )
 
+internal data class MetricsConfig(
+    val enable: Boolean = false,
+    val port: Int = 9386,
+    val bindAddress: String? = null
+)
+
 /**
  * ScalaBot App 配置.
  *
@@ -68,6 +74,7 @@ internal data class ProxyConfig(
  */
 internal data class AppConfig(
     val proxy: ProxyConfig = ProxyConfig(),
+    val metrics: MetricsConfig = MetricsConfig()
 )
 
 /**
