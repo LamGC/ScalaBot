@@ -29,7 +29,7 @@ internal class ExtensionLoader(
     fun getExtensions(): Set<LoadedExtensionEntry> {
         val extensionEntries = mutableSetOf<LoadedExtensionEntry>()
         for (extensionArtifact in bot.extensions) {
-            val extensionFilesMap = findExtensionPackageFile(extensionArtifact)
+            val extensionFilesMap = findExtensionPackage(extensionArtifact)
             val foundedNumber = allFoundedPackageNumber(extensionFilesMap)
             if (checkConflict(extensionFilesMap)) {
                 printExtensionFileConflictError(extensionArtifact, extensionFilesMap)
@@ -105,11 +105,19 @@ internal class ExtensionLoader(
         return result.size
     }
 
-    private fun findExtensionPackageFile(
+    private fun findExtensionPackage(
         extensionArtifact: Artifact,
     ): Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
         val result = mutableMapOf<ExtensionPackageFinder, Set<FoundExtensionPackage>>()
-        for (finder in finders) {
+        val sortedFinders = finders.sortedBy { it.getPriority() }
+        var highPriority = sortedFinders.first().getPriority()
+
+        for (finder in sortedFinders) {
+            if (finder.getPriority() > highPriority && result.isNotEmpty()) {
+                break
+            }
+            highPriority = finder.getPriority()
+
             if (!checkExtensionPackageFinder(finder)) {
                 continue
             }
