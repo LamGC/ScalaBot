@@ -12,6 +12,17 @@ import org.telegram.abilitybots.api.toggle.DefaultToggle
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.api.objects.Update
 
+/**
+ * 可扩展 Bot.
+ * @param name 机器人名称. 建议设为机器人用户名.
+ * @param token 机器人 API 令牌.
+ * @property creatorId 机器人所有人的 Telegram 用户 Id. 可通过联系部分机器人来获取该信息.
+ * (e.g. [@userinfobot](http://t.me/userinfobot))
+ * @param db 机器人数据库对象. 用于状态机等用途.
+ * @param options AbilityBot 设置对象.
+ * @property extensions 扩展坐标集合.
+ * @param disableBuiltInAbility 是否禁用 [AbilityBot] 内置命令.
+ */
 internal class ScalaBot(
     name: String,
     token: String,
