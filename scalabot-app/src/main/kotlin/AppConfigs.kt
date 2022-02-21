@@ -7,6 +7,7 @@ import mu.KotlinLogging
 import net.lamgc.scalabot.util.ArtifactSerializer
 import net.lamgc.scalabot.util.ProxyTypeSerializer
 import org.eclipse.aether.artifact.Artifact
+import org.eclipse.aether.repository.Proxy
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -58,7 +59,17 @@ internal data class ProxyConfig(
     val type: DefaultBotOptions.ProxyType = DefaultBotOptions.ProxyType.NO_PROXY,
     val host: String = "127.0.0.1",
     val port: Int = 1080
-)
+) {
+
+    fun toAetherProxy(): Proxy? {
+        return if (type == DefaultBotOptions.ProxyType.HTTP) {
+            Proxy(Proxy.TYPE_HTTP, host, port)
+        } else {
+            null
+        }
+    }
+
+}
 
 internal data class MetricsConfig(
     val enable: Boolean = false,

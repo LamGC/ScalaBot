@@ -25,7 +25,10 @@ internal class ExtensionLoader(
     private val finders: Set<ExtensionPackageFinder> = setOf(
         FileNameFinder,
         MavenMetaInformationFinder,
-        MavenRepositoryExtensionFinder(LocalRepository("${System.getProperty("user.home")}/.m2/repository"))
+        MavenRepositoryExtensionFinder(
+            LocalRepository("${System.getProperty("user.home")}/.m2/repository"),
+            proxy = Const.config.proxy.toAetherProxy()
+        )
     )
 
     fun getExtensions(): Set<LoadedExtensionEntry> {
