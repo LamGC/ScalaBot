@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     api("org.telegram:telegrambots-abilities:5.6.0")
-    api("org.slf4j:slf4j-api:1.7.33")
+    api("org.slf4j:slf4j-api:1.7.36")
 
     // There is nothing to test.
     // testImplementation(kotlin("test"))
