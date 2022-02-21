@@ -2,6 +2,10 @@
     <include resource="base-logback.xml"/>
 
     <logger name="org.apache.http" level="INFO"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultTransporterProvider" level="INFO"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultRepositoryConnectorProvider" level="INFO"/>
+    <logger name="org.eclipse.aether.internal.impl.EnhancedLocalRepositoryManager" level="INFO"/>
+
     <root level="DEBUG">
         <appender-ref ref="FILE_OUT"/>
         <appender-ref ref="STD_ERR"/>
