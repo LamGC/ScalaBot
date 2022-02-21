@@ -88,9 +88,13 @@ internal class ExtensionLoader(
             ExtensionClassLoaderCleaner.getOrCreateExtensionClassLoader(extensionArtifact, extensionFile)
         val factories = mutableSetOf<LoadedExtensionEntry>()
         for (factory in extClassLoader.serviceLoader) {
-            val extension =
-                factory.createExtensionInstance(bot, getExtensionDataFolder(extensionArtifact))
-            factories.add(LoadedExtensionEntry(extensionArtifact, factory::class.java, extension))
+            try {
+                val extension =
+                    factory.createExtensionInstance(bot, getExtensionDataFolder(extensionArtifact))
+                factories.add(LoadedExtensionEntry(extensionArtifact, factory::class.java, extension))
+            } catch (e: Exception) {
+                log.error(e) { "创建扩展时发生异常. (ExtArtifact: `$extensionArtifact`, Factory: ${factory::class.java.name})" }
+            }
         }
         return factories.toSet()
     }
