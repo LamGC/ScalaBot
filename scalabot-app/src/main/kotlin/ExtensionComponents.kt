@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import net.lamgc.scalabot.extension.BotExtensionFactory
 import net.lamgc.scalabot.util.getPriority
 import org.eclipse.aether.artifact.Artifact
+import org.eclipse.aether.repository.LocalRepository
 import org.telegram.abilitybots.api.util.AbilityExtension
 import java.io.File
 import java.io.FileNotFoundException
@@ -23,7 +24,8 @@ internal class ExtensionLoader(
 
     private val finders: Set<ExtensionPackageFinder> = setOf(
         FileNameFinder,
-        MavenMetaInformationFinder
+        MavenMetaInformationFinder,
+        MavenRepositoryExtensionFinder(LocalRepository("${System.getProperty("user.home")}/.m2/repository"))
     )
 
     fun getExtensions(): Set<LoadedExtensionEntry> {
@@ -39,8 +41,12 @@ internal class ExtensionLoader(
                 continue
             }
 
-            val files = getExtensionFiles(filterHighPriorityResult(extensionFilesMap))
-            extensionEntries.addAll(getExtensionFactories(extensionArtifact, files.first()))
+            extensionEntries.addAll(
+                getExtensionFactories(
+                    extensionArtifact,
+                    filterHighPriorityResult(extensionFilesMap)
+                )
+            )
         }
         return extensionEntries.toSet()
     }
@@ -73,19 +79,13 @@ internal class ExtensionLoader(
         return foundResult.filterKeys { it.getPriority() == highPriority }
     }
 
-    private fun getExtensionFiles(packageMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Set<File> {
-        val files = mutableSetOf<File>()
-        for (set in packageMap.values) {
-            for (foundedExtensionPackage in set) {
-                files.add(foundedExtensionPackage.loadExtension())
-            }
-        }
-        return files
-    }
-
-    private fun getExtensionFactories(extensionArtifact: Artifact, extensionFile: File): Set<LoadedExtensionEntry> {
+    private fun getExtensionFactories(
+        extensionArtifact: Artifact,
+        foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>
+    ): Set<LoadedExtensionEntry> {
+        val foundPackage = foundResult.values.first().first()
         val extClassLoader =
-            ExtensionClassLoaderCleaner.getOrCreateExtensionClassLoader(extensionArtifact, extensionFile)
+            ExtensionClassLoaderCleaner.getOrCreateExtensionClassLoader(extensionArtifact, foundPackage)
         val factories = mutableSetOf<LoadedExtensionEntry>()
         for (factory in extClassLoader.serviceLoader) {
             try {
@@ -125,9 +125,13 @@ internal class ExtensionLoader(
             if (!checkExtensionPackageFinder(finder)) {
                 continue
             }
-            val artifacts = finder.findByArtifact(extensionArtifact, extensionsPath)
-            if (artifacts.isNotEmpty()) {
-                result[finder] = artifacts
+            try {
+                val artifacts = finder.findByArtifact(extensionArtifact, extensionsPath)
+                if (artifacts.isNotEmpty()) {
+                    result[finder] = artifacts
+                }
+            } catch (e: Exception) {
+                log.error { "搜索器 ${finder::class.java.name} 在搜索扩展 `$extensionArtifact` 时发生错误:" }
             }
         }
         return result
@@ -184,9 +188,12 @@ internal object ExtensionClassLoaderCleaner {
     private val usageCountMap = mutableMapOf<ExtensionClassLoader, AtomicInteger>()
 
     @Synchronized
-    fun getOrCreateExtensionClassLoader(extensionArtifact: Artifact, extensionFile: File): ExtensionClassLoader {
+    fun getOrCreateExtensionClassLoader(
+        extensionArtifact: Artifact,
+        foundExtensionPackage: FoundExtensionPackage
+    ): ExtensionClassLoader {
         return if (!artifactMap.containsKey(extensionArtifact)) {
-            val newClassLoader = ExtensionClassLoader(extensionFile)
+            val newClassLoader = foundExtensionPackage.createClassLoader()
             artifactMap[extensionArtifact] = newClassLoader
             usageCountMap[newClassLoader] = AtomicInteger(1)
             newClassLoader
@@ -237,6 +244,14 @@ internal interface ExtensionPackageFinder {
      * @return 返回按搜索器的方式可以找到的所有与构件坐标有关的扩展包路径.
      */
     fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage>
+
+    /**
+     * 获取类加载器工厂.
+     *
+     * 搜索器可根据需求自行实现类加载器工厂.
+     * @return 返回 [ExtensionClassLoaderFactory] 实现.
+     */
+    fun getClassLoaderFactory(): ExtensionClassLoaderFactory = DefaultExtensionClassLoaderFactory
 }
 
 /**
@@ -264,14 +279,17 @@ internal interface FoundExtensionPackage {
      * 当调用本方法时, Finder 可以将扩展包下载到本地(如果扩展包在远端服务器的话).
      * @return 返回扩展包在本地存储时指向扩展包文件的 File 对象.
      */
-    fun loadExtension(): File
+    fun getPackageFile(): File
 
     /**
-     *
+     * 找到该扩展包的发现器对象.
      */
     fun getExtensionPackageFinder(): ExtensionPackageFinder
 
 }
+
+private fun FoundExtensionPackage.createClassLoader(): ExtensionClassLoader =
+    getExtensionPackageFinder().getClassLoaderFactory().createClassLoader(this)
 
 /**
  * 已找到的扩展包文件.
@@ -294,7 +312,7 @@ internal class FileFoundExtensionPackage(
 
     override fun getRawUrl(): URL = file.canonicalFile.toURI().toURL()
 
-    override fun loadExtension(): File = file
+    override fun getPackageFile(): File = file
 
     override fun getExtensionPackageFinder(): ExtensionPackageFinder = finder
 }
@@ -304,18 +322,37 @@ internal class FileFoundExtensionPackage(
  *
  * 通过为每个扩展包提供专有的加载器, 可防止意外使用其他扩展的类(希望如此).
  * @param urls 扩展包资源 Url.
+ * @param dependencyLoader 依赖项的类加载器. 当扩展包含有其他依赖项时, 需将依赖项单独设置在一个类加载器中, 以确保扩展加载安全.
  */
-internal class ExtensionClassLoader(vararg urls: URL) :
-    URLClassLoader(urls) {
+internal class ExtensionClassLoader(urls: Array<URL>, dependencyLoader: ClassLoader = getSystemClassLoader()) :
+    URLClassLoader(urls, dependencyLoader) {
 
     /**
      * 指定扩展包 File 来创建 ClassLoader.
      * @param extensionFile 扩展包文件.
      */
     constructor(extensionFile: File) :
-            this(URL(getUrlString(extensionFile)))
+            this(arrayOf(URL(getUrlString(extensionFile))))
 
     val serviceLoader: ServiceLoader<BotExtensionFactory> = ServiceLoader.load(BotExtensionFactory::class.java, this)
+
+    // 为防止从非扩展包位置引入扩展的问题, 覆写了以下两个方法
+    // 当寻找 BotExtensionFactory 时, 将不再遵循双亲委派原则,
+    // 以免使用了不来自扩展包的机器人扩展.
+
+    override fun getResources(name: String?): Enumeration<URL> {
+        if (BotExtensionFactory::class.java.equals(name)) {
+            return findResources(name)
+        }
+        return super.getResources(name)
+    }
+
+    override fun getResource(name: String?): URL? {
+        if (BotExtensionFactory::class.java.equals(name)) {
+            return findResource(name)
+        }
+        return super.getResource(name)
+    }
 
     companion object {
         private fun getUrlString(extensionFile: File, defaultScheme: String = "file:///"): String {
@@ -326,6 +363,31 @@ internal class ExtensionClassLoader(vararg urls: URL) :
         }
     }
 }
+
+/**
+ * 扩展类加载器工厂接口.
+ *
+ * 可供有多依赖需求的扩展使用, 由 Finder 提供.
+ */
+internal interface ExtensionClassLoaderFactory {
+
+    /**
+     * 创建扩展包的类加载器.
+     * @param foundExtensionPackage 已找到的扩展包信息.
+     */
+    fun createClassLoader(foundExtensionPackage: FoundExtensionPackage): ExtensionClassLoader
+
+}
+
+/**
+ * 针对单文件依赖的 ClassLoader 工厂.
+ */
+internal object DefaultExtensionClassLoaderFactory : ExtensionClassLoaderFactory {
+    override fun createClassLoader(foundExtensionPackage: FoundExtensionPackage): ExtensionClassLoader {
+        return ExtensionClassLoader(foundExtensionPackage.getPackageFile())
+    }
+}
+
 
 /**
  * 搜索器规则.

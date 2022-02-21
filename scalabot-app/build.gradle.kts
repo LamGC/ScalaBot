@@ -13,7 +13,14 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:2.1.21")
     implementation("ch.qos.logback:logback-classic:1.2.10")
 
-    implementation("org.eclipse.aether:aether-api:1.1.0")
+    val aetherVersion = "1.1.0"
+    implementation("org.eclipse.aether:aether-api:$aetherVersion")
+    implementation("org.eclipse.aether:aether-util:$aetherVersion")
+    implementation("org.eclipse.aether:aether-impl:$aetherVersion")
+    implementation("org.eclipse.aether:aether-transport-file:$aetherVersion")
+    implementation("org.eclipse.aether:aether-transport-http:$aetherVersion")
+    implementation("org.eclipse.aether:aether-connector-basic:$aetherVersion")
+    implementation("org.apache.maven:maven-aether-provider:3.3.9")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("com.google.code.gson:gson:2.9.0")
