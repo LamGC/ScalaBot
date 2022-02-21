@@ -131,6 +131,10 @@ internal enum class AppPaths(
             initialized.set(true)
         }
     }
+
+    override fun toString(): String {
+        return path
+    }
 }
 
 internal object Const {
