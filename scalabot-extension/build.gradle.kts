@@ -35,12 +35,24 @@ tasks.withType<KotlinCompile> {
 
 publishing {
     repositories {
-        maven {
-            credentials {
-
-            }
-            url = uri("")
+        val repoRootKey = "maven.repo.local.root"
+        val snapshot = project.version.toString().endsWith("-SNAPSHOT")
+        val repoRoot = System.getProperty(repoRootKey)?.trim()
+        if (repoRoot == null || repoRoot.isEmpty()) {
+            logger.warn(
+                "\"$repoRootKey\" configuration item is not specified, " +
+                        "please add start parameter \"-D$repoRootKey {localPublishRepo}\"" +
+                        " (if you are not currently executing the publish task, " +
+                        "you can ignore this information)"
+            )
+            return@repositories
         }
+        val repoUri = if (snapshot) {
+            uri("$repoRoot/snapshots")
+        } else {
+            uri("$repoRoot/releases")
+        }
+        maven(repoUri)
     }
 
     publications {
@@ -63,14 +75,14 @@ publishing {
                 developers {
                     developer {
                         id.set("LamGC")
-                        name.set("Lam GC")
+                        name.set("LamGC")
                         email.set("lam827@lamgc.net")
                         url.set("https://github.com/LamGC")
                     }
                 }
                 scm {
                     connection.set("scm:git:https://github.com/LamGC/ScalaBot.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:LamGC/ScalaBot.git")
+                    developerConnection.set("scm:git:https://github.com/LamGC/ScalaBot.git")
                     url.set("https://github.com/LamGC/ScalaBot")
                 }
                 issueManagement {
