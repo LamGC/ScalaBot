@@ -41,7 +41,7 @@ internal data class BotConfig(
     /*
      * 使用构件坐标来选择机器人所使用的扩展包.
      * 这么做的原因是我暂时没找到一个合适的方法来让开发者方便地设定自己的扩展 Id,
-     * 而构件坐标(POM Reference 或者叫 GAV 坐标)是开发者创建 Maven/Gradle 项目所一定会设置的,
+     * 而构件坐标(POM Reference 或者叫 GAV 坐标)是开发者创建 Maven/Gradle 项目时一定会设置的,
      * 所以就直接用了. :P
      */
     val extensions: Set<Artifact>,
