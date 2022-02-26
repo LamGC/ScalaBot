@@ -32,7 +32,7 @@ internal class ScalaBot(
     val extensions: Set<Artifact>,
     disableBuiltInAbility: Boolean
 ) :
-    AbilityBot(token, name, db, if (disableBuiltInAbility) DefaultToggle() else BareboneToggle(), options) {
+    AbilityBot(token, name, db, if (disableBuiltInAbility) BareboneToggle() else DefaultToggle(), options) {
 
     companion object {
         @JvmStatic
