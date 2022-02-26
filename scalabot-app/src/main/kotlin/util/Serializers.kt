@@ -6,7 +6,7 @@ import org.eclipse.aether.artifact.DefaultArtifact
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.lang.reflect.Type
 
-object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyType>,
+internal object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyType>,
     JsonSerializer<DefaultBotOptions.ProxyType> {
 
     override fun deserialize(
@@ -34,7 +34,7 @@ object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyType>,
     }
 }
 
-object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact> {
+internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact> {
     override fun serialize(src: Artifact, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
         val gavBuilder = StringBuilder("${src.groupId}:${src.artifactId}")
         if (!src.extension.equals("jar")) {
