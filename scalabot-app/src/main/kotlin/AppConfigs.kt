@@ -10,6 +10,7 @@ import net.lamgc.scalabot.util.ProxyTypeSerializer
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.repository.Proxy
 import org.telegram.telegrambots.bots.DefaultBotOptions
+import org.telegram.telegrambots.meta.ApiConstants
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,7 +39,7 @@ internal data class BotAccount(
 internal data class BotConfig(
     val enabled: Boolean = true,
     val account: BotAccount,
-    val disableBuiltInAbility: Boolean = true,
+    val disableBuiltInAbility: Boolean = false,
     /*
      * 使用构件坐标来选择机器人所使用的扩展包.
      * 这么做的原因是我暂时没找到一个合适的方法来让开发者方便地设定自己的扩展 Id,
@@ -47,7 +48,7 @@ internal data class BotConfig(
      */
     val extensions: Set<Artifact>,
     val proxy: ProxyConfig? = null,
-    val baseApiUrl: String? = null
+    val baseApiUrl: String? = ApiConstants.BASE_URL
 )
 
 /**
