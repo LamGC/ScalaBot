@@ -1,5 +1,6 @@
 package net.lamgc.scalabot
 
+import ch.qos.logback.core.PropertyDefinerBase
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -90,19 +91,38 @@ internal data class AppConfig(
 
 /**
  * 需要用到的路径.
+ *
+ * 必须提供 `pathSupplier` 或 `fileSupplier` 其中一个, 才能正常提供路径.
  */
 internal enum class AppPaths(
-    private val pathSupplier: () -> String,
-    private val initializer: AppPaths.() -> Unit = AppPaths::defaultInitializer
+    private val pathSupplier: () -> String = { fileSupplier.invoke().canonicalPath },
+    private val initializer: AppPaths.() -> Unit = AppPaths::defaultInitializer,
+    private val fileSupplier: () -> File = { File(pathSupplier()) }
 ) {
-    DEFAULT_CONFIG_APPLICATION({ "./config.json" }, {
+    /**
+     * 数据根目录.
+     *
+     * 所有运行数据的存放位置.
+     *
+     * 提示: 结尾不带 `/`.
+     */
+    DATA_ROOT(fileSupplier = {
+        File(System.getProperty(PathConst.PROP_DATA_PATH) ?: System.getenv(PathConst.ENV_DATA_PATH) ?: ".")
+    }, initializer = {
+        val f = file
+        if (!f.exists()) {
+            f.mkdirs()
+        }
+    }),
+
+    DEFAULT_CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.botConfigGson.toJson(AppConfig(), it)
             }
         }
     }),
-    DEFAULT_CONFIG_BOT({ "./bot.json" }, {
+    DEFAULT_CONFIG_BOT({ "$DATA_ROOT/bot.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.botConfigGson.toJson(
@@ -121,15 +141,15 @@ internal enum class AppPaths(
             }
         }
     }),
-    DATA_DB({ "./data/db/" }),
-    DATA_LOGS({ "./data/logs/" }),
-    EXTENSIONS({ "./extensions/" }),
-    DATA_EXTENSIONS({ "./data/extensions/" }),
-    TEMP({ "./tmp/" })
+    DATA_DB({ "$DATA_ROOT/data/db/" }),
+    DATA_LOGS({ "$DATA_ROOT/data/logs/" }),
+    EXTENSIONS({ "$DATA_ROOT/extensions/" }),
+    DATA_EXTENSIONS({ "$DATA_ROOT/data/extensions/" }),
+    TEMP({ "$DATA_ROOT/tmp/" })
     ;
 
     val file: File
-        get() = File(pathSupplier.invoke())
+        get() = fileSupplier.invoke()
     val path: String
         get() = pathSupplier.invoke()
 
@@ -138,13 +158,28 @@ internal enum class AppPaths(
     @Synchronized
     fun initial() {
         if (!initialized.get()) {
-            initializer(this)
+            initializer()
             initialized.set(true)
         }
     }
 
     override fun toString(): String {
         return path
+    }
+
+    private companion object PathConst {
+        private const val PROP_DATA_PATH = "bot.path.data"
+        private const val ENV_DATA_PATH = "BOT_DATA_PATH"
+    }
+
+}
+
+/**
+ * 为 LogBack 提供日志目录路径.
+ */
+internal class LogDirectorySupplier : PropertyDefinerBase() {
+    override fun getPropertyValue(): String {
+        return AppPaths.DATA_LOGS.path
     }
 }
 
@@ -153,14 +188,16 @@ internal object Const {
 }
 
 private fun AppPaths.defaultInitializer() {
-    if (!file.exists()) {
-        val result = if (path.endsWith("/")) {
-            file.mkdirs()
+    val f = file
+    val p = path
+    if (!f.exists()) {
+        val result = if (p.endsWith("/")) {
+            f.mkdirs()
         } else {
-            file.createNewFile()
+            f.createNewFile()
         }
         if (!result) {
-            log.warn { "初始化文件(夹)失败: $path" }
+            log.warn { "初始化文件(夹)失败: $p" }
         }
     }
 }

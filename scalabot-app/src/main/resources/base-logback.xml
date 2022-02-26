@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <included>
+    <define name="DATA_LOGS" class="net.lamgc.scalabot.LogDirectorySupplier"/>
+
     <appender name="STD_OUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>[%d{HH:mm:ss.SSS} %5level][%logger{36}][%thread]: %msg%n</pattern>
@@ -20,7 +22,7 @@
     </appender>
 
     <appender name="FILE_OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>data/logs/latest.log</file>
+        <file>${DATA_LOGS}/latest.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>data/logs/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
