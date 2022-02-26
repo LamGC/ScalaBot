@@ -30,11 +30,15 @@ internal class ScalaBot(
     db: DBContext,
     options: DefaultBotOptions,
     val extensions: Set<Artifact>,
+    extensionFinders: Set<ExtensionPackageFinder>,
     disableBuiltInAbility: Boolean
 ) :
     AbilityBot(token, name, db, if (disableBuiltInAbility) BareboneToggle() else DefaultToggle(), options) {
 
-    private val extensionLoader = ExtensionLoader(this)
+    private val extensionLoader = ExtensionLoader(
+        bot = this,
+        extensionFinders = extensionFinders
+    )
 
     init {
         val extensionEntries = extensionLoader.getExtensions()

@@ -6,12 +6,17 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import net.lamgc.scalabot.util.ArtifactSerializer
+import net.lamgc.scalabot.util.AuthenticationSerializer
+import net.lamgc.scalabot.util.MavenRepositoryConfigSerializer
 import net.lamgc.scalabot.util.ProxyTypeSerializer
 import org.eclipse.aether.artifact.Artifact
+import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
+import org.eclipse.aether.repository.RemoteRepository
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.ApiConstants
 import java.io.File
+import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -76,18 +81,56 @@ internal data class ProxyConfig(
 internal data class MetricsConfig(
     val enable: Boolean = false,
     val port: Int = 9386,
-    val bindAddress: String? = null
+    val bindAddress: String? = "0.0.0.0"
 )
+
+/**
+ * Maven 远端仓库配置.
+ * @property url 仓库地址.
+ * @property proxy 访问仓库所使用的代理, 仅支持 http/https 代理.
+ * @property layout 仓库布局版本, Maven 2 及以上使用 `default`, Maven 1 使用 `legacy`.
+ */
+internal data class MavenRepositoryConfig(
+    val url: URL,
+    val proxy: Proxy? = Proxy("http", "127.0.0.1", 1080),
+    val layout: String = "default",
+    // 可能要设计个 type 来判断解析成什么类型的 Authentication.
+    val authentication: Authentication? = null
+) {
+
+    fun toRemoteRepository(): RemoteRepository {
+        val builder = RemoteRepository.Builder(null, checkRepositoryLayout(layout), url.toString())
+        if (proxy != null) {
+            builder.setProxy(proxy)
+        } else if (Const.config.proxy.type == DefaultBotOptions.ProxyType.HTTP) {
+            builder.setProxy(Const.config.proxy.toAetherProxy())
+        }
+        return builder.build()
+    }
+
+    private companion object {
+        fun checkRepositoryLayout(layoutType: String): String {
+            val type = layoutType.trim().lowercase()
+            if (type != "default" && type != "legacy") {
+                throw IllegalArgumentException("Invalid layout type (expecting 'default' or 'legacy')")
+            }
+            return type
+        }
+    }
+}
 
 /**
  * ScalaBot App 配置.
  *
  * App 配置信息与 BotConfig 分开, 分别存储在各自单独的文件中.
  * @property proxy Telegram API 代理配置.
+ * @property metrics 运行指标数据配置. 可通过时序数据库记录运行数据.
+ * @property mavenRepositories Maven 远端仓库配置.
  */
 internal data class AppConfig(
     val proxy: ProxyConfig = ProxyConfig(),
-    val metrics: MetricsConfig = MetricsConfig()
+    val metrics: MetricsConfig = MetricsConfig(),
+    val mavenRepositories: List<MavenRepositoryConfig> = emptyList()
 )
 
 /**
@@ -119,7 +162,15 @@ internal enum class AppPaths(
     DEFAULT_CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
-                GsonConst.botConfigGson.toJson(AppConfig(), it)
+                GsonConst.botConfigGson.toJson(
+                    AppConfig(
+                        mavenRepositories = listOf(
+                            MavenRepositoryConfig(
+                                URL(MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL)
+                            )
+                        )
+                    ), it
+                )
             }
         }
     }),
@@ -217,6 +268,8 @@ private object GsonConst {
 
     val appConfigGson: Gson = baseGson.newBuilder()
         .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(MavenRepositoryConfig::class.java, MavenRepositoryConfigSerializer)
+        .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
         .create()
 
     val botConfigGson: Gson = baseGson.newBuilder()

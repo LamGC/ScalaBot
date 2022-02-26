@@ -53,6 +53,11 @@ internal class Launcher : AutoCloseable {
 
     private val botApi = TelegramBotsApi(DefaultBotSession::class.java)
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
+    private val remoteRepositories = Const.config.mavenRepositories
+        .map(MavenRepositoryConfig::toRemoteRepository)
+        .toMutableList().apply {
+            add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = Const.config.proxy.toAetherProxy()))
+        }.toList()
 
     @Synchronized
     fun launch(): Boolean {
@@ -94,6 +99,13 @@ internal class Launcher : AutoCloseable {
             }
         }
         val account = botConfig.account
+        val extensionPackageFinders = setOf(
+            MavenRepositoryExtensionFinder(
+                remoteRepositories = remoteRepositories,
+                proxy = Const.config.proxy.toAetherProxy()
+            )
+        )
+
         val bot = ScalaBot(
             account.name,
             account.token,
@@ -101,6 +113,7 @@ internal class Launcher : AutoCloseable {
             BotDBMaker.getBotMaker(account),
             botOption,
             botConfig.extensions,
+            extensionPackageFinders,
             botConfig.disableBuiltInAbility
         )
         botSessionMap[bot] = botApi.registerBot(bot)

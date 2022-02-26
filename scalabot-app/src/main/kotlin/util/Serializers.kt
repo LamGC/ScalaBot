@@ -1,10 +1,16 @@
 package net.lamgc.scalabot.util
 
 import com.google.gson.*
+import mu.KotlinLogging
+import net.lamgc.scalabot.MavenRepositoryConfig
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
+import org.eclipse.aether.repository.Authentication
+import org.eclipse.aether.repository.Proxy
+import org.eclipse.aether.util.repository.AuthenticationBuilder
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.lang.reflect.Type
+import java.net.URL
 
 internal object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyType>,
     JsonSerializer<DefaultBotOptions.ProxyType> {
@@ -55,3 +61,105 @@ internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<
 
 }
 
+internal object AuthenticationSerializer : JsonDeserializer<Authentication> {
+
+    private val log = KotlinLogging.logger { }
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Authentication? {
+        val builder = AuthenticationBuilder()
+        when (json) {
+            is JsonArray -> {
+                for (element in json) {
+                    if (element is JsonArray) {
+                        builder.addCustom(jsonArrayToAuthentication(element))
+                    } else if (element is JsonObject) {
+                        jsonToAuthentication(element, builder)
+                    }
+                }
+            }
+            is JsonObject -> {
+                jsonToAuthentication(json, builder)
+            }
+            else -> {
+                throw JsonParseException("Unsupported JSON data type: ${json::class.java}")
+            }
+        }
+        return builder.build()
+    }
+
+    private fun jsonArrayToAuthentication(jsonArray: JsonArray): Authentication {
+        val builder = AuthenticationBuilder()
+        for (element in jsonArray) {
+            when (element) {
+                is JsonObject -> jsonToAuthentication(element, builder)
+                is JsonArray -> builder.addCustom(jsonArrayToAuthentication(element))
+                else -> log.warn { "不支持的 Json 类型: ${element::class.java}" }
+            }
+        }
+        return builder.build()
+    }
+
+    private const val KEY_TYPE = "type"
+
+    private fun jsonToAuthentication(json: JsonObject, builder: AuthenticationBuilder) {
+        if (!json.has(KEY_TYPE)) {
+            log.warn { "缺少 type 字段, 无法判断 Maven 认证信息类型." }
+            return
+        } else if (!json.get(KEY_TYPE).isJsonPrimitive) {
+            log.warn { "type 字段类型错误(应为 Primitive 类型), 无法判断 Maven 认证信息类型.(实际类型: `${json::class.java}`)" }
+            return
+        }
+
+        when (json.get(KEY_TYPE).asString.trim().lowercase()) {
+            "string" -> {
+                builder.addString(checkJsonKey(json, "key"), checkJsonKey(json, "value"))
+            }
+            "secret" -> {
+                builder.addSecret(checkJsonKey(json, "key"), checkJsonKey(json, "value"))
+            }
+        }
+
+    }
+}
+
+private fun checkJsonKey(json: JsonObject, key: String): String {
+    if (!json.has(key)) {
+        throw JsonParseException("Required field does not exist: $key")
+    } else if (!json.get(key).isJsonPrimitive) {
+        throw JsonParseException("Wrong field `$key` type: ${json.get(key)::class.java}")
+    }
+    return json.get(key).asString
+}
+
+internal object MavenRepositoryConfigSerializer
+    : JsonDeserializer<MavenRepositoryConfig> {
+
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): MavenRepositoryConfig {
+        return when (json) {
+            is JsonObject -> {
+                MavenRepositoryConfig(
+                    url = URL(checkJsonKey(json, "url")),
+                    proxy = if (json.has("proxy") && json.get("proxy").isJsonObject)
+                        context.deserialize<Proxy>(
+                            json.getAsJsonObject("proxy"), Proxy::class.java
+                        ) else null,
+                    layout = json.get("layout").asString ?: "default",
+                    authentication = if (json.has("authentication") && json.get("authentication").isJsonObject)
+                        context.deserialize<Authentication>(
+                            json.getAsJsonObject("authentication"), Authentication::class.java
+                        ) else null
+                )
+            }
+            is JsonPrimitive -> {
+                MavenRepositoryConfig(URL(json.asString))
+            }
+            else -> {
+                throw JsonParseException("Unsupported Maven warehouse configuration type.")
+            }
+        }
+    }
+}

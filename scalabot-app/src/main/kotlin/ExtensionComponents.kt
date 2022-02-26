@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import net.lamgc.scalabot.extension.BotExtensionFactory
 import net.lamgc.scalabot.util.getPriority
 import org.eclipse.aether.artifact.Artifact
-import org.eclipse.aether.repository.LocalRepository
 import org.telegram.abilitybots.api.util.AbilityExtension
 import java.io.File
 import java.io.FileNotFoundException
@@ -18,18 +17,18 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class ExtensionLoader(
     private val bot: ScalaBot,
     private val extensionsDataFolder: File = AppPaths.DATA_EXTENSIONS.file,
-    private val extensionsPath: File = AppPaths.EXTENSIONS.file
+    private val extensionsPath: File = AppPaths.EXTENSIONS.file,
+    private val extensionFinders: Set<ExtensionPackageFinder> = setOf()
 ) {
     private val log = KotlinLogging.logger { }
 
-    private val finders: Set<ExtensionPackageFinder> = setOf(
+    private val finders: Set<ExtensionPackageFinder> = mutableSetOf(
         FileNameFinder,
         MavenMetaInformationFinder,
         MavenRepositoryExtensionFinder(
-            LocalRepository("${System.getProperty("user.home")}/.m2/repository"),
             proxy = Const.config.proxy.toAetherProxy()
         )
-    )
+    ).apply { addAll(extensionFinders) }.toSet()
 
     fun getExtensions(): Set<LoadedExtensionEntry> {
         val extensionEntries = mutableSetOf<LoadedExtensionEntry>()

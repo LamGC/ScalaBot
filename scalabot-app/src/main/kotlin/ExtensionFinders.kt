@@ -234,7 +234,7 @@ internal object MavenMetaInformationFinder : ExtensionPackageFinder {
  */
 @FinderRules(priority = FinderPriority.REMOTE)
 internal class MavenRepositoryExtensionFinder(
-    private val localRepository: LocalRepository,
+    private val localRepository: LocalRepository = LocalRepository("${System.getProperty("user.home")}/.m2/repository"),
     private val proxy: Proxy? = null,
     private val remoteRepositories: List<RemoteRepository> = listOf(getMavenCentralRepository(proxy)),
 ) : ExtensionPackageFinder {
