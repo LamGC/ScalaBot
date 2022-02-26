@@ -47,7 +47,7 @@ internal data class BotConfig(
      * 所以就直接用了. :P
      */
     val extensions: Set<Artifact>,
-    val proxy: ProxyConfig? = null,
+    val proxy: ProxyConfig? = ProxyConfig(),
     val baseApiUrl: String? = ApiConstants.BASE_URL
 )
 
