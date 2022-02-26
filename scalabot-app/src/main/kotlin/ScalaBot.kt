@@ -34,6 +34,47 @@ internal class ScalaBot(
 ) :
     AbilityBot(token, name, db, if (disableBuiltInAbility) BareboneToggle() else DefaultToggle(), options) {
 
+    private val extensionLoader = ExtensionLoader(this)
+
+    init {
+        val extensionEntries = extensionLoader.getExtensions()
+        for (entry in extensionEntries) {
+            addExtension(entry.extension)
+            log.debug {
+                "[Bot ${botUsername}] 扩展包 `${entry.extensionArtifact}` 中的扩展 `${entry.extension::class.qualifiedName}` " +
+                        "(由工厂类 `${entry.factoryClass.name}` 创建) 已注册."
+            }
+        }
+    }
+
+    override fun creatorId(): Long = creatorId
+
+    override fun onUpdateReceived(update: Update?) {
+        botUpdateCounter.labels(botUsername).inc()
+        botUpdateGauge.labels(botUsername).inc()
+
+        val timer = updateProcessTime.labels(botUsername).startTimer()
+        try {
+            super.onUpdateReceived(update)
+        } catch (e: Exception) {
+            exceptionHandlingCounter.labels(botUsername).inc()
+            throw e
+        } finally {
+            timer.observeDuration()
+            botUpdateGauge.labels(botUsername).dec()
+        }
+    }
+
+    override fun onRegister() {
+        super.onRegister()
+        onlineBotGauge.inc()
+    }
+
+    override fun onClosing() {
+        super.onClosing()
+        onlineBotGauge.dec()
+    }
+
     companion object {
         @JvmStatic
         private val log = KotlinLogging.logger { }
@@ -82,46 +123,5 @@ internal class ScalaBot(
             .labelNames("bot_name")
             .subsystem("telegrambots")
             .register()
-    }
-
-    private val extensionLoader = ExtensionLoader(this)
-
-    init {
-        val extensionEntries = extensionLoader.getExtensions()
-        for (entry in extensionEntries) {
-            addExtension(entry.extension)
-            log.debug {
-                "[Bot ${botUsername}] 扩展包 `${entry.extensionArtifact}` 中的扩展 `${entry.extension::class.qualifiedName}` " +
-                        "(由工厂类 `${entry.factoryClass.name}` 创建) 已注册."
-            }
-        }
-    }
-
-    override fun creatorId(): Long = creatorId
-
-    override fun onUpdateReceived(update: Update?) {
-        botUpdateCounter.labels(botUsername).inc()
-        botUpdateGauge.labels(botUsername).inc()
-
-        val timer = updateProcessTime.labels(botUsername).startTimer()
-        try {
-            super.onUpdateReceived(update)
-        } catch (e: Exception) {
-            exceptionHandlingCounter.labels(botUsername).inc()
-            throw e
-        } finally {
-            timer.observeDuration()
-            botUpdateGauge.labels(botUsername).dec()
-        }
-    }
-
-    override fun onRegister() {
-        super.onRegister()
-        onlineBotGauge.inc()
-    }
-
-    override fun onClosing() {
-        super.onClosing()
-        onlineBotGauge.dec()
     }
 }
