@@ -103,13 +103,11 @@ internal class ExtensionLoader(
     }
 
     private fun allFoundedPackageNumber(filesMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Int {
-        val result = mutableSetOf<URL>()
+        var number = 0
         for (files in filesMap.values) {
-            for (file in files) {
-                result.add(file.getRawUrl())
-            }
+            number += files.size
         }
-        return result.size
+        return number
     }
 
     private fun findExtensionPackage(
