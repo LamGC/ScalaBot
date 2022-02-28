@@ -354,14 +354,14 @@ internal class MavenRepositoryExtensionFinder(
                 RepositoryPolicy(
                     true,
                     RepositoryPolicy.UPDATE_POLICY_DAILY,
-                    RepositoryPolicy.CHECKSUM_POLICY_WARN
+                    RepositoryPolicy.CHECKSUM_POLICY_FAIL
                 )
             )
             builder.setSnapshotPolicy(
                 RepositoryPolicy(
                     true,
                     RepositoryPolicy.UPDATE_POLICY_ALWAYS,
-                    RepositoryPolicy.CHECKSUM_POLICY_WARN
+                    RepositoryPolicy.CHECKSUM_POLICY_FAIL
                 )
             )
             if (authentication != null) {
