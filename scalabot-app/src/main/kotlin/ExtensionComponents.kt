@@ -24,10 +24,7 @@ internal class ExtensionLoader(
 
     private val finders: Set<ExtensionPackageFinder> = mutableSetOf(
         FileNameFinder,
-        MavenMetaInformationFinder,
-        MavenRepositoryExtensionFinder(
-            proxy = Const.config.proxy.toAetherProxy()
-        )
+        MavenMetaInformationFinder
     ).apply { addAll(extensionFinders) }.toSet()
 
     fun getExtensions(): Set<LoadedExtensionEntry> {
