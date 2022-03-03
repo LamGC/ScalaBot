@@ -10,12 +10,15 @@ on [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots).
 AbilityExtension 对象时提供扩展将要服务的 AbilityBot 对象，这样 AbilityExtension 就可以不受限的实现功能了。
 
 ## 使用
-
-1. 首先，在 Telegram 中联系 [BotFather](https://t.me/BotFather) ，申请机器人账号。
-2. 下载 [最新版本](https://github.com/LamGC/ScalaBot/releases/latest) 的 ScalaBot， 将发行包解压到某个目录中，然后准备一个用于存储 ScalaBot 运行数据的目录。
-3. 在作为数据存储位置的目录中，执行从分发包中解压出来的 `bin/ScalaBot` 脚本以打开 ScalaBot。 由于首次启动缺少配置文件，ScalaBot 将会初始化配置文件（`config.json` 和 `bot.json`）
-4. 将配置文件配置好后，如已下载好需要使用的扩展包，将扩展包移至 `extensions` 文件夹即可。（无需下载的扩展包将由 ScalaBot 自动下载）
-5. 如果一切正常，ScalaBot 正常运行，绑定好的 Telegram Bot 账号将会对消息有所反应。
+1. （如果没有准备机器人账号）首先，在 Telegram 中联系 [BotFather](https://t.me/BotFather) ，申请机器人账号。
+2. 运行环境需要安装好 Java 11（或更高版本）；
+3. 下载 [最新版本](https://github.com/LamGC/ScalaBot/releases/latest) 的 ScalaBot 发行包， 将发行包解压到某个目录中，然后准备一个用于存储 ScalaBot
+   运行数据的目录；
+4. （可选）如果有需要在非运行目录的路径上运行 ScalaBot（例如以 Service 形式启动，或者使用 Docker），可通过环境变量 `BOT_DATA_PATH` 指定 ScalaBot 的运行目录；
+5. 在作为数据存储位置的目录中，执行从分发包中解压出来的 `bin/ScalaBot` 脚本以打开 ScalaBot。 由于首次启动缺少配置文件，ScalaBot 将会初始化配置文件（`config.json` 和 `bot.json`
+   ），可按照 [配置文件示例](https://github.com/LamGC/ScalaBot/wiki/Configuration) 进行配置。
+6. 将配置文件配置好后，如已下载好需要使用的扩展包，将扩展包移至 `extensions` 文件夹即可。（无需下载的扩展包将由 ScalaBot 自动下载）
+7. 如果一切正常，ScalaBot 正常运行，绑定好的 Telegram Bot 账号将会对消息有所反应。
 
 ## 开发扩展包
 
