@@ -62,7 +62,11 @@ internal class Launcher : AutoCloseable {
             return false
         }
         for (botConfig in botConfigs) {
-            launchBot(botConfig)
+            try {
+                launchBot(botConfig)
+            } catch (e: Exception) {
+                log.error(e) { "机器人 `${botConfig.account.name}` 启动时发生错误." }
+            }
         }
         return true
     }
