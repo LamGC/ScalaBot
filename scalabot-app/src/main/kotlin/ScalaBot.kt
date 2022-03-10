@@ -41,14 +41,16 @@ internal class ScalaBot(
     )
 
     init {
+        log.info { "[Bot $botUsername] 正在加载扩展..." }
         val extensionEntries = extensionLoader.getExtensions()
         for (entry in extensionEntries) {
             addExtension(entry.extension)
             log.debug {
-                "[Bot ${botUsername}] 扩展包 `${entry.extensionArtifact}` 中的扩展 `${entry.extension::class.qualifiedName}` " +
+                "[Bot $botUsername] 扩展包 `${entry.extensionArtifact}` 中的扩展 `${entry.extension::class.qualifiedName}` " +
                         "(由工厂类 `${entry.factoryClass.name}` 创建) 已注册."
             }
         }
+        log.info { "[Bot $botUsername] 扩展加载完成." }
     }
 
     override fun creatorId(): Long = creatorId
