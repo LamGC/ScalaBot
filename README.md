@@ -9,7 +9,17 @@ on [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots).
 是按 Bot 融入应用的方式设计的， 且 AbilityExtension 对 ReplyFlow 不太支持（因为无法获取所属 AbilityBot 的 StateDB）， 所以我尝试提供了一个 Factory 接口，在创建
 AbilityExtension 对象时提供扩展将要服务的 AbilityBot 对象，这样 AbilityExtension 就可以不受限的实现功能了。
 
+## 开发版本警告
+
+当前应用处于开发版本状态，在 1.0.0 发布前，任何功能都可能存在不兼容更改，在升级版本前，请仔细阅读更新日志， （如果有）按照迁移指南迁移数据后方可升级；  
+由于不遵循迁移指南而导致的损失，本项目相关开发人员不会对此负责。
+
+### 版本号
+
+本项目遵循 SemVer 版本号规范，但在正式版（1.0.0）发布前，可能会存在次版本号更新不向下兼容的问题，请仔细阅读迁移指南进行升级！
+
 ## 使用
+
 1. （如果没有准备机器人账号）首先，在 Telegram 中联系 [BotFather](https://t.me/BotFather) ，申请机器人账号。
 2. 运行环境需要安装好 Java 11（或更高版本）；
 3. 下载 [最新版本](https://github.com/LamGC/ScalaBot/releases/latest) 的 ScalaBot 发行包， 将发行包解压到某个目录中，然后准备一个用于存储 ScalaBot
