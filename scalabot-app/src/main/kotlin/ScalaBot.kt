@@ -7,10 +7,14 @@ import mu.KotlinLogging
 import org.eclipse.aether.artifact.Artifact
 import org.telegram.abilitybots.api.bot.AbilityBot
 import org.telegram.abilitybots.api.db.DBContext
+import org.telegram.abilitybots.api.objects.Ability
 import org.telegram.abilitybots.api.toggle.BareboneToggle
 import org.telegram.abilitybots.api.toggle.DefaultToggle
 import org.telegram.telegrambots.bots.DefaultBotOptions
+import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands
 import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand
 
 /**
  * 可扩展 Bot.
@@ -73,6 +77,34 @@ internal class ScalaBot(
             timer.observeDuration()
             botUpdateGauge.labels(botUsername).dec()
         }
+    }
+
+    /**
+     * 更新 Telegram Bot 的命令列表.
+     *
+     * 本方法将根据已注册的 [Ability] 更新 Telegram 中机器人的命令列表.
+     *
+     * 调用本方法前, 必须先调用一次 [registerAbilities], 否则无法获取 Ability 信息.
+     * @return 更新成功返回 `true`.
+     */
+    fun updateCommandList(): Boolean {
+        if (abilities() == null) {
+            throw IllegalStateException("Abilities has not been initialized.")
+        }
+
+        val botCommands = abilities().values.map {
+            val abilityInfo = if (it.info() == null || it.info().trim().isEmpty()) {
+                log.warn { "[Bot $botUsername] Ability `${it.name()}` 没有说明信息." }
+                "(The command has no description)"
+            } else {
+                log.debug { "[Bot $botUsername] Ability `${it.name()}` info `${it.info()}`" }
+                it.info().trim()
+            }
+            BotCommand(it.name(), abilityInfo)
+        }
+        val setMyCommands = SetMyCommands()
+        setMyCommands.commands = botCommands
+        return execute(DeleteMyCommands()) && execute(setMyCommands)
     }
 
     override fun onRegister() {

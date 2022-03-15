@@ -119,6 +119,20 @@ internal class Launcher : AutoCloseable {
         )
         botSessionMap[bot] = botApi.registerBot(bot)
         log.info { "机器人 `${bot.botUsername}` 已启动." }
+
+        if (botConfig.autoUpdateCommandList) {
+            log.debug { "[Bot ${botConfig.account.name}] 正在自动更新命令列表..." }
+            try {
+                val result = bot.updateCommandList()
+                if (result) {
+                    log.info { "[Bot ${botConfig.account.name}] 已成功更新 Bot 命令列表." }
+                } else {
+                    log.warn { "[Bot ${botConfig.account.name}] 自动更新 Bot 命令列表失败!" }
+                }
+            } catch (e: Exception) {
+                log.warn(e) { "命令列表自动更新失败." }
+            }
+        }
     }
 
     @Synchronized
