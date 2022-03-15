@@ -23,7 +23,12 @@ public class SayHelloExtension implements AbilityExtension {
                 .info("Say hello to you.")
                 .privacy(Privacy.PUBLIC)
                 .locality(Locality.ALL)
-                .action(ctx -> ctx.bot().silent().send("Hello! " + ctx.user().getUserName(), ctx.chatId()))
+                .action(ctx -> {
+                    String msg = "Hello! " + ctx.user().getUserName() +
+                            " ( " + ctx.user().getId() + " ) [ " + ctx.user().getLanguageCode() + " ]" + "\n" +
+                            "Current Chat ID: " + ctx.chatId();
+                    ctx.bot().silent().send(msg, ctx.chatId());
+                })
                 .build();
     }
 
