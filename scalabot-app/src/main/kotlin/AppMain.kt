@@ -112,14 +112,10 @@ internal class Launcher : AutoCloseable {
         )
 
         val bot = ScalaBot(
-            account.name,
-            account.token,
-            account.creatorId,
             BotDBMaker.getBotMaker(account),
             botOption,
-            botConfig.extensions,
             extensionPackageFinders,
-            botConfig.disableBuiltInAbility
+            botConfig
         )
         botSessionMap[bot] = botApi.registerBot(bot)
         log.info { "机器人 `${bot.botUsername}` 已启动." }
