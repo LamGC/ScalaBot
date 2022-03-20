@@ -112,7 +112,7 @@ internal class Launcher : AutoCloseable {
         )
 
         val bot = ScalaBot(
-            BotDBMaker.getBotMaker(account),
+            BotDBMaker.getBotDbInstance(account),
             botOption,
             extensionPackageFinders,
             botConfig
