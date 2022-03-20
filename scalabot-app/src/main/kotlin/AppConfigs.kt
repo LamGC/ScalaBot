@@ -32,7 +32,14 @@ internal data class BotAccount(
     val name: String,
     val token: String,
     val creatorId: Long = -1
-)
+) {
+
+    val id
+        // 不要想着每次获取都要从 token 里取出有性能损耗.
+        // 由于 Gson 解析方式, 如果不这么做, 会出现 token 设置前 id 初始化完成, 就只有"0"了,
+        // 虽然能过单元测试, 但实际使用过程是不能正常用的.
+        get() = token.substringBefore(":").toLong()
+}
 
 /**
  * 机器人配置.
