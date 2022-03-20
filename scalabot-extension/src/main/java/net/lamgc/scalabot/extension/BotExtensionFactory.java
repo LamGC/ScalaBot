@@ -13,6 +13,7 @@ import java.io.File;
  * 所以将通过该接口工厂来创建扩展对象.
  *
  * @author LamGC
+ * @since 0.0.1
  */
 public interface BotExtensionFactory {
 
@@ -24,7 +25,8 @@ public interface BotExtensionFactory {
      * (因为 AbilityBot 只是调用了扩展中的方法来创建了功能对象).
      *
      * @param bot             机器人对象.
-     * @param shareDataFolder ScalaBot App 为扩展提供的数据目录, 建议存储在数据目录中, 便于数据的存储管理.
+     * @param shareDataFolder ScalaBot App 为扩展提供的共享数据目录, <b>同一个扩展包的 Factory</b> 接收到的共享数据目录<b>都是一样的</b>;
+     *                        建议将数据存储在数据目录中, 便于数据的存储管理.
      * @return 返回为该 Bot 对象创建的扩展对象.
      */
     AbilityExtension createExtensionInstance(BaseAbilityBot bot, File shareDataFolder);
