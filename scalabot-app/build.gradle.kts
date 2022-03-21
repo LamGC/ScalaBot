@@ -11,7 +11,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("io.github.microutils:kotlin-logging:2.1.21")
-    implementation("ch.qos.logback:logback-classic:1.2.10")
+    implementation("ch.qos.logback:logback-classic:1.2.11")
 
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
@@ -27,8 +27,8 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:5.6.0")
-    implementation("org.telegram:telegrambots:5.6.0")
+    implementation("org.telegram:telegrambots-abilities:5.7.1")
+    implementation("org.telegram:telegrambots:5.7.1")
 
     implementation("io.prometheus:simpleclient:0.15.0")
     implementation("io.prometheus:simpleclient_httpserver:0.15.0")
