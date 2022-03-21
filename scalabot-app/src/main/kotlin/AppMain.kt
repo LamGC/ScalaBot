@@ -4,6 +4,7 @@ import io.prometheus.client.exporter.HTTPServer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.lamgc.scalabot.util.registerShutdownHook
+import org.eclipse.aether.repository.LocalRepository
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.generics.BotSession
@@ -53,6 +54,12 @@ internal class Launcher : AutoCloseable {
 
     private val botApi = TelegramBotsApi(DefaultBotSession::class.java)
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
+    private val mavenLocalRepository =
+        if (Const.config.mavenLocalRepository != null && Const.config.mavenLocalRepository.isNotEmpty()) {
+            LocalRepository(Const.config.mavenLocalRepository)
+        } else {
+            LocalRepository("${System.getProperty("user.home")}/.m2/repository")
+        }
 
     @Synchronized
     fun launch(): Boolean {
@@ -106,6 +113,7 @@ internal class Launcher : AutoCloseable {
             }.toList()
         val extensionPackageFinders = setOf(
             MavenRepositoryExtensionFinder(
+                localRepository = mavenLocalRepository,
                 remoteRepositories = remoteRepositories,
                 proxy = Const.config.proxy.toAetherProxy()
             )

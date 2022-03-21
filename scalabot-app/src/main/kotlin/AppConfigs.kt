@@ -138,7 +138,8 @@ internal data class MavenRepositoryConfig(
 internal data class AppConfig(
     val proxy: ProxyConfig = ProxyConfig(),
     val metrics: MetricsConfig = MetricsConfig(),
-    val mavenRepositories: List<MavenRepositoryConfig> = emptyList()
+    val mavenRepositories: List<MavenRepositoryConfig> = emptyList(),
+    val mavenLocalRepository: String? = null
 )
 
 /**
