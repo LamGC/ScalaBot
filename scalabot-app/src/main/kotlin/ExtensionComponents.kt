@@ -90,6 +90,10 @@ internal class ExtensionLoader(
             try {
                 val extension =
                     factory.createExtensionInstance(bot, getExtensionDataFolder(extensionArtifact))
+                if (extension == null) {
+                    log.debug { "Factory ${factory::class.java} 创建插件时返回了 null, 已跳过. (BotName: ${bot.botUsername})" }
+                    continue
+                }
                 factories.add(LoadedExtensionEntry(extensionArtifact, factory::class.java, extension))
             } catch (e: Exception) {
                 log.error(e) { "创建扩展时发生异常. (ExtArtifact: `$extensionArtifact`, Factory: ${factory::class.java.name})" }
