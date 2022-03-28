@@ -34,11 +34,7 @@ internal fun File.deepListFiles(
         this.listFiles(filenameFilter)
     } else {
         this.listFiles()
-    }
-
-    if (files == null) {
-        return null
-    }
+    } ?: return null
 
     val result = if (addSelf) mutableSetOf(this) else mutableSetOf()
     for (file in files) {
@@ -48,10 +44,8 @@ internal fun File.deepListFiles(
             if (!onlyFile) {
                 result.add(file)
             }
-            val subFiles = file.deepListFiles(false, onlyFile, fileFilter, filenameFilter)
-            if (subFiles != null) {
-                result.addAll(subFiles)
-            }
+            val subFiles = file.deepListFiles(false, onlyFile, fileFilter, filenameFilter) ?: continue
+            result.addAll(subFiles)
         }
     }
     return result.toTypedArray()
