@@ -22,10 +22,13 @@ public interface BotExtensionFactory {
      *
      * <p> 如扩展无使用 {@link org.telegram.abilitybots.api.db.DBContext} 的话,
      * 也可以返回扩展单例, 因为 AbilityBot 本身并不禁止多个机器人共用一个扩展对象
-     * (因为 AbilityBot 只是调用了扩展中的方法来创建了功能对象).
+     * (AbilityBot 只是调用了扩展中的方法来创建 Ability 对象).
      *
      * @param bot             机器人对象.
-     * @param shareDataFolder ScalaBot App 为扩展提供的共享数据目录, <b>同一个扩展包的 Factory</b> 接收到的共享数据目录<b>都是一样的</b>;
+     * @param shareDataFolder ScalaBot App 为扩展提供的共享数据目录.
+     *                        <p>路径格式为:
+     *                        <pre> $DATA_ROOT/data/extensions/{GroupId}/{ArtifactId}</pre>
+     *                        <b>同一个扩展包的 Factory</b> 接收到的共享数据目录<b>都是一样的</b>,
      *                        建议将数据存储在数据目录中, 便于数据的存储管理.
      * @return 返回为该 Bot 对象创建的扩展对象, 如果不希望为该机器人提供扩展, 可返回 {@code null}.
      */
