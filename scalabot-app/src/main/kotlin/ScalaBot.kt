@@ -30,6 +30,7 @@ internal class ScalaBot(
     extensionFinders: Set<ExtensionPackageFinder>,
     botConfig: BotConfig,
     private val creatorId: Long = botConfig.account.creatorId,
+    val accountId: Long = botConfig.account.id,
     val extensions: Set<Artifact> = botConfig.extensions
 ) :
     AbilityBot(
