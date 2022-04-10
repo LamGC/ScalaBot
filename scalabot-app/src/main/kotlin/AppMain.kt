@@ -146,9 +146,16 @@ internal class Launcher : AutoCloseable {
     @Synchronized
     override fun close() {
         botSessionMap.forEach {
-            log.info { "正在关闭机器人 `${it.key.botUsername}` ..." }
-            it.value.stop()
-            log.info { "已关闭机器人 `${it.key.botUsername}`." }
+            try {
+                if (!it.value.isRunning) {
+                    return@forEach
+                }
+                log.info { "正在关闭机器人 `${it.key.botUsername}` ..." }
+                it.value.stop()
+                log.info { "已关闭机器人 `${it.key.botUsername}`." }
+            } catch (e: Exception) {
+                log.error(e) { "机器人 `${it.key.botUsername}` 关闭时发生异常." }
+            }
         }
     }
 
