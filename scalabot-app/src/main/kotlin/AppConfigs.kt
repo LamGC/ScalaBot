@@ -160,7 +160,10 @@ internal enum class AppPaths(
      * 提示: 结尾不带 `/`.
      */
     DATA_ROOT(fileSupplier = {
-        File(System.getProperty(PathConst.PROP_DATA_PATH) ?: System.getenv(PathConst.ENV_DATA_PATH) ?: ".")
+        File(
+            System.getProperty(PathConst.PROP_DATA_PATH) ?: System.getenv(PathConst.ENV_DATA_PATH)
+            ?: System.getProperty("user.dir") ?: "."
+        )
     }, initializer = {
         val f = file
         if (!f.exists()) {
