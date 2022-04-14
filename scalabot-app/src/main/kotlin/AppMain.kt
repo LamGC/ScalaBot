@@ -56,7 +56,11 @@ internal class Launcher : AutoCloseable {
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
     private val mavenLocalRepository =
         if (Const.config.mavenLocalRepository != null && Const.config.mavenLocalRepository.isNotEmpty()) {
-            LocalRepository(Const.config.mavenLocalRepository)
+            val repoPath = AppPaths.DATA_ROOT.file.toPath()
+                .resolve(Const.config.mavenLocalRepository)
+                .toRealPath()
+                .toFile()
+            LocalRepository(repoPath)
         } else {
             LocalRepository("${System.getProperty("user.home")}/.m2/repository")
         }

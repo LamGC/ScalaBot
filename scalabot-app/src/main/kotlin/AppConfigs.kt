@@ -134,6 +134,7 @@ internal data class MavenRepositoryConfig(
  * @property proxy Telegram API 代理配置.
  * @property metrics 运行指标数据配置. 可通过时序数据库记录运行数据.
  * @property mavenRepositories Maven 远端仓库配置.
+ * @property mavenLocalRepository Maven 本地仓库路径. 相对于运行目录 (而不是 DATA_ROOT 目录)
  */
 internal data class AppConfig(
     val proxy: ProxyConfig = ProxyConfig(),
