@@ -231,9 +231,9 @@ internal enum class AppPaths(
         return path
     }
 
-    private companion object PathConst {
-        private const val PROP_DATA_PATH = "bot.path.data"
-        private const val ENV_DATA_PATH = "BOT_DATA_PATH"
+    private object PathConst {
+        const val PROP_DATA_PATH = "bot.path.data"
+        const val ENV_DATA_PATH = "BOT_DATA_PATH"
     }
 
 }
