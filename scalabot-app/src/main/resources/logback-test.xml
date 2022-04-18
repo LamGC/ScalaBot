@@ -5,6 +5,8 @@
     <logger name="org.eclipse.aether.internal.impl.DefaultTransporterProvider" level="INFO"/>
     <logger name="org.eclipse.aether.internal.impl.DefaultRepositoryConnectorProvider" level="INFO"/>
     <logger name="org.eclipse.aether.internal.impl.EnhancedLocalRepositoryManager" level="INFO"/>
+    <logger name="org.telegram.telegrambots.facilities.proxysocketfactorys" level="INFO"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultUpdateCheckManager" level="INFO"/>
 
     <root level="DEBUG">
         <appender-ref ref="FILE_OUT"/>
