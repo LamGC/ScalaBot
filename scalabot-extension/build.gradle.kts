@@ -10,8 +10,9 @@ dependencies {
     api("org.telegram:telegrambots-abilities:6.0.1")
     api("org.slf4j:slf4j-api:1.7.36")
 
-    // There is nothing to test.
-    // testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.mockito:mockito-core:4.4.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 tasks.withType<Javadoc> {
