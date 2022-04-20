@@ -37,11 +37,16 @@ public class SayHelloExtension implements AbilityExtension {
      */
     public Ability test() {
         ReplyFlow botHello = ReplyFlow.builder(bot.db())
+                .enableStats("say_hello")
                 .action((bot, upd) -> bot.silent().send("What is u name?", upd.getMessage().getChatId()))
-                .onlyIf(update -> "hello".equalsIgnoreCase(update.getMessage().getText()))
+                .onlyIf(update -> update.hasMessage()
+                        && update.getMessage().hasText()
+                        && "hello".equalsIgnoreCase(update.getMessage().getText()))
                 .next(Reply.of((bot, upd) -> bot.silent()
                                 .send("OK! You name is " + upd.getMessage().getText().substring("my name is ".length()), upd.getMessage().getChatId()),
-                        upd -> upd.getMessage().getText().startsWith("my name is ")))
+                        upd -> upd.hasMessage()
+                                && upd.getMessage().hasText()
+                                && upd.getMessage().getText().startsWith("my name is ")))
                 .build();
 
         return Ability.builder()
