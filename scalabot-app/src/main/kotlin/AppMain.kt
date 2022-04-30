@@ -9,6 +9,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.generics.BotSession
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
+import java.io.File
 import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
@@ -54,16 +55,24 @@ internal class Launcher : AutoCloseable {
 
     private val botApi = TelegramBotsApi(DefaultBotSession::class.java)
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
-    private val mavenLocalRepository =
-        if (Const.config.mavenLocalRepository != null && Const.config.mavenLocalRepository.isNotEmpty()) {
-            val repoPath = AppPaths.DATA_ROOT.file.toPath()
-                .resolve(Const.config.mavenLocalRepository)
-                .toRealPath()
-                .toFile()
-            LocalRepository(repoPath)
-        } else {
-            LocalRepository("${System.getProperty("user.home")}/.m2/repository")
+    private val mavenLocalRepository = getMavenLocalRepository()
+
+    private fun getMavenLocalRepository(): LocalRepository {
+        val localPath =
+            if (Const.config.mavenLocalRepository != null && Const.config.mavenLocalRepository.isNotEmpty()) {
+                val repoPath = AppPaths.DATA_ROOT.file.toPath()
+                    .resolve(Const.config.mavenLocalRepository)
+                    .toRealPath()
+                    .toFile()
+                repoPath
+            } else {
+                File("${System.getProperty("user.home")}/.m2/repository")
+            }
+        if (!localPath.exists()) {
+            localPath.mkdirs()
         }
+        return LocalRepository(localPath)
+    }
 
     @Synchronized
     fun launch(): Boolean {
