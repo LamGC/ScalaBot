@@ -132,7 +132,7 @@ internal class ExtensionLoader(
                     result[finder] = artifacts
                 }
             } catch (e: Exception) {
-                log.error { "搜索器 ${finder::class.java.name} 在搜索扩展 `$extensionArtifact` 时发生错误:" }
+                log.error(e) { "搜索器 ${finder::class.java.name} 在搜索扩展 `$extensionArtifact` 时发生错误." }
             }
         }
         return result
