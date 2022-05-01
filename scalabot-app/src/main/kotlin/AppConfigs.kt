@@ -19,6 +19,7 @@ import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
 
@@ -268,8 +269,16 @@ private fun AppPaths.defaultInitializer() {
 }
 
 internal fun initialFiles() {
+    val configFilesNotInitialized = !AppPaths.DEFAULT_CONFIG_APPLICATION.file.exists()
+            && !AppPaths.DEFAULT_CONFIG_BOT.file.exists()
+
     for (path in AppPaths.values()) {
         path.initial()
+    }
+
+    if (configFilesNotInitialized) {
+        log.warn { "配置文件已初始化, 请根据需要修改配置文件后重新启动本程序." }
+        exitProcess(1)
     }
 }
 
