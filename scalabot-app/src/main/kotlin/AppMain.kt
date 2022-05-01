@@ -80,6 +80,9 @@ internal class Launcher : AutoCloseable {
         if (botConfigs.isEmpty()) {
             log.warn { "尚未配置任何机器人, 请先配置机器人后再启动本程序." }
             return false
+        } else if (botConfigs.none { it.enabled }) {
+            log.warn { "配置文件中没有已启用的机器人, 请至少启用一个机器人." }
+            return false
         }
         for (botConfig in botConfigs) {
             try {
