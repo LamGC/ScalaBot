@@ -122,7 +122,12 @@ internal class Launcher : AutoCloseable {
         val remoteRepositories = Const.config.mavenRepositories
             .map(MavenRepositoryConfig::toRemoteRepository)
             .toMutableList().apply {
-                add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = Const.config.proxy.toAetherProxy()))
+                if (this.none {
+                        it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL
+                                || it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL.trimEnd('/')
+                    }) {
+                    add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = Const.config.proxy.toAetherProxy()))
+                }
             }.toList()
         val extensionPackageFinders = setOf(
             MavenRepositoryExtensionFinder(
