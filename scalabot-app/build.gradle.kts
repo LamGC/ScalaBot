@@ -35,6 +35,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_httpserver:0.15.0")
 
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.12.3")
 }
 
 tasks.test {
