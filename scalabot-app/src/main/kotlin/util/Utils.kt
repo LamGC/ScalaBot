@@ -9,7 +9,7 @@ import java.io.FileFilter
 import java.io.FilenameFilter
 import java.net.URL
 
-internal fun ByteArray.toHaxString(): String = ByteUtils.bytesToHexString(this)
+internal fun ByteArray.toHexString(): String = joinToString("") { it.toString(16) }
 
 internal fun Artifact.equalsArtifact(that: Artifact): Boolean =
     this.groupId.equals(that.groupId) &&

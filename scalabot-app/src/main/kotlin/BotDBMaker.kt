@@ -2,7 +2,7 @@ package net.lamgc.scalabot
 
 import com.google.common.io.Files
 import mu.KotlinLogging
-import net.lamgc.scalabot.util.toHaxString
+import net.lamgc.scalabot.util.toHexString
 import org.mapdb.DB
 import org.mapdb.DBException
 import org.mapdb.DBMaker
@@ -186,5 +186,5 @@ private object BotAccountIdDbAdapter : FileDbAdapter("BotAccountId", { botAccoun
 private object BotTokenDbAdapter : FileDbAdapter("BotToken_v0.1.0", { botAccount ->
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val digestBytes = digest.digest(botAccount.token.toByteArray(StandardCharsets.UTF_8))
-    File(AppPaths.DATA_DB.file, "${digestBytes.toHaxString()}.db")
+    File(AppPaths.DATA_DB.file, "${digestBytes.toHexString()}.db")
 })
