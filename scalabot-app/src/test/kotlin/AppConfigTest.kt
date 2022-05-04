@@ -64,16 +64,17 @@ internal class AppPathsTest {
 
     @Test
     fun `default initializer`(@TempDir testDir: File) {
+        val defaultInitializerMethod = Class.forName("net.lamgc.scalabot.AppConfigsKt")
+            .getDeclaredMethod("defaultInitializer", AppPaths::class.java)
+            .apply { isAccessible = true }
+
         val dirPath = "${testDir.canonicalPath}/directory/"
         val dirFile = File(dirPath)
         mockk<AppPaths> {
             every { file }.returns(File(dirPath))
             every { path }.returns(dirPath)
             every { initial() }.answers {
-                Class.forName("net.lamgc.scalabot.AppConfigsKt")
-                    .getDeclaredMethod("defaultInitializer", AppPaths::class.java)
-                    .apply { isAccessible = true }
-                    .invoke(null, this@mockk)
+                defaultInitializerMethod.invoke(null, this@mockk)
             }
         }.initial()
         assertTrue(dirFile.exists() && dirFile.isDirectory, "默认初始器未正常初始化【文件夹】.")
@@ -83,10 +84,7 @@ internal class AppPathsTest {
                 every { file }.returns(this@apply)
                 every { path }.returns(this@apply.canonicalPath)
                 every { initial() }.answers {
-                    Class.forName("net.lamgc.scalabot.AppConfigsKt")
-                        .getDeclaredMethod("defaultInitializer", AppPaths::class.java)
-                        .apply { isAccessible = true }
-                        .invoke(null, this@mockk)
+                    defaultInitializerMethod.invoke(null, this@mockk)
                 }
             }.initial()
             assertTrue(this@apply.exists() && this@apply.isFile, "默认初始器未正常初始化【文件】.")
@@ -109,16 +107,15 @@ internal class AppPathsTest {
                 every { file }.returns(this@apply)
                 every { path }.returns(this@apply.canonicalPath)
                 every { initial() }.answers {
-                    Class.forName("net.lamgc.scalabot.AppConfigsKt")
-                        .getDeclaredMethod("defaultInitializer", AppPaths::class.java)
-                        .apply { isAccessible = true }
-                        .invoke(null, this@mockk)
+                    defaultInitializerMethod.invoke(null, this@mockk)
                 }
             }.initial()
             verify(exactly = 0) { createNewFile() }
             verify(exactly = 0) { mkdir() }
             verify(exactly = 0) { mkdirs() }
         }
+
+        defaultInitializerMethod.isAccessible = false
     }
 
 }
