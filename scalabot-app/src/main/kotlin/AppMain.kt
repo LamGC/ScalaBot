@@ -22,9 +22,7 @@ fun main(args: Array<String>): Unit = runBlocking {
 
     val launcher = Launcher()
         .registerShutdownHook()
-    if (Const.config.metrics.enable) {
-        startMetricsServer()
-    }
+    startMetricsServer()
     if (!launcher.launch()) {
         exitProcess(1)
     }
@@ -34,11 +32,16 @@ fun main(args: Array<String>): Unit = runBlocking {
  * 启动运行指标服务器.
  * 使用 Prometheus 指标格式.
  */
-fun startMetricsServer() {
+internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics) {
+    if (!config.enable) {
+        log.debug { "运行指标服务器已禁用." }
+        return
+    }
+
     val builder = HTTPServer.Builder()
         .withDaemonThreads(true)
-        .withPort(Const.config.metrics.port)
-        .withHostname(Const.config.metrics.bindAddress)
+        .withPort(config.port)
+        .withHostname(config.bindAddress)
 
     val httpServer = builder
         .build()
@@ -46,7 +49,7 @@ fun startMetricsServer() {
     log.info { "运行指标服务器已启动. (Port: ${httpServer.port})" }
 }
 
-internal class Launcher : AutoCloseable {
+internal class Launcher(private val config: AppConfig = Const.config) : AutoCloseable {
 
     companion object {
         @JvmStatic
@@ -59,9 +62,9 @@ internal class Launcher : AutoCloseable {
 
     private fun getMavenLocalRepository(): LocalRepository {
         val localPath =
-            if (Const.config.mavenLocalRepository != null && Const.config.mavenLocalRepository.isNotEmpty()) {
+            if (config.mavenLocalRepository != null && config.mavenLocalRepository.isNotEmpty()) {
                 val repoPath = AppPaths.DATA_ROOT.file.toPath()
-                    .resolve(Const.config.mavenLocalRepository)
+                    .resolve(config.mavenLocalRepository)
                     .toRealPath()
                     .toFile()
                 repoPath
@@ -104,15 +107,15 @@ internal class Launcher : AutoCloseable {
             val proxyConfig =
                 if (botConfig.proxy != null && botConfig.proxy.type != DefaultBotOptions.ProxyType.NO_PROXY) {
                     botConfig.proxy
-                } else if (Const.config.proxy.type != DefaultBotOptions.ProxyType.NO_PROXY) {
-                    Const.config.proxy
+                } else if (config.proxy.type != DefaultBotOptions.ProxyType.NO_PROXY) {
+                    config.proxy
                 } else {
                     null
                 }
             if (proxyConfig != null) {
                 proxyType = proxyConfig.type
-                proxyHost = Const.config.proxy.host
-                proxyPort = Const.config.proxy.port
+                proxyHost = config.proxy.host
+                proxyPort = config.proxy.port
                 log.debug { "机器人 `${botConfig.account.name}` 已启用代理配置: $proxyConfig" }
             }
 
@@ -122,21 +125,21 @@ internal class Launcher : AutoCloseable {
         }
         val account = botConfig.account
 
-        val remoteRepositories = Const.config.mavenRepositories
-            .map(MavenRepositoryConfig::toRemoteRepository)
+        val remoteRepositories = config.mavenRepositories
+            .map { it.toRemoteRepository(config.proxy) }
             .toMutableList().apply {
                 if (this.none {
                         it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL
                                 || it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL.trimEnd('/')
                     }) {
-                    add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = Const.config.proxy.toAetherProxy()))
+                    add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = config.proxy.toAetherProxy()))
                 }
             }.toList()
         val extensionPackageFinders = setOf(
             MavenRepositoryExtensionFinder(
                 localRepository = mavenLocalRepository,
                 remoteRepositories = remoteRepositories,
-                proxy = Const.config.proxy.toAetherProxy()
+                proxy = config.proxy.toAetherProxy()
             )
         )
 

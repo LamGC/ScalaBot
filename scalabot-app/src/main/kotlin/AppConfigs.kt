@@ -107,12 +107,12 @@ internal data class MavenRepositoryConfig(
     val authentication: Authentication? = null
 ) {
 
-    fun toRemoteRepository(): RemoteRepository {
+    fun toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
         val builder = RemoteRepository.Builder(null, checkRepositoryLayout(layout), url.toString())
         if (proxy != null) {
             builder.setProxy(proxy)
-        } else if (Const.config.proxy.type == DefaultBotOptions.ProxyType.HTTP) {
-            builder.setProxy(Const.config.proxy.toAetherProxy())
+        } else if (proxyConfig.type == DefaultBotOptions.ProxyType.HTTP) {
+            builder.setProxy(proxyConfig.toAetherProxy())
         }
         return builder.build()
     }
