@@ -106,7 +106,7 @@ internal data class MavenRepositoryConfig(
     val authentication: Authentication? = null
 ) {
 
-    fun toRemoteRepository(proxyConfig: ProxyConfig = Const.config.proxy): RemoteRepository {
+    fun toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
         val builder = RemoteRepository.Builder(null, checkRepositoryLayout(layout), url.toString())
         if (proxy != null) {
             builder.setProxy(proxy)

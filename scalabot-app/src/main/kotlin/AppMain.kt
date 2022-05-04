@@ -123,7 +123,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
         val account = botConfig.account
 
         val remoteRepositories = config.mavenRepositories
-            .map(MavenRepositoryConfig::toRemoteRepository)
+            .map { it.toRemoteRepository(config.proxy) }
             .toMutableList().apply {
                 if (this.none {
                         it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL
