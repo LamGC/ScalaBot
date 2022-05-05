@@ -81,17 +81,20 @@ private object UtilsInternal {
     val autoCloseableSet = mutableSetOf<AutoCloseable>()
 
     init {
-        Runtime.getRuntime().addShutdownHook(Thread({
-            log.debug { "Closing registered hook resources..." }
-            autoCloseableSet.forEach {
-                try {
-                    it.close()
-                } catch (e: Exception) {
-                    log.error(e) { "An exception occurred while closing the resource. (Resource: `$it`)" }
-                }
+        Runtime.getRuntime().addShutdownHook(Thread(this::doCloseResources, "Shutdown-AutoCloseable"))
+    }
+
+    fun doCloseResources() {
+        log.debug { "Closing registered hook resources..." }
+        autoCloseableSet.removeIf {
+            try {
+                it.close()
+            } catch (e: Exception) {
+                log.error(e) { "An exception occurred while closing the resource. (Resource: `$it`)" }
             }
-            log.debug { "All registered hook resources have been closed." }
-        }, "Shutdown-AutoCloseable"))
+            true
+        }
+        log.debug { "All registered hook resources have been closed." }
     }
 }
 

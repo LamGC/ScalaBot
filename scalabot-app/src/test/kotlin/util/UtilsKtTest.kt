@@ -1,18 +1,21 @@
 package net.lamgc.scalabot.util
 
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.verify
 import net.lamgc.scalabot.ExtensionPackageFinder
 import net.lamgc.scalabot.FinderPriority
 import net.lamgc.scalabot.FinderRules
 import net.lamgc.scalabot.FoundExtensionPackage
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.io.File
+import java.lang.reflect.InvocationTargetException
 import java.nio.charset.StandardCharsets
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 internal class UtilsKtTest {
 
@@ -57,5 +60,60 @@ internal class UtilsKtTest {
             NoAnnotationFinder().getPriority()
         }
 
+    }
+
+    @Test
+    fun `AutoCloseable shutdown hook`() {
+        val utilsInternalClass = Class.forName("net.lamgc.scalabot.util.UtilsInternal")
+        val utilsInternalObject = utilsInternalClass.getDeclaredField("INSTANCE").get(null)
+            ?: fail("无法获取 UtilsInternal 对象.")
+        val doCloseResourcesMethod = utilsInternalClass.getDeclaredMethod("doCloseResources")
+            .apply {
+                isAccessible = true
+            }
+
+        // 正常的运行过程.
+        val mockResource = mockk<AutoCloseable> {
+            justRun { close() }
+        }.registerShutdownHook()
+        doCloseResourcesMethod.invoke(utilsInternalObject)
+        verify { mockResource.close() }
+
+        // 异常捕获检查.
+        val exceptionMockResource = mockk<AutoCloseable> {
+            every { close() } throws RuntimeException("Expected exception.")
+        }.registerShutdownHook()
+        assertDoesNotThrow("在关闭资源时出现未捕获异常.") {
+            doCloseResourcesMethod.invoke(utilsInternalObject)
+        }
+        verify { exceptionMockResource.close() }
+
+        // 错误抛出检查.
+        val errorMockResource = mockk<AutoCloseable> {
+            every { close() } throws Error("Expected error.")
+        }.registerShutdownHook()
+        assertThrows<Error>("关闭资源时捕获了不该捕获的 Error.") {
+            try {
+                doCloseResourcesMethod.invoke(utilsInternalObject)
+            } catch (e: InvocationTargetException) {
+                throw e.targetException
+            }
+        }
+        verify { errorMockResource.close() }
+
+        @Suppress("UNCHECKED_CAST")
+        val resourceSet = utilsInternalClass.getDeclaredMethod("getAutoCloseableSet").invoke(utilsInternalObject)
+                as MutableSet<AutoCloseable>
+        resourceSet.clear()
+
+        val closeRef = mockk<AutoCloseable> {
+            justRun { close() }
+        }
+        resourceSet.add(closeRef)
+        assertTrue(resourceSet.contains(closeRef), "测试用资源虚引用添加失败.")
+        doCloseResourcesMethod.invoke(utilsInternalObject)
+        assertFalse(resourceSet.contains(closeRef), "资源虚引用未从列表中删除.")
+
+        resourceSet.clear()
     }
 }
