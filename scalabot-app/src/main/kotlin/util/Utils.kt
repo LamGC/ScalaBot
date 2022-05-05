@@ -56,9 +56,14 @@ internal fun File.deepListFiles(
  * @return 获取 Finder 的优先级.
  * @throws NoSuchFieldException 如果 Finder 没有添加 [FinderRules] 注解时抛出该异常.
  */
-internal fun ExtensionPackageFinder.getPriority() =
-    this::class.java.getDeclaredAnnotation(FinderRules::class.java)?.priority
+internal fun ExtensionPackageFinder.getPriority(): Int {
+    val value = this::class.java.getDeclaredAnnotation(FinderRules::class.java)?.priority
         ?: throw NoSuchFieldException("Finder did not add `FinderRules` annotation")
+    if (value < 0) {
+        throw IllegalArgumentException("Priority cannot be lower than 0. (Class: ${this::class.java})")
+    }
+    return value
+}
 
 /**
  * 为 [AutoCloseable] 对象注册 Jvm Shutdown 钩子.
