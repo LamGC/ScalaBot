@@ -7,7 +7,6 @@ import org.eclipse.aether.artifact.Artifact
 import java.io.File
 import java.io.FileFilter
 import java.io.FilenameFilter
-import java.net.URL
 
 internal fun ByteArray.toHexString(): String = joinToString("") { it.toString(16) }
 
@@ -95,19 +94,5 @@ private object UtilsInternal {
             true
         }
         log.debug { "All registered hook resources have been closed." }
-    }
-}
-
-fun URL.resolveToFile(canonical: Boolean = true): File {
-    if ("file" != protocol) {
-        throw ClassCastException("Only the URL of the `file` protocol can be converted into a File object.")
-    }
-
-    val urlString = toString().substringAfter(':')
-    val file = File(urlString)
-    return if (canonical) {
-        file.canonicalFile
-    } else {
-        file
     }
 }
