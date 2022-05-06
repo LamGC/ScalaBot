@@ -114,7 +114,6 @@ internal class ScalaBot(
     }
 
     override fun onClosing() {
-        super.onClosing()
         onlineBotGauge.dec()
     }
 
@@ -151,7 +150,7 @@ internal class ScalaBot(
         private val updateProcessTime = Summary.build()
             .name("update_process_duration_seconds")
             .help(
-                "Time to process update. (This indicator includes the pre-processing of update by TelegrammBots, " +
+                "Time to process update. (This indicator includes the pre-processing of update by TelegramBots, " +
                         "so it may be different from the actual execution time of ability. " +
                         "It is not recommended to use it as the accurate execution time of ability)"
             )
