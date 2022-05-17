@@ -38,24 +38,21 @@ tasks.withType<KotlinCompile> {
 
 publishing {
     repositories {
-        val repoRootKey = "maven.repo.local.root"
-        val snapshot = project.version.toString().endsWith("-SNAPSHOT")
-        val repoRoot = System.getProperty(repoRootKey)?.trim()
-        if (repoRoot == null || repoRoot.isEmpty()) {
-            logger.warn(
-                "\"$repoRootKey\" configuration item is not specified, " +
-                        "please add start parameter \"-D$repoRootKey {localPublishRepo}\"" +
-                        " (if you are not currently executing the publish task, " +
-                        "you can ignore this information)"
-            )
-            return@repositories
-        }
-        val repoUri = if (snapshot) {
-            uri("$repoRoot/snapshots")
+        if (project.version.toString().endsWith("-SNAPSHOT")) {
+            maven("https://repo.lamgc.moe/repository/maven-snapshots/") {
+                credentials {
+                    username = project.properties["repo.credentials.private.username"].toString()
+                    password = project.properties["repo.credentials.private.password"].toString()
+                }
+            }
         } else {
-            uri("$repoRoot/releases")
+            maven("https://repo.lamgc.moe/repository/maven-releases/") {
+                credentials {
+                    username = project.properties["repo.credentials.private.username"].toString()
+                    password = project.properties["repo.credentials.private.password"].toString()
+                }
+            }
         }
-        maven(repoUri)
     }
 
     publications {
