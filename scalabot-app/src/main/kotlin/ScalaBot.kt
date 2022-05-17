@@ -103,6 +103,12 @@ internal class ScalaBot(
             }
             BotCommand(it.name(), abilityInfo)
         }
+
+        if (botCommands.isEmpty()) {
+            log.info { "Bot 没有任何命令, 命令列表更新已跳过." }
+            return true
+        }
+
         val setMyCommands = SetMyCommands()
         setMyCommands.commands = botCommands
         return execute(DeleteMyCommands()) && execute(setMyCommands)
