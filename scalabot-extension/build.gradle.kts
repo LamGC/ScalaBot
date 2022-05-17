@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     java
     `maven-publish`
+    signing
 }
 
 dependencies {
@@ -93,4 +94,9 @@ publishing {
         }
     }
 
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["maven"])
 }
