@@ -10,6 +10,13 @@ import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.generics.BotSession
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.io.File
+import java.io.IOException
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.isReadable
+import kotlin.io.path.isWritable
 import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
@@ -65,6 +72,28 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
             if (config.mavenLocalRepository != null && config.mavenLocalRepository.isNotEmpty()) {
                 val repoPath = AppPaths.DATA_ROOT.file.toPath()
                     .resolve(config.mavenLocalRepository)
+                    .apply {
+                        if (!exists()) {
+                            if (!parent.isWritable() || !parent.isReadable()) {
+                                throw IOException("Unable to read and write the directory where Maven repository is located.")
+                            }
+                            if (System.getProperty("os.name").lowercase().startsWith("windows")) {
+                                createDirectories()
+                            } else {
+                                createDirectories(
+                                    PosixFilePermissions.asFileAttribute(
+                                        setOf(
+                                            PosixFilePermission.OWNER_READ,
+                                            PosixFilePermission.OWNER_WRITE,
+                                            PosixFilePermission.GROUP_READ,
+                                            PosixFilePermission.GROUP_WRITE,
+                                            PosixFilePermission.OTHERS_READ,
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    }
                     .toRealPath()
                     .toFile()
                 repoPath
