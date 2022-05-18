@@ -155,7 +155,7 @@ internal object MavenRepositoryConfigSerializer
                 )
             }
             is JsonPrimitive -> {
-                MavenRepositoryConfig(URL(json.asString))
+                MavenRepositoryConfig(url = URL(json.asString))
             }
             else -> {
                 throw JsonParseException("Unsupported Maven warehouse configuration type.")

@@ -257,9 +257,21 @@ internal class MavenRepositoryExtensionFinder(
     }
 
     override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage> {
+        log.debug {
+            StringBuilder().apply {
+                append("构件 $extensionArtifact 将在以下仓库拉取: \n")
+                remoteRepositories.forEach {
+                    append("\t- ${it}\n")
+                }
+            }
+        }
         val extensionArtifactResult = repositorySystem.resolveArtifact(
             repoSystemSession,
-            ArtifactRequest(extensionArtifact, remoteRepositories, null)
+            ArtifactRequest(
+                extensionArtifact,
+                repositorySystem.newResolutionRepositories(repoSystemSession, remoteRepositories),
+                null
+            )
         )
         val extResolvedArtifact = extensionArtifactResult.artifact
         if (!extensionArtifactResult.isResolved) {

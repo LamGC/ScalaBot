@@ -13,12 +13,14 @@ import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.repository.RemoteRepository
+import org.eclipse.aether.repository.RepositoryPolicy
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.ApiConstants
 import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
@@ -100,6 +102,7 @@ internal data class MetricsConfig(
  * @property layout 仓库布局版本, Maven 2 及以上使用 `default`, Maven 1 使用 `legacy`.
  */
 internal data class MavenRepositoryConfig(
+    val id: String? = null,
     val url: URL,
     val proxy: Proxy? = Proxy("http", "127.0.0.1", 1080),
     val layout: String = "default",
@@ -108,12 +111,29 @@ internal data class MavenRepositoryConfig(
 ) {
 
     fun toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
-        val builder = RemoteRepository.Builder(null, checkRepositoryLayout(layout), url.toString())
+        val builder =
+            RemoteRepository.Builder(id ?: createDefaultRepositoryId(), checkRepositoryLayout(layout), url.toString())
         if (proxy != null) {
             builder.setProxy(proxy)
         } else if (proxyConfig.type == DefaultBotOptions.ProxyType.HTTP) {
             builder.setProxy(proxyConfig.toAetherProxy())
         }
+
+        builder.setReleasePolicy(
+            RepositoryPolicy(
+                true,
+                RepositoryPolicy.UPDATE_POLICY_NEVER,
+                RepositoryPolicy.CHECKSUM_POLICY_FAIL
+            )
+        )
+        builder.setSnapshotPolicy(
+            RepositoryPolicy(
+                true,
+                RepositoryPolicy.UPDATE_POLICY_ALWAYS,
+                RepositoryPolicy.CHECKSUM_POLICY_WARN
+            )
+        )
+
         return builder.build()
     }
 
@@ -125,6 +145,13 @@ internal data class MavenRepositoryConfig(
             }
             return type
         }
+
+        private val repoNumber = AtomicInteger(1)
+
+        fun createDefaultRepositoryId(): String {
+            return "Repository-${repoNumber.getAndIncrement()}"
+        }
+
     }
 }
 
@@ -180,7 +207,8 @@ internal enum class AppPaths(
                     AppConfig(
                         mavenRepositories = listOf(
                             MavenRepositoryConfig(
-                                URL(MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL)
+                                id = "central",
+                                url = URL(MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL)
                             )
                         )
                     ), it
