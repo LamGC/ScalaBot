@@ -142,12 +142,15 @@ internal object MavenRepositoryConfigSerializer
         return when (json) {
             is JsonObject -> {
                 MavenRepositoryConfig(
+                    id = json.get("id")?.asString,
                     url = URL(checkJsonKey(json, "url")),
                     proxy = if (json.has("proxy") && json.get("proxy").isJsonObject)
                         context.deserialize<Proxy>(
                             json.getAsJsonObject("proxy"), Proxy::class.java
                         ) else null,
                     layout = json.get("layout").asString ?: "default",
+                    enableReleases = json.get("enableReleases")?.asBoolean ?: true,
+                    enableSnapshots = json.get("enableSnapshots")?.asBoolean ?: true,
                     authentication = if (json.has("authentication") && json.get("authentication").isJsonObject)
                         context.deserialize<Authentication>(
                             json.getAsJsonObject("authentication"), Authentication::class.java

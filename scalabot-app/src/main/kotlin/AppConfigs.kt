@@ -106,6 +106,8 @@ internal data class MavenRepositoryConfig(
     val url: URL,
     val proxy: Proxy? = Proxy("http", "127.0.0.1", 1080),
     val layout: String = "default",
+    val enableReleases: Boolean = true,
+    val enableSnapshots: Boolean = true,
     // 可能要设计个 type 来判断解析成什么类型的 Authentication.
     val authentication: Authentication? = null
 ) {
@@ -121,14 +123,14 @@ internal data class MavenRepositoryConfig(
 
         builder.setReleasePolicy(
             RepositoryPolicy(
-                true,
+                enableReleases,
                 RepositoryPolicy.UPDATE_POLICY_NEVER,
                 RepositoryPolicy.CHECKSUM_POLICY_FAIL
             )
         )
         builder.setSnapshotPolicy(
             RepositoryPolicy(
-                true,
+                enableSnapshots,
                 RepositoryPolicy.UPDATE_POLICY_ALWAYS,
                 RepositoryPolicy.CHECKSUM_POLICY_WARN
             )
