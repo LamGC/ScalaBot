@@ -18,8 +18,16 @@ internal class ArtifactSerializerTest {
     }
 
     @Test
-    fun serialize() {
+    fun `Basic format serialization`() {
         val gav = "org.example.software:test:1.0.0-SNAPSHOT"
+        val expectArtifact = DefaultArtifact(gav)
+        val actualArtifact = DefaultArtifact(ArtifactSerializer.serialize(expectArtifact, null, null).asString)
+        assertEquals(expectArtifact, actualArtifact)
+    }
+
+    @Test
+    fun `Full format serialization`() {
+        val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
         val expectArtifact = DefaultArtifact(gav)
         val actualArtifact = DefaultArtifact(ArtifactSerializer.serialize(expectArtifact, null, null).asString)
         assertEquals(expectArtifact, actualArtifact)
