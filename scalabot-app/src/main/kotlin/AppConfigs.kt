@@ -104,7 +104,7 @@ internal data class MetricsConfig(
 internal data class MavenRepositoryConfig(
     val id: String? = null,
     val url: URL,
-    val proxy: Proxy? = Proxy("http", "127.0.0.1", 1080),
+    val proxy: Proxy? = null,
     val layout: String = "default",
     val enableReleases: Boolean = true,
     val enableSnapshots: Boolean = true,
