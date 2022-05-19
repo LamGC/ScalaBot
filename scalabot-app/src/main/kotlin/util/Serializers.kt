@@ -1,7 +1,6 @@
 package net.lamgc.scalabot.util
 
 import com.google.gson.*
-import mu.KotlinLogging
 import net.lamgc.scalabot.MavenRepositoryConfig
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
@@ -66,69 +65,18 @@ internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<
 
 internal object AuthenticationSerializer : JsonDeserializer<Authentication> {
 
-    private val log = KotlinLogging.logger { }
-
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Authentication? {
-        val builder = AuthenticationBuilder()
-        when (json) {
-            is JsonArray -> {
-                for (element in json) {
-                    if (element is JsonArray) {
-                        builder.addCustom(jsonArrayToAuthentication(element))
-                    } else if (element is JsonObject) {
-                        jsonToAuthentication(element, builder)
-                    }
-                }
-            }
-            is JsonObject -> {
-                jsonToAuthentication(json, builder)
-            }
-            else -> {
-                throw JsonParseException("Unsupported JSON data type: ${json::class.java}")
-            }
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Authentication {
+        if (json !is JsonObject) {
+            throw JsonParseException("Unsupported JSON type.")
         }
+        val username = SerializerUtils.checkJsonKey(json, "username")
+        val password = SerializerUtils.checkJsonKey(json, "password")
+        val builder = AuthenticationBuilder()
+        builder.addUsername(username)
+        builder.addPassword(password)
         return builder.build()
     }
 
-    private fun jsonArrayToAuthentication(jsonArray: JsonArray): Authentication {
-        val builder = AuthenticationBuilder()
-        for (element in jsonArray) {
-            when (element) {
-                is JsonObject -> jsonToAuthentication(element, builder)
-                is JsonArray -> builder.addCustom(jsonArrayToAuthentication(element))
-                else -> log.warn { "不支持的 Json 类型: ${element::class.java}" }
-            }
-        }
-        return builder.build()
-    }
-
-    private const val KEY_TYPE = "type"
-
-    private fun jsonToAuthentication(json: JsonObject, builder: AuthenticationBuilder) {
-        if (!json.has(KEY_TYPE)) {
-            log.warn { "缺少 type 字段, 无法判断 Maven 认证信息类型." }
-            return
-        } else if (!json.get(KEY_TYPE).isJsonPrimitive) {
-            log.warn { "type 字段类型错误(应为 Primitive 类型), 无法判断 Maven 认证信息类型.(实际类型: `${json::class.java}`)" }
-            return
-        }
-
-        when (json.get(KEY_TYPE).asString.trim().lowercase()) {
-            "string" -> {
-                builder.addString(
-                    SerializerUtils.checkJsonKey(json, "key"),
-                    SerializerUtils.checkJsonKey(json, "value")
-                )
-            }
-            "secret" -> {
-                builder.addSecret(
-                    SerializerUtils.checkJsonKey(json, "key"),
-                    SerializerUtils.checkJsonKey(json, "value")
-                )
-            }
-        }
-
-    }
 }
 
 private object SerializerUtils {
