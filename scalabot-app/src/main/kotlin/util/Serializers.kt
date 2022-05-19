@@ -55,8 +55,8 @@ internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<
         return JsonPrimitive(gavBuilder.append(':').append(src.version).toString())
     }
 
-    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Artifact {
-        if (!json!!.isJsonPrimitive) {
+    override fun deserialize(json: JsonElement, typeOfT: Type?, context: JsonDeserializationContext?): Artifact {
+        if (!json.isJsonPrimitive) {
             throw JsonParseException("Wrong configuration value type.")
         }
         return DefaultArtifact(json.asString.trim())
@@ -115,23 +115,31 @@ internal object AuthenticationSerializer : JsonDeserializer<Authentication> {
 
         when (json.get(KEY_TYPE).asString.trim().lowercase()) {
             "string" -> {
-                builder.addString(checkJsonKey(json, "key"), checkJsonKey(json, "value"))
+                builder.addString(
+                    SerializerUtils.checkJsonKey(json, "key"),
+                    SerializerUtils.checkJsonKey(json, "value")
+                )
             }
             "secret" -> {
-                builder.addSecret(checkJsonKey(json, "key"), checkJsonKey(json, "value"))
+                builder.addSecret(
+                    SerializerUtils.checkJsonKey(json, "key"),
+                    SerializerUtils.checkJsonKey(json, "value")
+                )
             }
         }
 
     }
 }
 
-private fun checkJsonKey(json: JsonObject, key: String): String {
-    if (!json.has(key)) {
-        throw JsonParseException("Required field does not exist: $key")
-    } else if (!json.get(key).isJsonPrimitive) {
-        throw JsonParseException("Wrong field `$key` type: ${json.get(key)::class.java}")
+private object SerializerUtils {
+    fun checkJsonKey(json: JsonObject, key: String): String {
+        if (!json.has(key)) {
+            throw JsonParseException("Required field does not exist: $key")
+        } else if (!json.get(key).isJsonPrimitive) {
+            throw JsonParseException("Wrong field `$key` type: ${json.get(key)::class.java}")
+        }
+        return json.get(key).asString
     }
-    return json.get(key).asString
 }
 
 internal object MavenRepositoryConfigSerializer
@@ -146,7 +154,7 @@ internal object MavenRepositoryConfigSerializer
             is JsonObject -> {
                 MavenRepositoryConfig(
                     id = json.get("id")?.asString,
-                    url = URL(checkJsonKey(json, "url")),
+                    url = URL(SerializerUtils.checkJsonKey(json, "url")),
                     proxy = if (json.has("proxy") && json.get("proxy").isJsonObject)
                         context.deserialize<Proxy>(
                             json.getAsJsonObject("proxy"), Proxy::class.java
