@@ -36,6 +36,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("com.github.stefanbirkner:system-lambda:1.2.1")
 }
 
 tasks.test {

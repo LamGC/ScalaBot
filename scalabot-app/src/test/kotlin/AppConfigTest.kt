@@ -1,5 +1,6 @@
 package net.lamgc.scalabot
 
+import com.github.stefanbirkner.systemlambda.SystemLambda
 import com.google.gson.Gson
 import io.mockk.every
 import io.mockk.mockk
@@ -40,23 +41,27 @@ internal class AppPathsTest {
 
     @Test
     fun `Data root path priority`() {
-        System.setProperty("bot.path.data", "A")
+        System.setProperty("bot.path.data", "fromSystemProperties")
 
-        assertEquals("A", AppPaths.DATA_ROOT.file.path, "`DATA_ROOT`没有优先返回 Property 的值.")
+        assertEquals("fromSystemProperties", AppPaths.DATA_ROOT.file.path, "`DATA_ROOT`没有优先返回 Property 的值.")
         System.getProperties().remove("bot.path.data")
-        if (System.getenv("BOT_DATA_PATH") != null) {
+
+        val expectEnvValue = "fromEnvironmentVariable"
+        SystemLambda.withEnvironmentVariable("BOT_DATA_PATH", expectEnvValue).execute {
             assertEquals(
-                System.getenv("BOT_DATA_PATH"), AppPaths.DATA_ROOT.file.path,
-                "`DATA_ROOT`没有返回 env 的值."
+                expectEnvValue, AppPaths.DATA_ROOT.file.path,
+                "`DATA_ROOT`没有优先返回 env 的值."
             )
-        } else {
+        }
+
+        SystemLambda.withEnvironmentVariable("BOT_DATA_PATH", null).execute {
             assertEquals(
                 System.getProperty("user.dir"), AppPaths.DATA_ROOT.file.path,
-                "`DATA_ROOT`没有返回 `user.dir` 的值."
+                "`DATA_ROOT`没有返回 System.properties `user.dir` 的值."
             )
             val userDir = System.getProperty("user.dir")
             System.getProperties().remove("user.dir")
-            assertEquals(".", AppPaths.DATA_ROOT.file.path, "`DATA_ROOT`没有返回 `.`(当前目录).")
+            assertEquals(".", AppPaths.DATA_ROOT.file.path, "`DATA_ROOT`没有返回替补值 `.`(当前目录).")
             System.setProperty("user.dir", userDir)
             assertNotNull(System.getProperty("user.dir"), "环境还原失败!")
         }
