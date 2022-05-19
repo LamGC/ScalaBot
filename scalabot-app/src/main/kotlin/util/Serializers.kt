@@ -151,7 +151,7 @@ internal object MavenRepositoryConfigSerializer
                         context.deserialize<Proxy>(
                             json.getAsJsonObject("proxy"), Proxy::class.java
                         ) else null,
-                    layout = json.get("layout").asString ?: "default",
+                    layout = json.get("layout")?.asString ?: "default",
                     enableReleases = json.get("enableReleases")?.asBoolean ?: true,
                     enableSnapshots = json.get("enableSnapshots")?.asBoolean ?: true,
                     authentication = if (json.has("authentication") && json.get("authentication").isJsonObject)
