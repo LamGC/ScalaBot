@@ -20,6 +20,9 @@ internal object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyTy
         typeOfT: Type?,
         context: JsonDeserializationContext?
     ): DefaultBotOptions.ProxyType {
+        if (json.isJsonNull) {
+            return DefaultBotOptions.ProxyType.NO_PROXY
+        }
         if (!json.isJsonPrimitive) {
             throw JsonParseException("Wrong configuration value type.")
         }
