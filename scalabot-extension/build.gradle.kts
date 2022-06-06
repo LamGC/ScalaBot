@@ -40,14 +40,14 @@ tasks.withType<KotlinCompile> {
 publishing {
     repositories {
         if (project.version.toString().endsWith("-SNAPSHOT")) {
-            maven("https://repo.lamgc.moe/repository/maven-snapshots/") {
+            maven("https://nexus.kuku.me/repository/maven-snapshots/") {
                 credentials {
                     username = project.properties["repo.credentials.private.username"].toString()
                     password = project.properties["repo.credentials.private.password"].toString()
                 }
             }
         } else {
-            maven("https://repo.lamgc.moe/repository/maven-releases/") {
+            maven("https://nexus.kuku.me/repository/maven-releases/") {
                 credentials {
                     username = project.properties["repo.credentials.private.username"].toString()
                     password = project.properties["repo.credentials.private.password"].toString()
