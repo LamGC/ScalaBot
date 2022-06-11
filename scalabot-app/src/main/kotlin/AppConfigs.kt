@@ -331,13 +331,23 @@ private object GsonConst {
 }
 
 internal fun loadAppConfig(configFile: File = AppPaths.DEFAULT_CONFIG_APPLICATION.file): AppConfig {
-    configFile.bufferedReader(StandardCharsets.UTF_8).use {
-        return GsonConst.appConfigGson.fromJson(it, AppConfig::class.java)!!
+    try {
+        configFile.bufferedReader(StandardCharsets.UTF_8).use {
+            return GsonConst.appConfigGson.fromJson(it, AppConfig::class.java)!!
+        }
+    } catch (e: Exception) {
+        log.error { "读取 config.json 时发生错误, 请检查配置格式是否正确." }
+        throw e
     }
 }
 
-internal fun loadBotConfig(botConfigFile: File = AppPaths.DEFAULT_CONFIG_BOT.file): Set<BotConfig> {
-    botConfigFile.bufferedReader(StandardCharsets.UTF_8).use {
-        return GsonConst.botConfigGson.fromJson(it, object : TypeToken<Set<BotConfig>>() {}.type)!!
+internal fun loadBotConfig(botConfigFile: File = AppPaths.DEFAULT_CONFIG_BOT.file): Set<BotConfig>? {
+    try {
+        botConfigFile.bufferedReader(StandardCharsets.UTF_8).use {
+            return GsonConst.botConfigGson.fromJson(it, object : TypeToken<Set<BotConfig>>() {}.type)!!
+        }
+    } catch (e: Exception) {
+        log.error(e) { "读取 Bot 配置文件 (bot.json) 时发生错误, 请检查配置格式是否正确." }
+        return null
     }
 }

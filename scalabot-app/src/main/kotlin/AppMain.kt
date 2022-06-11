@@ -108,7 +108,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
 
     @Synchronized
     fun launch(): Boolean {
-        val botConfigs = loadBotConfig()
+        val botConfigs = loadBotConfig() ?: return false
         if (botConfigs.isEmpty()) {
             log.warn { "尚未配置任何机器人, 请先配置机器人后再启动本程序." }
             return false
