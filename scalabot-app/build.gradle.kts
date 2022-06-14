@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.6.10"
     application
+    id("org.jetbrains.kotlinx.kover") version "0.5.1"
     // id("org.jetbrains.kotlin") version "1.6.10"
 }
 
@@ -35,7 +36,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_httpserver:0.15.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("io.mockk:mockk:1.12.4")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.1")
 }
 
