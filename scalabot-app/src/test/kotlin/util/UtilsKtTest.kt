@@ -116,4 +116,43 @@ internal class UtilsKtTest {
 
         resourceSet.clear()
     }
+
+    @Test
+    fun `Artifact equals`() {
+        val artifact = DefaultArtifact("org.example:artifact:jar:0.0.1")
+        assertFalse(artifact.isSnapshot, "Release artifact is snapshot.")
+        assertTrue(artifact.equalsArtifact(artifact))
+        assertTrue(artifact.setFile(File(".")).equalsArtifact(artifact.setFile(File("."))))
+        val snapshotArtifact = DefaultArtifact("org.example:artifact:jar:0.0.1-SNAPSHOT")
+        val snapshotTimestampArtifact = DefaultArtifact("org.example:artifact:jar:0.0.1-20220605.130047-1")
+        assertTrue(snapshotArtifact.isSnapshot, "SnapshotArtifact not snapshot.")
+        assertNotEquals(artifact.isSnapshot, snapshotArtifact.isSnapshot)
+        assertNotEquals(artifact.baseVersion, snapshotArtifact.baseVersion)
+        assertFalse(artifact.equalsArtifact(snapshotArtifact))
+        assertFalse(snapshotArtifact.equalsArtifact(snapshotTimestampArtifact))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example:artifact:0.0.2")))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example.test:artifact:0.0.1")))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example:artifact-a:0.0.1")))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example:artifact:war:0.0.1")))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example:artifact:war:javadoc:0.0.1")))
+        assertFalse(artifact.equalsArtifact(DefaultArtifact("org.example:artifact:rar:source:0.0.1")))
+
+        assertFalse(
+            artifact.equalsArtifact(
+                DefaultArtifact("org.example:artifact:jar:0.0.1")
+                    .setFile(File("./xxx01.jar"))
+            )
+        )
+
+        val artifactWithExtension = DefaultArtifact("org.example:artifact:jar:0.0.1")
+        assertFalse(artifactWithExtension.equalsArtifact(DefaultArtifact("org.example:artifact:war:0.0.1")))
+
+        assertTrue(artifact.equalsArtifact(artifact.setProperties(mapOf(Pair("a", "b"))), checkProperties = false))
+        assertFalse(artifact.equalsArtifact(artifact.setProperties(mapOf(Pair("a", "b"))), checkProperties = true))
+        assertTrue(
+            artifact.setProperties(mapOf(Pair("a", "b")))
+                .equalsArtifact(artifact.setProperties(mapOf(Pair("a", "b"))), checkProperties = true)
+        )
+    }
+
 }
