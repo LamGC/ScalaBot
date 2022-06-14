@@ -10,16 +10,14 @@ import java.io.FilenameFilter
 
 internal fun ByteArray.toHexString(): String = joinToString("") { it.toString(16) }
 
-internal fun Artifact.equalsArtifact(that: Artifact): Boolean =
+internal fun Artifact.equalsArtifact(that: Artifact, checkProperties: Boolean = false): Boolean =
     this.groupId.equals(that.groupId) &&
             this.artifactId.equals(that.artifactId) &&
             this.version.equals(that.version) &&
-            this.baseVersion.equals(that.baseVersion) &&
-            this.isSnapshot == that.isSnapshot &&
             this.classifier.equals(that.classifier) &&
             this.extension.equals(that.extension) &&
             (if (this.file == null) that.file == null else this.file.equals(that.file)) &&
-            this.properties.equals(that.properties)
+            (!checkProperties || this.properties.equals(that.properties))
 
 internal fun File.deepListFiles(
     addSelf: Boolean = false,
