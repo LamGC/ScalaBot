@@ -17,6 +17,12 @@ import kotlin.test.assertTrue
 internal class BotAccountTest {
 
     @Test
+    fun `id getter`() {
+        val accountId = abs(Random().nextInt()).toLong()
+        assertEquals(accountId, BotAccount("Test", "${accountId}:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10", 0).id)
+    }
+
+    @Test
     fun deserializerTest() {
         val accountId = abs(Random().nextInt()).toLong()
         val creatorId = abs(Random().nextInt()).toLong()
