@@ -25,13 +25,13 @@ internal fun File.deepListFiles(
     fileFilter: FileFilter? = null,
     filenameFilter: FilenameFilter? = null
 ): Array<File>? {
-    val files = if (fileFilter != null) {
+    val files = (if (fileFilter != null) {
         this.listFiles(fileFilter)
     } else if (filenameFilter != null) {
         this.listFiles(filenameFilter)
     } else {
         this.listFiles()
-    } ?: return null
+    }) ?: return null
 
     val result = if (addSelf) mutableSetOf(this) else mutableSetOf()
     for (file in files) {
