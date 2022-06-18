@@ -11,7 +11,7 @@ dependencies {
     implementation(project(":scalabot-extension"))
 
     implementation("org.slf4j:slf4j-api:1.7.36")
-    implementation("io.github.microutils:kotlin-logging:2.1.21")
+    implementation("io.github.microutils:kotlin-logging:2.1.23")
     implementation("ch.qos.logback:logback-classic:1.2.11")
 
     val aetherVersion = "1.1.0"
@@ -23,7 +23,7 @@ dependencies {
     implementation("org.eclipse.aether:aether-connector-basic:$aetherVersion")
     implementation("org.apache.maven:maven-aether-provider:3.3.9")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.20")
     implementation("com.google.code.gson:gson:2.9.0")
 
