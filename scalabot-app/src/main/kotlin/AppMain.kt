@@ -39,14 +39,15 @@ fun main(args: Array<String>): Unit = runBlocking {
  * 启动运行指标服务器.
  * 使用 Prometheus 指标格式.
  */
-internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics) {
+internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics): HTTPServer? {
     if (!config.enable) {
         log.debug { "运行指标服务器已禁用." }
-        return
+        return null
     }
 
     val builder = HTTPServer.Builder()
         .withDaemonThreads(true)
+        .withAuthenticator(config.authenticator)
         .withPort(config.port)
         .withHostname(config.bindAddress)
 
@@ -54,6 +55,7 @@ internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics) {
         .build()
         .registerShutdownHook()
     log.info { "运行指标服务器已启动. (Port: ${httpServer.port})" }
+    return httpServer
 }
 
 internal class Launcher(private val config: AppConfig = Const.config) : AutoCloseable {

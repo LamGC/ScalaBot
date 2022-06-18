@@ -5,10 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
-import net.lamgc.scalabot.util.ArtifactSerializer
-import net.lamgc.scalabot.util.AuthenticationSerializer
-import net.lamgc.scalabot.util.MavenRepositoryConfigSerializer
-import net.lamgc.scalabot.util.ProxyTypeSerializer
+import net.lamgc.scalabot.util.*
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
@@ -92,7 +89,8 @@ internal data class ProxyConfig(
 internal data class MetricsConfig(
     val enable: Boolean = false,
     val port: Int = 9386,
-    val bindAddress: String? = "0.0.0.0"
+    val bindAddress: String? = "0.0.0.0",
+    val authenticator: UsernameAuthenticator? = null
 )
 
 /**
@@ -322,6 +320,7 @@ private object GsonConst {
         .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
         .registerTypeAdapter(MavenRepositoryConfig::class.java, MavenRepositoryConfigSerializer)
         .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
+        .registerTypeAdapter(UsernameAuthenticator::class.java, UsernameAuthenticatorSerializer)
         .create()
 
     val botConfigGson: Gson = baseGson.newBuilder()
