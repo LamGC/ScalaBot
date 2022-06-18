@@ -1,9 +1,6 @@
 package net.lamgc.scalabot.util
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import net.lamgc.scalabot.ExtensionPackageFinder
 import net.lamgc.scalabot.FinderPriority
 import net.lamgc.scalabot.FinderRules
@@ -13,6 +10,8 @@ import org.eclipse.aether.artifact.DefaultArtifact
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.io.File
+import java.io.FileFilter
+import java.io.FilenameFilter
 import java.lang.reflect.InvocationTargetException
 import java.nio.charset.StandardCharsets
 import kotlin.test.*
@@ -153,6 +152,166 @@ internal class UtilsKtTest {
             artifact.setProperties(mapOf(Pair("a", "b")))
                 .equalsArtifact(artifact.setProperties(mapOf(Pair("a", "b"))), checkProperties = true)
         )
+    }
+
+    @Test
+    fun `deepListFile Test - Basics`() {
+        assertNull(mockk<File> {
+            every { listFiles() } returns null
+        }.deepListFiles())
+        assertNull(mockk<File> {
+            every { listFiles(ofType(FileFilter::class)) } returns null
+        }.deepListFiles(fileFilter = { true }))
+        assertNull(mockk<File> {
+            every { listFiles(ofType(FilenameFilter::class)) } returns null
+        }.deepListFiles(filenameFilter = { _, _ -> true }))
+
+
+        val listFileMock = mockk<File> {
+            every { listFiles() } returns arrayOf()
+            every { listFiles(ofType(FileFilter::class)) } returns arrayOf()
+            every { listFiles(ofType(FilenameFilter::class)) } returns arrayOf()
+        }
+        assertNotNull(listFileMock.deepListFiles())
+        verify(exactly = 1) { listFileMock.listFiles() }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FilenameFilter::class)) }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FileFilter::class)) }
+        clearMocks(listFileMock, answers = false)
+
+        assertNotNull(listFileMock.deepListFiles(filenameFilter = { _, _ -> true }))
+        verify(exactly = 0) { listFileMock.listFiles() }
+        verify(exactly = 1) { listFileMock.listFiles(ofType(FilenameFilter::class)) }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FileFilter::class)) }
+        clearMocks(listFileMock, answers = false)
+
+        assertNotNull(listFileMock.deepListFiles(fileFilter = { true }))
+        verify(exactly = 0) { listFileMock.listFiles() }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FilenameFilter::class)) }
+        verify(exactly = 1) { listFileMock.listFiles(ofType(FileFilter::class)) }
+        clearMocks(listFileMock, answers = false)
+
+        assertNotNull(listFileMock.deepListFiles(fileFilter = { true }, filenameFilter = { _, _ -> true }))
+        verify(exactly = 0) { listFileMock.listFiles() }
+        verify(exactly = 1) { listFileMock.listFiles(ofType(FileFilter::class)) }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FilenameFilter::class)) }
+        clearMocks(listFileMock, answers = false)
+
+        val addSelfResult = listFileMock.deepListFiles(addSelf = true)
+        assertNotNull(addSelfResult)
+        assertEquals(1, addSelfResult.size)
+        assertTrue(addSelfResult.contains(listFileMock))
+        verify(exactly = 1) { listFileMock.listFiles() }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FilenameFilter::class)) }
+        verify(exactly = 0) { listFileMock.listFiles(ofType(FileFilter::class)) }
+
+        val addSelfWithoutDirMock = createDirectory(
+            "root", arrayOf(
+                createDirectory(
+                    "dir01", arrayOf(
+                        createFile("test01")
+                    )
+                ),
+                createDirectory(
+                    "dir02", arrayOf(
+                        createFile("test02")
+                    )
+                ),
+                createDirectory(
+                    "dir03", arrayOf(
+                        createFile("test03")
+                    )
+                )
+            )
+        )
+        val addSelfWithoutDirResult = addSelfWithoutDirMock.deepListFiles(addSelf = true, onlyFile = true)
+        assertNotNull(addSelfWithoutDirResult)
+        assertFalse(addSelfWithoutDirResult.isEmpty())
+        assertEquals(1, addSelfWithoutDirResult.filter { it.isDirectory }.size)
+        assertEquals(addSelfWithoutDirMock, addSelfWithoutDirResult.find { it.isDirectory })
+    }
+
+    @Test
+    fun `deepListFile Test - Complex`() {
+        val mock = createDirectory(
+            "root", arrayOf(
+                createFile("test"),
+                createFile("test02"),
+                createDirectory("dir01"),
+                createDirectory("dir02")
+            )
+        )
+
+        val withDirResult = mock.deepListFiles(onlyFile = false)
+        assertNotNull(withDirResult)
+        assertEquals(4, withDirResult.size)
+        assertEquals(2, withDirResult.filter { it.isFile }.size)
+        assertEquals(2, withDirResult.filter { it.isDirectory }.size)
+
+        val withoutDirResult = mock.deepListFiles(onlyFile = true)
+        assertNotNull(withoutDirResult)
+        assertEquals(2, withoutDirResult.filter { it.isFile }.size)
+        assertNull(withoutDirResult.find { it.isDirectory })
+
+        val subDirFailedMock = createDirectory(
+            "root", arrayOf(
+                mockk(name = "dir::cannotReadableDirectory") {
+                    every { isFile } returns false
+                    every { isDirectory } returns true
+                    every { name } returns "cannotReadableDirectory"
+                    every { listFiles() } returns null
+                    every { listFiles(ofType(FileFilter::class)) } returns null
+                    every { listFiles(ofType(FilenameFilter::class)) } returns null
+                },
+                createDirectory(
+                    "dir2", arrayOf(
+                        createFile("test")
+                    )
+                )
+            )
+        )
+
+        val subDirFailedWithDirResult = subDirFailedMock.deepListFiles(onlyFile = false)
+        assertNotNull(subDirFailedWithDirResult)
+        assertEquals(3, subDirFailedWithDirResult.size)
+        assertNotNull(subDirFailedWithDirResult.find { it.isDirectory && it.name == "cannotReadableDirectory" })
+        assertNotNull(subDirFailedWithDirResult.find { it.isDirectory && it.name == "dir2" })
+        assertNotNull(subDirFailedWithDirResult.find { it.isFile && it.name == "test" })
+
+        val subDirFailedWithoutDirResult = subDirFailedMock.deepListFiles(onlyFile = true)
+        assertNotNull(subDirFailedWithoutDirResult)
+        assertEquals(1, subDirFailedWithoutDirResult.size)
+        assertEquals(0, subDirFailedWithoutDirResult.filter { it.isDirectory }.size)
+        assertNotNull(subDirFailedWithoutDirResult.find { it.isFile && it.name == "test" })
+        assertNull(subDirFailedWithoutDirResult.find { it.isDirectory && it.name == "cannotReadableDirectory" })
+        assertNull(subDirFailedWithoutDirResult.find { it.isDirectory && it.name == "dir2" })
+    }
+
+    private fun createFile(path: String): File {
+        val file = File(path)
+        return mockk(name = "file::$path") {
+            every { isFile } returns true
+            every { isDirectory } returns false
+            every { name } returns file.name
+            every { listFiles() } returns null
+            every { listFiles(ofType(FileFilter::class)) } returns null
+            every { listFiles(ofType(FilenameFilter::class)) } returns null
+        }
+    }
+
+    private fun createDirectory(path: String, subFiles: Array<File> = arrayOf()): File {
+        val file = File(path)
+        return mockk(name = "dir::$path") {
+            every { isFile } returns false
+            every { isDirectory } returns true
+            every { name } returns file.name
+            every { listFiles() } returns subFiles
+            every { listFiles(ofType(FileFilter::class)) } answers {
+                subFiles.filter { (firstArg() as FileFilter).accept(it) }.toTypedArray()
+            }
+            every { listFiles(ofType(FilenameFilter::class)) } answers {
+                subFiles.filter { (firstArg() as FilenameFilter).accept(file.parentFile, file.name) }.toTypedArray()
+            }
+        }
     }
 
 }

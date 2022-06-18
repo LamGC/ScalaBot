@@ -71,11 +71,10 @@ fun <T : AutoCloseable> T.registerShutdownHook(): T {
     return this
 }
 
-private val log = KotlinLogging.logger { }
-
 private object UtilsInternal {
 
     val autoCloseableSet = mutableSetOf<AutoCloseable>()
+    private val log = KotlinLogging.logger { }
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread(this::doCloseResources, "Shutdown-AutoCloseable"))
