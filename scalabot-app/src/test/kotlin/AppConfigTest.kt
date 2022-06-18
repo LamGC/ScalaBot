@@ -126,6 +126,25 @@ internal class AppPathsTest {
             verify(exactly = 0) { mkdirs() }
         }
 
+        mockk<File> {
+            every { exists() }.returns(false)
+            every { canonicalPath }.answers { alreadyExistsFile.canonicalPath }
+            every { createNewFile() }.answers { false }
+            every { mkdirs() }.answers { false }
+            every { mkdir() }.answers { false }
+        }.apply {
+            mockk<AppPaths> {
+                every { file }.returns(this@apply)
+                every { path }.returns(this@apply.canonicalPath)
+                every { initial() }.answers {
+                    defaultInitializerMethod.invoke(null, this@mockk)
+                }
+            }.initial()
+            verify(exactly = 1) { createNewFile() }
+            verify(exactly = 0) { mkdir() }
+            verify(exactly = 0) { mkdirs() }
+        }
+
         defaultInitializerMethod.isAccessible = false
     }
 
