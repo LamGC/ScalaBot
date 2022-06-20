@@ -13,10 +13,11 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 /**
- * 数据库适配器.
- *
+ * 数据库适配器列表.
  * 应按照新到旧的顺序放置, 新的适配器应该在上面.
+ * @suppress 由于本列表需要设置已弃用的适配器以保证旧版数据库的正常使用, 故忽略弃用警告.
  */
+@Suppress("DEPRECATION")
 private val adapters = arrayListOf<DbAdapter>(
     BotAccountIdDbAdapter, // since [v0.2.0 ~ latest)
     BotTokenDbAdapter // since [v0.0.1 ~ v0.2.0)
@@ -183,6 +184,7 @@ private object BotAccountIdDbAdapter : FileDbAdapter("BotAccountId", { botAccoun
  *
  * **已弃用**: 由于 Token 可以重新生成, 当 Token 改变后数据库文件名也会改变, 故弃用该方法.
  */
+@Deprecated(message = "由于 BotToken 可变, 故不再使用该适配器.", level = DeprecationLevel.WARNING)
 private object BotTokenDbAdapter : FileDbAdapter("BotToken_v0.1.0", { botAccount ->
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val digestBytes = digest.digest(botAccount.token.toByteArray(StandardCharsets.UTF_8))
