@@ -2,6 +2,7 @@ package net.lamgc.scalabot
 
 import com.github.stefanbirkner.systemlambda.SystemLambda
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -26,18 +27,19 @@ internal class BotAccountTest {
     fun deserializerTest() {
         val accountId = abs(Random().nextInt()).toLong()
         val creatorId = abs(Random().nextInt()).toLong()
-        val botAccount = Gson().fromJson(
+        val botAccountJsonObject = Gson().fromJson(
             """
             {
                 "name": "TestBot",
                 "token": "${accountId}:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10",
                 "creatorId": $creatorId
             }
-        """.trimIndent(), BotAccount::class.java
+        """.trimIndent(), JsonObject::class.java
         )
-        assertEquals("TestBot", botAccount.name)
-        assertEquals("${accountId}:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10", botAccount.token)
-        assertEquals(accountId, botAccount.id, "Botaccount ID does not match expectations.")
+        val botAccount = Gson().fromJson(botAccountJsonObject, BotAccount::class.java)
+        assertEquals(botAccountJsonObject["name"].asString, botAccount.name)
+        assertEquals(botAccountJsonObject["token"].asString, botAccount.token)
+        assertEquals(accountId, botAccount.id, "BotAccount ID does not match expectations.")
         assertEquals(creatorId, botAccount.creatorId)
     }
 
