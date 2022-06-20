@@ -1,19 +1,16 @@
-package util
+package net.lamgc.scalabot.config.serializer
 
 import com.google.gson.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.lamgc.scalabot.MavenRepositoryConfig
-import net.lamgc.scalabot.util.AuthenticationSerializer
-import net.lamgc.scalabot.util.MavenRepositoryConfigSerializer
-import net.lamgc.scalabot.util.ProxyTypeSerializer
+import net.lamgc.scalabot.config.MavenRepositoryConfig
+import net.lamgc.scalabot.config.ProxyType
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.AuthenticationContext
 import org.eclipse.aether.repository.Proxy
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Type
@@ -26,7 +23,7 @@ internal class SerializersKtTest {
     private val method: Method
 
     init {
-        val clazz = Class.forName("net.lamgc.scalabot.util.SerializerUtils")
+        val clazz = Class.forName("net.lamgc.scalabot.config.serializer.SerializerUtils")
         method = clazz.getDeclaredMethod("checkJsonKey", JsonObject::class.java, String::class.java)
         method.isAccessible = true
         instance = clazz.getDeclaredField("INSTANCE").apply {
@@ -69,7 +66,7 @@ internal class ProxyTypeSerializerTest {
 
     @Test
     fun `serialize test`() {
-        for (type in DefaultBotOptions.ProxyType.values()) {
+        for (type in ProxyType.values()) {
             assertEquals(
                 JsonPrimitive(type.name), ProxyTypeSerializer.serialize(type, null, null),
                 "ProxyType 序列化结果与预期不符."
@@ -91,11 +88,11 @@ internal class ProxyTypeSerializerTest {
         }
 
         assertEquals(
-            DefaultBotOptions.ProxyType.NO_PROXY,
+            ProxyType.NO_PROXY,
             ProxyTypeSerializer.deserialize(JsonNull.INSTANCE, null, null)
         )
 
-        for (type in DefaultBotOptions.ProxyType.values()) {
+        for (type in ProxyType.values()) {
             assertEquals(
                 type, ProxyTypeSerializer.deserialize(JsonPrimitive(type.name), null, null),
                 "ProxyType 反序列化结果与预期不符."

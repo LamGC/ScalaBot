@@ -3,6 +3,10 @@ package net.lamgc.scalabot
 import io.prometheus.client.exporter.HTTPServer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import net.lamgc.scalabot.config.AppConfig
+import net.lamgc.scalabot.config.BotConfig
+import net.lamgc.scalabot.config.MetricsConfig
+import net.lamgc.scalabot.config.ProxyType
 import net.lamgc.scalabot.util.registerShutdownHook
 import org.eclipse.aether.repository.LocalRepository
 import org.telegram.telegrambots.bots.DefaultBotOptions
@@ -71,9 +75,9 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
 
     private fun getMavenLocalRepository(): LocalRepository {
         val localPath =
-            if (config.mavenLocalRepository != null && config.mavenLocalRepository.isNotEmpty()) {
+            if (config.mavenLocalRepository != null && config.mavenLocalRepository!!.isNotEmpty()) {
                 val repoPath = AppPaths.DATA_ROOT.file.toPath()
-                    .resolve(config.mavenLocalRepository)
+                    .resolve(config.mavenLocalRepository!!)
                     .apply {
                         if (!exists()) {
                             if (!parent.isWritable() || !parent.isReadable()) {
@@ -136,15 +140,15 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
         log.info { "正在启动机器人 `${botConfig.account.name}`..." }
         val botOption = DefaultBotOptions().apply {
             val proxyConfig =
-                if (botConfig.proxy != null && botConfig.proxy.type != DefaultBotOptions.ProxyType.NO_PROXY) {
+                if (botConfig.proxy != null && botConfig.proxy!!.type != ProxyType.NO_PROXY) {
                     botConfig.proxy
-                } else if (config.proxy.type != DefaultBotOptions.ProxyType.NO_PROXY) {
+                } else if (config.proxy.type != ProxyType.NO_PROXY) {
                     config.proxy
                 } else {
                     null
                 }
             if (proxyConfig != null) {
-                proxyType = proxyConfig.type
+                proxyType = proxyConfig.type.toTelegramBotsType()
                 proxyHost = config.proxy.host
                 proxyPort = config.proxy.port
                 log.debug { "机器人 `${botConfig.account.name}` 已启用代理配置: $proxyConfig" }

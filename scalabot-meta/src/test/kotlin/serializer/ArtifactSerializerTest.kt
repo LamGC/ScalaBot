@@ -1,6 +1,6 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package net.lamgc.scalabot.util
+package net.lamgc.scalabot.config.serializer
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException

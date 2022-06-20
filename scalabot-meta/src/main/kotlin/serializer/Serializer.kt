@@ -1,40 +1,41 @@
-package net.lamgc.scalabot.util
+package net.lamgc.scalabot.config.serializer
 
 import com.google.gson.*
-import net.lamgc.scalabot.MavenRepositoryConfig
+import net.lamgc.scalabot.config.MavenRepositoryConfig
+import net.lamgc.scalabot.config.ProxyType
+import net.lamgc.scalabot.config.UsernameAuthenticator
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.util.repository.AuthenticationBuilder
-import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.lang.reflect.Type
 import java.net.URL
 
-internal object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyType>,
-    JsonSerializer<DefaultBotOptions.ProxyType> {
+object ProxyTypeSerializer : JsonDeserializer<ProxyType>,
+    JsonSerializer<ProxyType> {
 
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type?,
         context: JsonDeserializationContext?
-    ): DefaultBotOptions.ProxyType {
+    ): ProxyType {
         if (json.isJsonNull) {
-            return DefaultBotOptions.ProxyType.NO_PROXY
+            return ProxyType.NO_PROXY
         }
         if (!json.isJsonPrimitive) {
             throw JsonParseException("Wrong configuration value type.")
         }
         val value = json.asString.trim()
         try {
-            return DefaultBotOptions.ProxyType.valueOf(value.uppercase())
+            return ProxyType.valueOf(value.uppercase())
         } catch (e: IllegalArgumentException) {
             throw JsonParseException("Invalid value: $value")
         }
     }
 
     override fun serialize(
-        src: DefaultBotOptions.ProxyType,
+        src: ProxyType,
         typeOfSrc: Type?,
         context: JsonSerializationContext?
     ): JsonElement {
@@ -42,7 +43,7 @@ internal object ProxyTypeSerializer : JsonDeserializer<DefaultBotOptions.ProxyTy
     }
 }
 
-internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact> {
+object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact> {
     override fun serialize(src: Artifact, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
         val gavBuilder = StringBuilder("${src.groupId}:${src.artifactId}")
         if (!src.extension.equals("jar")) {
@@ -63,7 +64,7 @@ internal object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<
 
 }
 
-internal object AuthenticationSerializer : JsonDeserializer<Authentication> {
+object AuthenticationSerializer : JsonDeserializer<Authentication> {
 
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Authentication {
         if (json !is JsonObject) {
@@ -90,7 +91,7 @@ private object SerializerUtils {
     }
 }
 
-internal object MavenRepositoryConfigSerializer
+object MavenRepositoryConfigSerializer
     : JsonDeserializer<MavenRepositoryConfig> {
 
     override fun deserialize(
@@ -124,4 +125,42 @@ internal object MavenRepositoryConfigSerializer
             }
         }
     }
+}
+
+object UsernameAuthenticatorSerializer : JsonSerializer<UsernameAuthenticator>,
+    JsonDeserializer<UsernameAuthenticator> {
+
+    override fun serialize(
+        src: UsernameAuthenticator,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?
+    ): JsonElement {
+        return src.toJsonObject()
+    }
+
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): UsernameAuthenticator? {
+        if (json.isJsonNull) {
+            return null
+        } else if (!json.isJsonObject) {
+            throw JsonParseException("Invalid attribute value type.")
+        }
+
+        val jsonObj = json.asJsonObject
+
+        if (jsonObj["username"]?.isJsonPrimitive != true) {
+            throw JsonParseException("Invalid attribute value: username")
+        } else if (jsonObj["password"]?.isJsonPrimitive != true) {
+            throw JsonParseException("Invalid attribute value: password")
+        }
+
+        if (jsonObj["username"].asString.isEmpty() || jsonObj["password"].asString.isEmpty()) {
+            throw JsonParseException("`username` or `password` is empty.")
+        }
+        return UsernameAuthenticator(jsonObj["username"].asString, jsonObj["password"].asString)
+    }
+
 }
