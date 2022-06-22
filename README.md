@@ -1,7 +1,11 @@
+<div style="text-align: center;">
+
 # ScalaBot
 
-基于 [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots) 的可扩展机器人服务器。 Extensible robot server based
-on [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots).
+基于 [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots) 的可扩展机器人服务器。  
+Extensible robot server based on [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots).
+
+</div>
 
 ## 背景
 
