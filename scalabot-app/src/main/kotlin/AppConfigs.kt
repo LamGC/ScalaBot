@@ -66,7 +66,7 @@ internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig):
     return builder.build()
 }
 
-internal fun checkRepositoryLayout(layoutType: String): String {
+private fun checkRepositoryLayout(layoutType: String): String {
     val type = layoutType.trim().lowercase()
     if (type != "default" && type != "legacy") {
         throw IllegalArgumentException("Invalid layout type (expecting 'default' or 'legacy')")
@@ -76,7 +76,7 @@ internal fun checkRepositoryLayout(layoutType: String): String {
 
 private val repoNumberGenerator = AtomicInteger(1)
 
-internal fun createDefaultRepositoryId(): String {
+private fun createDefaultRepositoryId(): String {
     return "Repository-${repoNumberGenerator.getAndIncrement()}"
 }
 
