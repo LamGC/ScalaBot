@@ -11,6 +11,7 @@ import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.util.repository.AuthenticationBuilder
 import java.lang.reflect.Type
+import java.net.MalformedURLException
 import java.net.URL
 
 object ProxyTypeSerializer : JsonDeserializer<ProxyType>,
@@ -65,7 +66,12 @@ object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact>
         if (!json.isJsonPrimitive) {
             throw JsonParseException("Wrong configuration value type.")
         }
-        return DefaultArtifact(json.asString.trim())
+        val artifactStr = json.asString.trim()
+        try {
+            return DefaultArtifact(artifactStr)
+        } catch (e: IllegalArgumentException) {
+            throw JsonParseException("Invalid artifact format: `${artifactStr}`.")
+        }
     }
 
 }
@@ -124,10 +130,14 @@ object MavenRepositoryConfigSerializer
                 )
             }
             is JsonPrimitive -> {
-                MavenRepositoryConfig(url = URL(json.asString))
+                try {
+                    return MavenRepositoryConfig(url = URL(json.asString))
+                } catch (e: MalformedURLException) {
+                    throw JsonParseException("Invalid URL: ${json.asString}", e)
+                }
             }
             else -> {
-                throw JsonParseException("Unsupported Maven warehouse configuration type.")
+                throw JsonParseException("Unsupported Maven repository configuration type. (Only support JSON object or url string)")
             }
         }
     }
