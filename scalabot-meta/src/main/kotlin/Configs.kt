@@ -15,7 +15,7 @@ import java.net.URL
 data class BotAccount(
     val name: String,
     val token: String,
-    val creatorId: Long = -1
+    val creatorId: Long
 ) {
 
     val id
@@ -43,8 +43,8 @@ data class BotConfig(
      * 而构件坐标(POM Reference 或者叫 GAV 坐标)是开发者创建 Maven/Gradle 项目时一定会设置的,
      * 所以就直接用了. :P
      */
-    val extensions: Set<Artifact>,
-    val proxy: ProxyConfig? = ProxyConfig(),
+    val extensions: Set<Artifact> = emptySet(),
+    val proxy: ProxyConfig = ProxyConfig(type = ProxyType.NO_PROXY),
     val baseApiUrl: String? = ApiConstants.BASE_URL
 )
 
