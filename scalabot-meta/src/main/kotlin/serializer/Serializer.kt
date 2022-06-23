@@ -4,6 +4,7 @@ import com.google.gson.*
 import net.lamgc.scalabot.config.MavenRepositoryConfig
 import net.lamgc.scalabot.config.ProxyType
 import net.lamgc.scalabot.config.UsernameAuthenticator
+import org.eclipse.aether.artifact.AbstractArtifact
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
@@ -45,14 +46,19 @@ object ProxyTypeSerializer : JsonDeserializer<ProxyType>,
 
 object ArtifactSerializer : JsonSerializer<Artifact>, JsonDeserializer<Artifact> {
     override fun serialize(src: Artifact, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
-        val gavBuilder = StringBuilder("${src.groupId}:${src.artifactId}")
-        if (!src.extension.equals("jar")) {
-            gavBuilder.append(':').append(src.extension)
+        return if (src is AbstractArtifact) {
+            JsonPrimitive(src.toString())
+        } else {
+            JsonPrimitive(
+                DefaultArtifact(
+                    src.groupId,
+                    src.artifactId,
+                    src.classifier,
+                    src.extension,
+                    src.version
+                ).toString()
+            )
         }
-        if (src.classifier.isNotEmpty()) {
-            gavBuilder.append(':').append(src.classifier)
-        }
-        return JsonPrimitive(gavBuilder.append(':').append(src.version).toString())
     }
 
     override fun deserialize(json: JsonElement, typeOfT: Type?, context: JsonDeserializationContext?): Artifact {
