@@ -45,7 +45,7 @@ data class BotConfig(
      */
     val extensions: Set<Artifact> = emptySet(),
     val proxy: ProxyConfig = ProxyConfig(type = ProxyType.NO_PROXY),
-    val baseApiUrl: String? = ApiConstants.BASE_URL
+    val baseApiUrl: String = ApiConstants.BASE_URL
 )
 
 enum class ProxyType {

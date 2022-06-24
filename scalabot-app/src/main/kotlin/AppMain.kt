@@ -140,7 +140,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
         log.info { "正在启动机器人 `${botConfig.account.name}`..." }
         val botOption = DefaultBotOptions().apply {
             val proxyConfig =
-                if (botConfig.proxy != null && botConfig.proxy!!.type != ProxyType.NO_PROXY) {
+                if (botConfig.proxy.type != ProxyType.NO_PROXY) {
                     botConfig.proxy
                 } else if (config.proxy.type != ProxyType.NO_PROXY) {
                     config.proxy
@@ -154,9 +154,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
                 log.debug { "机器人 `${botConfig.account.name}` 已启用代理配置: $proxyConfig" }
             }
 
-            if (botConfig.baseApiUrl != null) {
-                baseUrl = botConfig.baseApiUrl
-            }
+            baseUrl = botConfig.baseApiUrl
         }
         val account = botConfig.account
 
