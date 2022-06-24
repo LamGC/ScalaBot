@@ -1,15 +1,15 @@
 package net.lamgc.scalabot.config.serializer
 
 import com.google.gson.*
-import net.lamgc.scalabot.config.MavenRepositoryConfig
-import net.lamgc.scalabot.config.ProxyType
-import net.lamgc.scalabot.config.UsernameAuthenticator
+import com.google.gson.reflect.TypeToken
+import net.lamgc.scalabot.config.*
 import org.eclipse.aether.artifact.AbstractArtifact
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.util.repository.AuthenticationBuilder
+import org.telegram.telegrambots.meta.ApiConstants
 import java.lang.reflect.Type
 import java.net.MalformedURLException
 import java.net.URL
@@ -180,3 +180,82 @@ object UsernameAuthenticatorSerializer : JsonSerializer<UsernameAuthenticator>,
     }
 
 }
+
+object ProxyConfigSerializer : JsonSerializer<ProxyConfig>, JsonDeserializer<ProxyConfig> {
+    override fun serialize(src: ProxyConfig?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
+        if (src == null) {
+            return JsonNull.INSTANCE
+        }
+        return JsonObject().apply {
+            addProperty("type", src.type.name)
+            addProperty("host", src.host)
+            addProperty("port", src.port)
+        }
+    }
+
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): ProxyConfig {
+        if (json == null || json.isJsonNull) {
+            return ProxyConfig()
+        } else if (json !is JsonObject) {
+            throw JsonParseException("Invalid json type.")
+        }
+
+        val typeStr = json["type"]?.asString ?: return ProxyConfig()
+        val type = try {
+            ProxyType.valueOf(typeStr)
+        } catch (e: IllegalArgumentException) {
+            throw JsonParseException("Invalid proxy type: `$typeStr`")
+        }
+
+        if (!json.has("host") || !json.has("port")) {
+            throw JsonParseException("Missing `host` field or `port` field.")
+        }
+
+        return ProxyConfig(
+            type = type,
+            host = json["host"].asString,
+            port = json["port"].asInt
+        )
+    }
+
+}
+
+object BotConfigSerializer : JsonSerializer<BotConfig>, JsonDeserializer<BotConfig> {
+
+    override fun serialize(src: BotConfig, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return JsonObject().apply {
+            addProperty("enabled", src.enabled)
+            add("account", context.serialize(src.account))
+            addProperty("disableBuiltInAbility", src.disableBuiltInAbility)
+            addProperty("autoUpdateCommandList", src.autoUpdateCommandList)
+            add("extensions", context.serialize(src.extensions))
+            add("proxy", ProxyConfigSerializer.serialize(src.proxy, ProxyConfig::class.java, context))
+            addProperty("baseApiUrl", src.baseApiUrl)
+        }
+    }
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): BotConfig {
+        if (json !is JsonObject) {
+            throw JsonParseException("Unsupported JSON type.")
+        }
+
+        if (!json.has("account")) {
+            throw JsonParseException("Missing `account` field.")
+        } else if (!json.get("account").isJsonObject) {
+            throw JsonParseException("Invalid `account` field type.")
+        }
+
+        // 从 json 反序列化 BotConfig（使用构造函数）
+        return BotConfig(
+            enabled = json.get("enabled")?.asBoolean ?: true,
+            account = context.deserialize(json.get("account"), BotAccount::class.java)!!,
+            disableBuiltInAbility = json.get("disableBuiltInAbility")?.asBoolean ?: false,
+            autoUpdateCommandList = json.get("autoUpdateCommandList")?.asBoolean ?: false,
+            extensions = context.deserialize(json.get("extensions"), object : TypeToken<Set<Artifact>>() {}.type)
+                ?: emptySet(),
+            proxy = context.deserialize(json.get("proxy"), ProxyConfig::class.java) ?: ProxyConfig(),
+            baseApiUrl = json.get("baseApiUrl")?.asString ?: ApiConstants.BASE_URL
+        )
+    }
+}
+
