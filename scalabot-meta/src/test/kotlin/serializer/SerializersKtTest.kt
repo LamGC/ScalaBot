@@ -4,8 +4,9 @@ import com.google.gson.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.lamgc.scalabot.config.MavenRepositoryConfig
-import net.lamgc.scalabot.config.ProxyType
+import net.lamgc.scalabot.config.*
+import org.eclipse.aether.artifact.Artifact
+import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.AuthenticationContext
 import org.eclipse.aether.repository.Proxy
@@ -116,14 +117,14 @@ internal class MavenRepositoryConfigSerializerTest {
             MavenRepositoryConfigSerializer.deserialize(
                 JsonArray(),
                 MavenRepositoryConfig::class.java,
-                TestJsonDeserializationContext
+                TestJsonSerializationContext.default()
             )
         }
         assertThrows(JsonParseException::class.java) {
             MavenRepositoryConfigSerializer.deserialize(
                 JsonNull.INSTANCE,
                 MavenRepositoryConfig::class.java,
-                TestJsonDeserializationContext
+                TestJsonSerializationContext.default()
             )
         }
     }
@@ -134,8 +135,16 @@ internal class MavenRepositoryConfigSerializerTest {
         val config = MavenRepositoryConfigSerializer.deserialize(
             JsonPrimitive(expectRepoUrl),
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
+
+        assertThrows(JsonParseException::class.java) {
+            MavenRepositoryConfigSerializer.deserialize(
+                JsonPrimitive("NOT A URL."),
+                MavenRepositoryConfig::class.java,
+                TestJsonSerializationContext.default()
+            )
+        }
 
         assertNull(config.id)
         assertEquals(URL(expectRepoUrl), config.url)
@@ -154,7 +163,7 @@ internal class MavenRepositoryConfigSerializerTest {
         val config = MavenRepositoryConfigSerializer.deserialize(
             jsonObject,
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
 
         assertNull(config.id)
@@ -188,7 +197,7 @@ internal class MavenRepositoryConfigSerializerTest {
         var config = MavenRepositoryConfigSerializer.deserialize(
             jsonObject,
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
 
         assertEquals(jsonObject["id"].asString, config.id)
@@ -206,7 +215,7 @@ internal class MavenRepositoryConfigSerializerTest {
         config = MavenRepositoryConfigSerializer.deserialize(
             jsonObject,
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
 
         assertEquals(jsonObject["id"].asString, config.id)
@@ -226,7 +235,7 @@ internal class MavenRepositoryConfigSerializerTest {
         config = MavenRepositoryConfigSerializer.deserialize(
             jsonObject,
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
 
         assertEquals(jsonObject["id"].asString, config.id)
@@ -247,7 +256,7 @@ internal class MavenRepositoryConfigSerializerTest {
         config = MavenRepositoryConfigSerializer.deserialize(
             jsonObject,
             MavenRepositoryConfig::class.java,
-            TestJsonDeserializationContext
+            TestJsonSerializationContext.default()
         )
 
         assertEquals(jsonObject["id"].asString, config.id)
@@ -261,15 +270,37 @@ internal class MavenRepositoryConfigSerializerTest {
 
 }
 
-private object TestJsonDeserializationContext : JsonDeserializationContext {
+private class TestJsonSerializationContext(private val gson: Gson) : JsonDeserializationContext,
+    JsonSerializationContext {
 
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
-        .create()
-
-    override fun <T : Any?> deserialize(json: JsonElement, typeOfT: Type): T {
+    override fun <T : Any?> deserialize(json: JsonElement?, typeOfT: Type): T {
         return gson.fromJson(json, typeOfT)
     }
+
+    companion object {
+        fun default(): TestJsonSerializationContext {
+            return TestJsonSerializationContext(
+                GsonBuilder()
+                    .registerTypeAdapter(MavenRepositoryConfig::class.java, MavenRepositoryConfigSerializer)
+                    .registerTypeAdapter(BotConfig::class.java, BotConfigSerializer)
+                    .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
+                    .registerTypeAdapter(Artifact::class.java, ArtifactSerializer)
+                    .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
+                    .registerTypeAdapter(UsernameAuthenticator::class.java, UsernameAuthenticatorSerializer)
+                    .registerTypeAdapter(ProxyConfig::class.java, ProxyConfigSerializer)
+                    .create()
+            )
+        }
+    }
+
+    override fun serialize(src: Any?): JsonElement {
+        return gson.toJsonTree(src)
+    }
+
+    override fun serialize(src: Any?, typeOfSrc: Type?): JsonElement {
+        return gson.toJsonTree(src, typeOfSrc)
+    }
+
 }
 
 internal class AuthenticationSerializerTest {
@@ -279,19 +310,19 @@ internal class AuthenticationSerializerTest {
         assertThrows(JsonParseException::class.java) {
             AuthenticationSerializer.deserialize(
                 JsonNull.INSTANCE,
-                Authentication::class.java, TestJsonDeserializationContext
+                Authentication::class.java, TestJsonSerializationContext.default()
             )
         }
         assertThrows(JsonParseException::class.java) {
             AuthenticationSerializer.deserialize(
                 JsonArray(),
-                Authentication::class.java, TestJsonDeserializationContext
+                Authentication::class.java, TestJsonSerializationContext.default()
             )
         }
         assertThrows(JsonParseException::class.java) {
             AuthenticationSerializer.deserialize(
                 JsonPrimitive("A STRING"),
-                Authentication::class.java, TestJsonDeserializationContext
+                Authentication::class.java, TestJsonSerializationContext.default()
             )
         }
 
@@ -306,7 +337,7 @@ internal class AuthenticationSerializerTest {
 
         val result = AuthenticationSerializer.deserialize(
             expectJsonObject,
-            Authentication::class.java, TestJsonDeserializationContext
+            Authentication::class.java, TestJsonSerializationContext.default()
         )
 
         assertNotNull(result)
@@ -319,4 +350,282 @@ internal class AuthenticationSerializerTest {
         }
     }
 
+}
+
+internal class BotConfigSerializerTest {
+
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(BotConfig::class.java, BotConfigSerializer)
+        .registerTypeAdapter(Artifact::class.java, ArtifactSerializer)
+        .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(ProxyConfig::class.java, ProxyConfigSerializer)
+        .create()
+
+    @Test
+    fun `serializer test`() {
+        // 检查 BotConfig 的序列化
+        val botConfig = BotConfig(
+            account = BotAccount(
+                name = "test-bot",
+                token = "test-token",
+                creatorId = 10000
+            )
+        )
+
+        // 使用 gson 序列化 botConfig, 并检查序列化结果
+        val jsonObject = gson.toJsonTree(botConfig) as JsonObject
+        assertEquals("test-bot", jsonObject["account"].asJsonObject["name"].asString)
+        assertEquals("test-token", jsonObject["account"].asJsonObject["token"].asString)
+        assertEquals(10000, jsonObject["account"].asJsonObject["creatorId"].asInt)
+
+        assertEquals(botConfig.enabled, jsonObject["enabled"].asBoolean)
+        assertEquals(botConfig.proxy.host, jsonObject["proxy"].asJsonObject["host"].asString)
+        assertEquals(botConfig.proxy.port, jsonObject["proxy"].asJsonObject["port"].asInt)
+        assertEquals(botConfig.proxy.type.name, jsonObject["proxy"].asJsonObject["type"].asString)
+        assertEquals(botConfig.disableBuiltInAbility, jsonObject["disableBuiltInAbility"].asBoolean)
+        assertEquals(botConfig.autoUpdateCommandList, jsonObject["autoUpdateCommandList"].asBoolean)
+        assertEquals(botConfig.extensions.isEmpty(), jsonObject["extensions"].asJsonArray.isEmpty)
+        assertEquals(botConfig.baseApiUrl, jsonObject["baseApiUrl"].asString)
+    }
+
+    @Test
+    fun `deserialize test`() {
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonNull.INSTANCE,
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonArray(),
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonPrimitive("A STRING"),
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+
+        // 检查 BotConfig 的反序列化中是否能正确判断 account 的类型
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonObject().apply {
+                    addProperty("account", "A STRING")
+                },
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonObject().apply {
+                    add("account", JsonNull.INSTANCE)
+                },
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonObject().apply {
+                    add("account", JsonArray())
+                },
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotConfigSerializer.deserialize(
+                JsonObject(),
+                BotConfig::class.java, TestJsonSerializationContext(gson)
+            )
+        }
+
+
+        val expectBotAccount = BotAccount(
+            name = "test-bot",
+            token = "test-token",
+            creatorId = 10000
+        )
+        val expectDefaultBotConfig = BotConfig(account = expectBotAccount)
+        val minimumJsonObject = JsonObject().apply {
+            add("account", gson.toJsonTree(expectBotAccount))
+        }
+        val actualMinimumBotConfig = BotConfigSerializer.deserialize(
+            minimumJsonObject, BotConfig::class.java, TestJsonSerializationContext(gson)
+        )
+        assertNotNull(actualMinimumBotConfig)
+        assertEquals(expectDefaultBotConfig, actualMinimumBotConfig)
+
+        val expectDefaultProxy = ProxyConfig(
+            type = ProxyType.HTTP,
+            host = "https://example.com",
+            port = 443
+        )
+
+        // -------------------------------------------------
+
+        val jsonObject = JsonObject().apply {
+            add(
+                "account", gson.toJsonTree(
+                    BotAccount(
+                        name = "test-bot",
+                        token = "test-token",
+                        creatorId = 10000
+                    )
+                )
+            )
+            addProperty("enabled", true)
+            add("proxy", gson.toJsonTree(expectDefaultProxy))
+            addProperty("disableBuiltInAbility", true)
+            addProperty("autoUpdateCommandList", true)
+            addProperty("baseApiUrl", "https://test.com")
+            add("extensions", JsonArray())
+        }
+
+        val botConfig = BotConfigSerializer.deserialize(
+            jsonObject,
+            BotConfig::class.java, TestJsonSerializationContext(gson)
+        )
+
+        assertEquals("test-bot", botConfig.account.name)
+        assertEquals("test-token", botConfig.account.token)
+        assertEquals(10000, botConfig.account.creatorId)
+        assertEquals(true, botConfig.enabled)
+        assertEquals(expectDefaultProxy, botConfig.proxy)
+        assertEquals(true, botConfig.disableBuiltInAbility)
+        assertEquals(true, botConfig.autoUpdateCommandList)
+        assertEquals("https://test.com", botConfig.baseApiUrl)
+        assertEquals(true, botConfig.extensions.isEmpty())
+    }
+}
+
+internal class ProxyConfigSerializerTest {
+
+    // 测试 ProxyConfig 的 Json 序列化
+    @Test
+    fun `serialize test`() {
+        assertEquals(JsonNull.INSTANCE, ProxyConfigSerializer.serialize(null, null, null))
+
+        val expectDefaultConfig = ProxyConfig()
+        val actualDefaultJson = ProxyConfigSerializer.serialize(expectDefaultConfig, null, null)
+        assertTrue(actualDefaultJson is JsonObject)
+        assertEquals(expectDefaultConfig.type.name, actualDefaultJson["type"].asString)
+        assertEquals(expectDefaultConfig.host, actualDefaultJson["host"].asString)
+        assertEquals(expectDefaultConfig.port, actualDefaultJson["port"].asInt)
+    }
+
+    @Test
+    fun `Bad type deserialize test`() {
+        val defaultConfig = ProxyConfig()
+        assertEquals(defaultConfig, ProxyConfigSerializer.deserialize(null, null, null))
+        assertEquals(defaultConfig, ProxyConfigSerializer.deserialize(JsonNull.INSTANCE, null, null))
+    }
+
+    @Test
+    fun `deserialize test - object`() {
+        val defaultConfig = ProxyConfig()
+
+        assertThrows(JsonParseException::class.java) {
+            ProxyConfigSerializer.deserialize(JsonArray(), null, null)
+        }
+
+        val jsonWithoutType = JsonObject().apply {
+            addProperty("host", "example.com")
+            addProperty("port", 8080)
+        }
+        assertEquals(defaultConfig, ProxyConfigSerializer.deserialize(jsonWithoutType, null, null))
+
+        val looksGoodJson = JsonObject().apply {
+            addProperty("type", "HTTP")
+            addProperty("host", "example.com")
+            addProperty("port", 8080)
+        }
+        assertEquals(
+            ProxyConfig(
+                type = ProxyType.HTTP,
+                host = "example.com",
+                port = 8080
+            ), ProxyConfigSerializer.deserialize(looksGoodJson, null, null)
+        )
+
+        assertThrows(JsonParseException::class.java) {
+            ProxyConfigSerializer.deserialize(JsonObject().apply {
+                addProperty("type", "UNKNOWN")
+                addProperty("host", "example.com")
+                addProperty("port", 8080)
+            }, null, null)
+        }
+
+        assertThrows(JsonParseException::class.java) {
+            ProxyConfigSerializer.deserialize(JsonObject().apply {
+                addProperty("type", "HTTP")
+                addProperty("host", "example.com")
+            }, null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            ProxyConfigSerializer.deserialize(JsonObject().apply {
+                addProperty("type", "HTTP")
+                addProperty("port", 8080)
+            }, null, null)
+        }
+    }
+}
+
+internal class ArtifactSerializerTest {
+
+    @org.junit.jupiter.api.Test
+    fun badJsonType() {
+        assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonObject(), null, null) }
+        assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonArray(), null, null) }
+        assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonPrimitive("A STRING"), null, null) }
+    }
+
+    @org.junit.jupiter.api.Test
+    fun `Basic format serialization`() {
+        val gav = "org.example.software:test:1.0.0-SNAPSHOT"
+        val expectArtifact = DefaultArtifact(gav)
+        val actualArtifact = DefaultArtifact(ArtifactSerializer.serialize(expectArtifact, null, null).asString)
+        assertEquals(expectArtifact, actualArtifact)
+    }
+
+    @org.junit.jupiter.api.Test
+    fun `Full format serialization`() {
+        val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
+        val expectArtifact = DefaultArtifact(gav)
+        val actualArtifact = DefaultArtifact(ArtifactSerializer.serialize(expectArtifact, null, null).asString)
+        assertEquals(expectArtifact, actualArtifact)
+    }
+
+    @org.junit.jupiter.api.Test
+    fun `Bad format serialization`() {
+        assertFailsWith<JsonParseException> {
+            ArtifactSerializer.deserialize(JsonPrimitive("org.example~test"), null, null)
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    fun `Other artifact implementation serialization`() {
+        val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
+        val expectArtifact = DefaultArtifact(gav)
+        val otherArtifactImpl = mockk<Artifact> {
+            every { groupId } returns expectArtifact.groupId
+            every { artifactId } returns expectArtifact.artifactId
+            every { version } returns expectArtifact.version
+            every { classifier } returns expectArtifact.classifier
+            every { extension } returns expectArtifact.extension
+        }
+
+        val json = ArtifactSerializer.serialize(otherArtifactImpl, null, null)
+        assertTrue(json is JsonPrimitive)
+        assertEquals(expectArtifact.toString(), json.asString)
+    }
+
+    @org.junit.jupiter.api.Test
+    fun deserialize() {
+        val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
+        val expectArtifact = DefaultArtifact(gav)
+        val actualArtifact = ArtifactSerializer.deserialize(JsonPrimitive(gav), null, null)
+        assertEquals(expectArtifact, actualArtifact)
+    }
 }
