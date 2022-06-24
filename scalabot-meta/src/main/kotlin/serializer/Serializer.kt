@@ -9,7 +9,6 @@ import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.util.repository.AuthenticationBuilder
-import org.telegram.telegrambots.meta.ApiConstants
 import java.lang.reflect.Type
 import java.net.MalformedURLException
 import java.net.URL
@@ -222,6 +221,8 @@ object ProxyConfigSerializer : JsonSerializer<ProxyConfig>, JsonDeserializer<Pro
 
 object BotConfigSerializer : JsonSerializer<BotConfig>, JsonDeserializer<BotConfig> {
 
+    private val defaultConfig = BotConfig(account = BotAccount("__Default__", "__Default__", 0))
+
     override fun serialize(src: BotConfig, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
         return JsonObject().apply {
             addProperty("enabled", src.enabled)
@@ -247,14 +248,14 @@ object BotConfigSerializer : JsonSerializer<BotConfig>, JsonDeserializer<BotConf
 
         // 从 json 反序列化 BotConfig（使用构造函数）
         return BotConfig(
-            enabled = json.get("enabled")?.asBoolean ?: true,
+            enabled = json.get("enabled")?.asBoolean ?: defaultConfig.enabled,
             account = context.deserialize(json.get("account"), BotAccount::class.java)!!,
-            disableBuiltInAbility = json.get("disableBuiltInAbility")?.asBoolean ?: false,
-            autoUpdateCommandList = json.get("autoUpdateCommandList")?.asBoolean ?: false,
+            disableBuiltInAbility = json.get("disableBuiltInAbility")?.asBoolean ?: defaultConfig.disableBuiltInAbility,
+            autoUpdateCommandList = json.get("autoUpdateCommandList")?.asBoolean ?: defaultConfig.autoUpdateCommandList,
             extensions = context.deserialize(json.get("extensions"), object : TypeToken<Set<Artifact>>() {}.type)
-                ?: emptySet(),
-            proxy = context.deserialize(json.get("proxy"), ProxyConfig::class.java) ?: ProxyConfig(),
-            baseApiUrl = json.get("baseApiUrl")?.asString ?: ApiConstants.BASE_URL
+                ?: defaultConfig.extensions,
+            proxy = context.deserialize(json.get("proxy"), ProxyConfig::class.java) ?: defaultConfig.proxy,
+            baseApiUrl = json.get("baseApiUrl")?.asString ?: defaultConfig.baseApiUrl
         )
     }
 }
