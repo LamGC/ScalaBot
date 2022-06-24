@@ -1,7 +1,7 @@
-package net.lamgc.scalabot.config.serializer
+package net.lamgc.scalabot.config
 
 import com.google.gson.*
-import net.lamgc.scalabot.config.UsernameAuthenticator
+import net.lamgc.scalabot.config.serializer.UsernameAuthenticatorSerializer
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
