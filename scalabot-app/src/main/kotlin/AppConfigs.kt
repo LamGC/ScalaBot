@@ -131,7 +131,7 @@ internal enum class AppPaths(
                 GsonConst.botConfigGson.toJson(
                     setOf(
                         BotConfig(
-                            enabled = false,
+                            enabled = true,
                             proxy = ProxyConfig(),
                             account = BotAccount(
                                 "Bot Username",
@@ -226,14 +226,15 @@ private object GsonConst {
         .create()
 
     val appConfigGson: Gson = baseGson.newBuilder()
-        .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
         .registerTypeAdapter(MavenRepositoryConfig::class.java, MavenRepositoryConfigSerializer)
         .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
         .registerTypeAdapter(UsernameAuthenticator::class.java, UsernameAuthenticatorSerializer)
         .create()
 
     val botConfigGson: Gson = baseGson.newBuilder()
-        .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(BotConfig::class.java, BotConfigSerializer)
         .registerTypeAdapter(Artifact::class.java, ArtifactSerializer)
         .create()
 }

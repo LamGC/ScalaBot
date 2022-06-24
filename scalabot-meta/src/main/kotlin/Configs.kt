@@ -33,7 +33,7 @@ data class BotAccount(
  * @property proxy 为该机器人单独设置的代理配置, 如无设置, 则使用 AppConfig 中的代理配置.
  */
 data class BotConfig(
-    val enabled: Boolean = true,
+    val enabled: Boolean = false,
     val account: BotAccount,
     val disableBuiltInAbility: Boolean = false,
     val autoUpdateCommandList: Boolean = false,
