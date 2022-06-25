@@ -131,13 +131,6 @@ internal class MavenRepositoryConfigSerializerTest {
 
     @Test
     fun `json primitive deserialize test`() {
-        val expectRepoUrl = "https://repo.example.org/maven"
-        val config = MavenRepositoryConfigSerializer.deserialize(
-            JsonPrimitive(expectRepoUrl),
-            MavenRepositoryConfig::class.java,
-            TestJsonSerializationContext.default()
-        )
-
         assertThrows(JsonParseException::class.java) {
             MavenRepositoryConfigSerializer.deserialize(
                 JsonPrimitive("NOT A URL."),
@@ -145,6 +138,13 @@ internal class MavenRepositoryConfigSerializerTest {
                 TestJsonSerializationContext.default()
             )
         }
+
+        val expectRepoUrl = "https://repo.example.org/maven"
+        val config = MavenRepositoryConfigSerializer.deserialize(
+            JsonPrimitive(expectRepoUrl),
+            MavenRepositoryConfig::class.java,
+            TestJsonSerializationContext.default()
+        )
 
         assertNull(config.id)
         assertEquals(URL(expectRepoUrl), config.url)
@@ -577,14 +577,14 @@ internal class ProxyConfigSerializerTest {
 
 internal class ArtifactSerializerTest {
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun badJsonType() {
         assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonObject(), null, null) }
         assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonArray(), null, null) }
         assertFailsWith<JsonParseException> { ArtifactSerializer.deserialize(JsonPrimitive("A STRING"), null, null) }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun `Basic format serialization`() {
         val gav = "org.example.software:test:1.0.0-SNAPSHOT"
         val expectArtifact = DefaultArtifact(gav)
@@ -592,7 +592,7 @@ internal class ArtifactSerializerTest {
         assertEquals(expectArtifact, actualArtifact)
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun `Full format serialization`() {
         val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
         val expectArtifact = DefaultArtifact(gav)
@@ -600,14 +600,14 @@ internal class ArtifactSerializerTest {
         assertEquals(expectArtifact, actualArtifact)
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun `Bad format serialization`() {
         assertFailsWith<JsonParseException> {
             ArtifactSerializer.deserialize(JsonPrimitive("org.example~test"), null, null)
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun `Other artifact implementation serialization`() {
         val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
         val expectArtifact = DefaultArtifact(gav)
@@ -624,7 +624,7 @@ internal class ArtifactSerializerTest {
         assertEquals(expectArtifact.toString(), json.asString)
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun deserialize() {
         val gav = "org.example.software:test:war:javadoc:1.0.0-SNAPSHOT"
         val expectArtifact = DefaultArtifact(gav)

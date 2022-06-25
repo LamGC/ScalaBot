@@ -17,7 +17,7 @@ import kotlin.test.*
 
 internal class BotAccountTest {
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun `id getter`() {
         val accountId = abs(Random().nextInt()).toLong()
         Assertions.assertEquals(accountId, BotAccount("Test", "${accountId}:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10", 0).id)
@@ -26,7 +26,7 @@ internal class BotAccountTest {
     private val gson = GsonBuilder()
         .create()
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun deserializerTest() {
         val accountId = abs(Random().nextInt()).toLong()
         val creatorId = abs(Random().nextInt()).toLong()
@@ -46,7 +46,7 @@ internal class BotAccountTest {
         assertEquals("${accountId}:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10", botAccount.token)
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun serializerTest() {
         val accountId = abs(Random().nextInt()).toLong()
         val creatorId = abs(Random().nextInt()).toLong()
