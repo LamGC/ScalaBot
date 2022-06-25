@@ -632,3 +632,78 @@ internal class ArtifactSerializerTest {
         assertEquals(expectArtifact, actualArtifact)
     }
 }
+
+internal class UsernameAuthenticatorSerializerTest {
+
+    @Test
+    fun serializeTest() {
+        val authenticator = UsernameAuthenticator("testUser", "testPassword")
+        val jsonElement = UsernameAuthenticatorSerializer.serialize(authenticator, null, null)
+        assertTrue(jsonElement.isJsonObject)
+        val jsonObject = jsonElement.asJsonObject
+        assertEquals("testUser", jsonObject["username"]?.asString)
+        assertEquals("testPassword", jsonObject["password"]?.asString)
+    }
+
+    @Test
+    fun deserializeTest() {
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonArray(), null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonPrimitive(""), null, null)
+        }
+        assertNull(UsernameAuthenticatorSerializer.deserialize(JsonNull.INSTANCE, null, null))
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("username", "testUser")
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("username", "testUser")
+                add("password", JsonArray())
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("password", "testPassword")
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                add("username", JsonArray())
+                addProperty("password", "testPassword")
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("username", "")
+                addProperty("password", "")
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("username", "testUser")
+                addProperty("password", "")
+            }, null, null)
+        }
+        org.junit.jupiter.api.assertThrows<JsonParseException> {
+            UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+                addProperty("username", "")
+                addProperty("password", "testPassword")
+            }, null, null)
+        }
+
+        val authenticator = UsernameAuthenticatorSerializer.deserialize(JsonObject().apply {
+            addProperty("username", "testUser")
+            addProperty("password", "testPassword")
+        }, null, null)
+        assertNotNull(authenticator)
+
+        assertTrue(authenticator.checkCredentials("testUser", "testPassword"))
+        assertFalse(authenticator.checkCredentials("falseUser", "testPassword"))
+        assertFalse(authenticator.checkCredentials("testUser", "falsePassword"))
+    }
+
+}
