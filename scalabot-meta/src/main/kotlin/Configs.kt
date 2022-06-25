@@ -51,6 +51,7 @@ data class BotConfig(
 enum class ProxyType {
     NO_PROXY,
     HTTP,
+    HTTPS,
     SOCKS4,
     SOCKS5
 }

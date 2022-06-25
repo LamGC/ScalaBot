@@ -26,17 +26,19 @@ internal fun ProxyType.toTelegramBotsType(): DefaultBotOptions.ProxyType {
     return when (this) {
         ProxyType.NO_PROXY -> DefaultBotOptions.ProxyType.NO_PROXY
         ProxyType.HTTP -> DefaultBotOptions.ProxyType.HTTP
+        ProxyType.HTTPS -> DefaultBotOptions.ProxyType.HTTP
         ProxyType.SOCKS4 -> DefaultBotOptions.ProxyType.SOCKS4
         ProxyType.SOCKS5 -> DefaultBotOptions.ProxyType.SOCKS5
     }
 }
 
 internal fun ProxyConfig.toAetherProxy(): Proxy? {
-    return if (type == ProxyType.HTTP) {
-        Proxy(Proxy.TYPE_HTTP, host, port)
-    } else {
-        null
+    val typeStr = when (type) {
+        ProxyType.HTTP -> Proxy.TYPE_HTTP
+        ProxyType.HTTPS -> Proxy.TYPE_HTTPS
+        else -> return null
     }
+    return Proxy(typeStr, host, port)
 }
 
 internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
