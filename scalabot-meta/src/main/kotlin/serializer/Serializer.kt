@@ -115,16 +115,16 @@ object MavenRepositoryConfigSerializer
                 MavenRepositoryConfig(
                     id = json.get("id")?.asString,
                     url = URL(SerializerUtils.checkJsonKey(json, "url")),
-                    proxy = if (json.has("proxy") && json.get("proxy").isJsonObject)
+                    proxy = if (json.has("proxy"))
                         context.deserialize<Proxy>(
-                            json.getAsJsonObject("proxy"), Proxy::class.java
+                            json.get("proxy"), Proxy::class.java
                         ) else null,
                     layout = json.get("layout")?.asString ?: "default",
                     enableReleases = json.get("enableReleases")?.asBoolean ?: true,
                     enableSnapshots = json.get("enableSnapshots")?.asBoolean ?: true,
-                    authentication = if (json.has("authentication") && json.get("authentication").isJsonObject)
+                    authentication = if (json.has("authentication"))
                         context.deserialize<Authentication>(
-                            json.getAsJsonObject("authentication"), Authentication::class.java
+                            json.get("authentication"), Authentication::class.java
                         ) else null
                 )
             }

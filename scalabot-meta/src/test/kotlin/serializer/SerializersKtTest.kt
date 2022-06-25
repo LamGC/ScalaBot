@@ -227,7 +227,6 @@ internal class MavenRepositoryConfigSerializerTest {
 
         // ------------------------------------
 
-        jsonObject.add("authentication", JsonArray())
         jsonObject.add("layout", mockk<JsonPrimitive> {
             every { asString }.returns(null)
         })
