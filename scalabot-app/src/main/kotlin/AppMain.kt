@@ -82,17 +82,14 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
                             if (System.getProperty("os.name").lowercase().startsWith("windows")) {
                                 createDirectories()
                             } else {
-                                createDirectories(
-                                    PosixFilePermissions.asFileAttribute(
-                                        setOf(
-                                            PosixFilePermission.OWNER_READ,
-                                            PosixFilePermission.OWNER_WRITE,
-                                            PosixFilePermission.GROUP_READ,
-                                            PosixFilePermission.GROUP_WRITE,
-                                            PosixFilePermission.OTHERS_READ,
-                                        )
-                                    )
+                                val fileAttributes = setOf(
+                                    PosixFilePermission.OWNER_READ,
+                                    PosixFilePermission.OWNER_WRITE,
+                                    PosixFilePermission.GROUP_READ,
+                                    PosixFilePermission.GROUP_WRITE,
+                                    PosixFilePermission.OTHERS_READ,
                                 )
+                                createDirectories(PosixFilePermissions.asFileAttribute(fileAttributes))
                             }
                         }
                     }
