@@ -480,7 +480,9 @@ internal class BotConfigSerializerTest {
             addProperty("disableBuiltInAbility", true)
             addProperty("autoUpdateCommandList", true)
             addProperty("baseApiUrl", "https://test.com")
-            add("extensions", JsonArray())
+            add("extensions", JsonArray().apply {
+                add("org.example:test:1.0.0-SNAPSHOT")
+            })
         }
 
         val botConfig = BotConfigSerializer.deserialize(
@@ -496,7 +498,8 @@ internal class BotConfigSerializerTest {
         assertEquals(true, botConfig.disableBuiltInAbility)
         assertEquals(true, botConfig.autoUpdateCommandList)
         assertEquals("https://test.com", botConfig.baseApiUrl)
-        assertEquals(true, botConfig.extensions.isEmpty())
+        assertEquals(false, botConfig.extensions.isEmpty())
+        assertEquals(1, botConfig.extensions.size)
     }
 }
 
