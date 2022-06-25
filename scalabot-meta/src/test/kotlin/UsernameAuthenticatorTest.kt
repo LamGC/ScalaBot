@@ -10,6 +10,7 @@ internal class UsernameAuthenticatorTest {
         assertTrue(authenticator.checkCredentials("testUser", "testPassword"))
         assertFalse(authenticator.checkCredentials("falseUser", "testPassword"))
         assertFalse(authenticator.checkCredentials("testUser", "falsePassword"))
+        assertFalse(authenticator.checkCredentials("falseUser", "falsePassword"))
     }
 
     @Test
