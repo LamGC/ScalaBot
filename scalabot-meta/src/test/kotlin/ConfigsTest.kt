@@ -3,10 +3,14 @@ package net.lamgc.scalabot.config
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import net.lamgc.scalabot.config.serializer.*
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
+import org.eclipse.aether.repository.AuthenticationContext
 import org.eclipse.aether.repository.Proxy
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -347,8 +351,8 @@ internal class MavenRepositoryConfigTest {
                 "enableReleases": false,
                 "enableSnapshots": true,
                 "authentication": {
-                    "username": "username",
-                    "password": "password"
+                    "username": "testUser",
+                    "password": "testPassword"
                 }
             }
             """.trimIndent()
@@ -368,6 +372,16 @@ internal class MavenRepositoryConfigTest {
         assertEquals(false, config.enableReleases)
         assertEquals(true, config.enableSnapshots)
         assertNotNull(config.authentication)
+
+        val authContext = mockk<AuthenticationContext> {
+            every { put(ofType(String::class), any()) } answers { }
+        }
+        config.authentication!!.fill(authContext, null, emptyMap())
+
+        verify {
+            authContext.put(any(), "testUser")
+            authContext.put(any(), "testPassword".toCharArray())
+        }
     }
 
 }
