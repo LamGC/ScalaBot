@@ -1,6 +1,8 @@
 <div style="text-align: center;">
 
 # ScalaBot
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FLamGC%2FScalaBot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FLamGC%2FScalaBot?ref=badge_shield)
+
 
 基于 [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots) 的可扩展机器人服务器。  
 Extensible robot server based on [rubenlagus/TelegramBots](https://github.com/rubenlagus/TelegramBots).
@@ -57,3 +59,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FLamGC%2FScalaBot.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FLamGC%2FScalaBot?ref=badge_large)
