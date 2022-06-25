@@ -102,7 +102,6 @@ internal class BotConfigTest {
         assertEquals(minimumExpectConfig.baseApiUrl, json.get("baseApiUrl").asString)
     }
 
-    // 测试 BotConfig 的 json 反序列化
     @Test
     fun `json deserialize`() {
         val expectExtensionArtifact = DefaultArtifact("org.example.test:test-extension:1.0.0")
@@ -147,6 +146,34 @@ internal class BotConfigTest {
         assertEquals(expectExtensionArtifact, actualConfig.extensions.first())
 
         assertEquals("http://localhost:8080", actualConfig.baseApiUrl)
+    }
+
+    @Test
+    fun `json deserialize - minimum parameters`() {
+        @Language("JSON5") val minimumLooksGoodJson = """
+            {
+                "account": {
+                    "name": "TestBot",
+                    "token": "123456789:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10",
+                    "creatorId": 123456789
+                }
+            }
+        """.trimIndent()
+        val expectDefaultConfig = BotConfig(account = BotAccount("Test", "Test", 0))
+        val actualMinimumConfig = gson.fromJson(minimumLooksGoodJson, BotConfig::class.java)
+        assertNotNull(actualMinimumConfig)
+        assertEquals("TestBot", actualMinimumConfig.account.name)
+        assertEquals("123456789:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10", actualMinimumConfig.account.token)
+        assertEquals(123456789, actualMinimumConfig.account.creatorId)
+
+        assertEquals(expectDefaultConfig.enabled, actualMinimumConfig.enabled)
+        assertEquals(expectDefaultConfig.disableBuiltInAbility, actualMinimumConfig.disableBuiltInAbility)
+        assertEquals(expectDefaultConfig.autoUpdateCommandList, actualMinimumConfig.autoUpdateCommandList)
+        assertEquals(expectDefaultConfig.proxy, actualMinimumConfig.proxy)
+        assertEquals(expectDefaultConfig.baseApiUrl, actualMinimumConfig.baseApiUrl)
+
+        assertTrue(expectDefaultConfig.extensions.containsAll(actualMinimumConfig.extensions))
+        assertTrue(actualMinimumConfig.extensions.containsAll(expectDefaultConfig.extensions))
     }
 
 }
