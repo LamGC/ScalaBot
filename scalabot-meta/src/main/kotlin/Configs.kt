@@ -11,6 +11,7 @@ import java.net.URL
  * @property name 机器人名称, 建议与实际设定的名称相同.
  * @property token 机器人 API Token.
  * @property creatorId 机器人创建者, 管理机器人需要使用该信息.
+ * @property id 机器人账号 ID.
  */
 data class BotAccount(
     val name: String,
@@ -27,10 +28,13 @@ data class BotAccount(
 
 /**
  * 机器人配置.
+ * @property enabled 是否启用机器人.
  * @property account 机器人帐号信息, 用于访问 API.
  * @property disableBuiltInAbility 是否禁用 AbilityBot 自带命令.
+ * @property autoUpdateCommandList 是否自动更新机器人在 Telegram 的命令列表.
  * @property extensions 该机器人启用的扩展.
  * @property proxy 为该机器人单独设置的代理配置, 如无设置, 则使用 AppConfig 中的代理配置.
+ * @property baseApiUrl 机器人所使用的 API 地址, 适用于自建 Telegram Bot API 端点.
  */
 data class BotConfig(
     val enabled: Boolean = false,
@@ -48,6 +52,9 @@ data class BotConfig(
     val baseApiUrl: String = ApiConstants.BASE_URL
 )
 
+/**
+ * 代理类型.
+ */
 enum class ProxyType {
     NO_PROXY,
     HTTP,
@@ -68,6 +75,17 @@ data class ProxyConfig(
     val port: Int = 1080
 )
 
+/**
+ * ScalaBot 的运行指标公开配置.
+ *
+ * ScalaBot 内置了用于公开运行指标的服务端,
+ * 该指标遵循 Prometheus 的标准, 可以通过 Prometheus 的工具来查看.
+ *
+ * @property enable 是否启用运行指标服务端.
+ * @property port 运行指标服务端的端口.
+ * @property bindAddress 运行指标服务端的绑定地址, 绑定后只有该地址可以访问.
+ * @property authenticator 运行指标服务端的 HTTP 认证配置.
+ */
 data class MetricsConfig(
     val enable: Boolean = false,
     val port: Int = 9386,
@@ -77,9 +95,13 @@ data class MetricsConfig(
 
 /**
  * Maven 远端仓库配置.
+ * @property id 远端仓库 ID, 如果该属性未配置 (null), 那么运行时将会自动分配一个 Id.
  * @property url 仓库地址.
  * @property proxy 访问仓库所使用的代理, 仅支持 http/https 代理.
  * @property layout 仓库布局版本, Maven 2 及以上使用 `default`, Maven 1 使用 `legacy`.
+ * @property enableReleases 是否在该远端仓库获取发布版本.
+ * @property enableSnapshots 是否在该远端仓库获取快照版本.
+ * @property authentication 访问该远端仓库所使用的认证配置.
  */
 data class MavenRepositoryConfig(
     val id: String? = null,
