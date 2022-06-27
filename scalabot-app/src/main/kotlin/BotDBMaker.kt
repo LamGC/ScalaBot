@@ -2,6 +2,7 @@ package net.lamgc.scalabot
 
 import com.google.common.io.Files
 import mu.KotlinLogging
+import net.lamgc.scalabot.config.BotAccount
 import net.lamgc.scalabot.util.toHexString
 import org.mapdb.DB
 import org.mapdb.DBException

@@ -5,14 +5,14 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
-import net.lamgc.scalabot.util.*
+import net.lamgc.scalabot.config.*
+import net.lamgc.scalabot.config.serializer.*
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.repository.RemoteRepository
 import org.eclipse.aether.repository.RepositoryPolicy
 import org.telegram.telegrambots.bots.DefaultBotOptions
-import org.telegram.telegrambots.meta.ApiConstants
 import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -22,154 +22,65 @@ import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
 
-/**
- * 机器人帐号信息.
- * @property name 机器人名称, 建议与实际设定的名称相同.
- * @property token 机器人 API Token.
- * @property creatorId 机器人创建者, 管理机器人需要使用该信息.
- */
-internal data class BotAccount(
-    val name: String,
-    val token: String,
-    val creatorId: Long = -1
-) {
-
-    val id
-        // 不要想着每次获取都要从 token 里取出有性能损耗.
-        // 由于 Gson 解析方式, 如果不这么做, 会出现 token 设置前 id 初始化完成, 就只有"0"了,
-        // 虽然能过单元测试, 但实际使用过程是不能正常用的.
-        get() = token.substringBefore(":").toLong()
+internal fun ProxyType.toTelegramBotsType(): DefaultBotOptions.ProxyType {
+    return when (this) {
+        ProxyType.NO_PROXY -> DefaultBotOptions.ProxyType.NO_PROXY
+        ProxyType.HTTP -> DefaultBotOptions.ProxyType.HTTP
+        ProxyType.HTTPS -> DefaultBotOptions.ProxyType.HTTP
+        ProxyType.SOCKS4 -> DefaultBotOptions.ProxyType.SOCKS4
+        ProxyType.SOCKS5 -> DefaultBotOptions.ProxyType.SOCKS5
+    }
 }
 
-/**
- * 机器人配置.
- * @property account 机器人帐号信息, 用于访问 API.
- * @property disableBuiltInAbility 是否禁用 AbilityBot 自带命令.
- * @property extensions 该机器人启用的扩展.
- * @property proxy 为该机器人单独设置的代理配置, 如无设置, 则使用 AppConfig 中的代理配置.
- */
-internal data class BotConfig(
-    val enabled: Boolean = true,
-    val account: BotAccount,
-    val disableBuiltInAbility: Boolean = false,
-    val autoUpdateCommandList: Boolean = false,
-    /*
-     * 使用构件坐标来选择机器人所使用的扩展包.
-     * 这么做的原因是我暂时没找到一个合适的方法来让开发者方便地设定自己的扩展 Id,
-     * 而构件坐标(POM Reference 或者叫 GAV 坐标)是开发者创建 Maven/Gradle 项目时一定会设置的,
-     * 所以就直接用了. :P
-     */
-    val extensions: Set<Artifact>,
-    val proxy: ProxyConfig? = ProxyConfig(),
-    val baseApiUrl: String? = ApiConstants.BASE_URL
-)
+internal fun ProxyConfig.toAetherProxy(): Proxy? {
+    val typeStr = when (type) {
+        ProxyType.HTTP -> Proxy.TYPE_HTTP
+        ProxyType.HTTPS -> Proxy.TYPE_HTTPS
+        else -> return null
+    }
+    return Proxy(typeStr, host, port)
+}
 
-/**
- * 代理配置.
- * @property type 代理类型.
- * @property host 代理服务端地址.
- * @property port 代理服务端端口.
- */
-internal data class ProxyConfig(
-    val type: DefaultBotOptions.ProxyType = DefaultBotOptions.ProxyType.NO_PROXY,
-    val host: String = "127.0.0.1",
-    val port: Int = 1080
-) {
-
-    fun toAetherProxy(): Proxy? {
-        return if (type == DefaultBotOptions.ProxyType.HTTP) {
-            Proxy(Proxy.TYPE_HTTP, host, port)
-        } else {
-            null
-        }
+internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
+    val builder =
+        RemoteRepository.Builder(id ?: createDefaultRepositoryId(), checkRepositoryLayout(layout), url.toString())
+    if (proxy != null) {
+        builder.setProxy(proxy)
+    } else if (proxyConfig.type == ProxyType.HTTP) {
+        builder.setProxy(proxyConfig.toAetherProxy())
     }
 
-}
-
-internal data class MetricsConfig(
-    val enable: Boolean = false,
-    val port: Int = 9386,
-    val bindAddress: String? = "0.0.0.0",
-    val authenticator: UsernameAuthenticator? = null
-)
-
-/**
- * Maven 远端仓库配置.
- * @property url 仓库地址.
- * @property proxy 访问仓库所使用的代理, 仅支持 http/https 代理.
- * @property layout 仓库布局版本, Maven 2 及以上使用 `default`, Maven 1 使用 `legacy`.
- */
-internal data class MavenRepositoryConfig(
-    val id: String? = null,
-    val url: URL,
-    val proxy: Proxy? = null,
-    val layout: String = "default",
-    val enableReleases: Boolean = true,
-    val enableSnapshots: Boolean = true,
-    // 可能要设计个 type 来判断解析成什么类型的 Authentication.
-    val authentication: Authentication? = null
-) {
-
-    fun toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
-        val builder =
-            RemoteRepository.Builder(id ?: createDefaultRepositoryId(), checkRepositoryLayout(layout), url.toString())
-        if (proxy != null) {
-            builder.setProxy(proxy)
-        } else if (proxyConfig.type == DefaultBotOptions.ProxyType.HTTP) {
-            builder.setProxy(proxyConfig.toAetherProxy())
-        }
-
-        builder.setReleasePolicy(
-            RepositoryPolicy(
-                enableReleases,
-                RepositoryPolicy.UPDATE_POLICY_NEVER,
-                RepositoryPolicy.CHECKSUM_POLICY_FAIL
-            )
+    builder.setReleasePolicy(
+        RepositoryPolicy(
+            enableReleases,
+            RepositoryPolicy.UPDATE_POLICY_NEVER,
+            RepositoryPolicy.CHECKSUM_POLICY_FAIL
         )
-        builder.setSnapshotPolicy(
-            RepositoryPolicy(
-                enableSnapshots,
-                RepositoryPolicy.UPDATE_POLICY_ALWAYS,
-                RepositoryPolicy.CHECKSUM_POLICY_WARN
-            )
+    )
+    builder.setSnapshotPolicy(
+        RepositoryPolicy(
+            enableSnapshots,
+            RepositoryPolicy.UPDATE_POLICY_ALWAYS,
+            RepositoryPolicy.CHECKSUM_POLICY_WARN
         )
+    )
 
-        return builder.build()
-    }
-
-    private companion object {
-        fun checkRepositoryLayout(layoutType: String): String {
-            val type = layoutType.trim().lowercase()
-            if (type != "default" && type != "legacy") {
-                throw IllegalArgumentException("Invalid layout type (expecting 'default' or 'legacy')")
-            }
-            return type
-        }
-
-        private val repoNumber = AtomicInteger(1)
-
-        fun createDefaultRepositoryId(): String {
-            return "Repository-${repoNumber.getAndIncrement()}"
-        }
-
-    }
+    return builder.build()
 }
 
-/**
- * ScalaBot App 配置.
- *
- * App 配置信息与 BotConfig 分开, 分别存储在各自单独的文件中.
- * @property proxy Telegram API 代理配置.
- * @property metrics 运行指标数据配置. 可通过时序数据库记录运行数据.
- * @property mavenRepositories Maven 远端仓库配置.
- * @property mavenLocalRepository Maven 本地仓库路径. 相对于运行目录 (而不是 DATA_ROOT 目录)
- */
-internal data class AppConfig(
-    val proxy: ProxyConfig = ProxyConfig(),
-    val metrics: MetricsConfig = MetricsConfig(),
-    val mavenRepositories: List<MavenRepositoryConfig> = emptyList(),
-    val mavenLocalRepository: String? = null
-)
+private fun checkRepositoryLayout(layoutType: String): String {
+    val type = layoutType.trim().lowercase()
+    if (type != "default" && type != "legacy") {
+        throw IllegalArgumentException("Invalid layout type (expecting 'default' or 'legacy')")
+    }
+    return type
+}
+
+private val repoNumberGenerator = AtomicInteger(1)
+
+private fun createDefaultRepositoryId(): String {
+    return "Repository-${repoNumberGenerator.getAndIncrement()}"
+}
 
 /**
  * 需要用到的路径.
@@ -222,7 +133,7 @@ internal enum class AppPaths(
                 GsonConst.botConfigGson.toJson(
                     setOf(
                         BotConfig(
-                            enabled = false,
+                            enabled = true,
                             proxy = ProxyConfig(),
                             account = BotAccount(
                                 "Bot Username",
@@ -317,14 +228,15 @@ private object GsonConst {
         .create()
 
     val appConfigGson: Gson = baseGson.newBuilder()
-        .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
         .registerTypeAdapter(MavenRepositoryConfig::class.java, MavenRepositoryConfigSerializer)
         .registerTypeAdapter(Authentication::class.java, AuthenticationSerializer)
         .registerTypeAdapter(UsernameAuthenticator::class.java, UsernameAuthenticatorSerializer)
         .create()
 
     val botConfigGson: Gson = baseGson.newBuilder()
-        .registerTypeAdapter(DefaultBotOptions.ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
+        .registerTypeAdapter(BotConfig::class.java, BotConfigSerializer)
         .registerTypeAdapter(Artifact::class.java, ArtifactSerializer)
         .create()
 }

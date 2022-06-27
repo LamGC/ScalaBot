@@ -4,6 +4,7 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import mu.KotlinLogging
+import net.lamgc.scalabot.config.BotConfig
 import org.eclipse.aether.artifact.Artifact
 import org.telegram.abilitybots.api.bot.AbilityBot
 import org.telegram.abilitybots.api.db.DBContext

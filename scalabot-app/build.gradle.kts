@@ -7,6 +7,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":scalabot-meta"))
     implementation(project(":scalabot-extension"))
 
     implementation("org.slf4j:slf4j-api:1.7.36")
