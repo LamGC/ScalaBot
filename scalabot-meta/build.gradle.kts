@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.kotlinx.kover") version "0.5.1"
+    kotlin("jvm")
+    id("org.jetbrains.kotlinx.kover")
     id("org.jetbrains.dokka") version "1.7.0"
     `maven-publish`
     signing
