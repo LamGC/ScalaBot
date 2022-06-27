@@ -6,10 +6,6 @@ plugins {
     signing
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
