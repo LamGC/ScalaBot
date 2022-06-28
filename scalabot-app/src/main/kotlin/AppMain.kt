@@ -33,7 +33,7 @@ fun main(args: Array<String>): Unit = runBlocking {
 
     val launcher = Launcher()
         .registerShutdownHook()
-    startMetricsServer()
+    startMetricsServer()?.registerShutdownHook()
     if (!launcher.launch()) {
         exitProcess(1)
     }
@@ -57,7 +57,6 @@ internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics): H
 
     val httpServer = builder
         .build()
-        .registerShutdownHook()
     log.info { "运行指标服务器已启动. (Port: ${httpServer.port})" }
     return httpServer
 }
