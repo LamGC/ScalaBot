@@ -145,22 +145,24 @@ internal class ExtensionLoader(
         extensionArtifact: Artifact,
         foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>
     ) {
-        val errMessage = StringBuilder(
-            """
-            [Bot ${bot.botUsername}] 扩展包 $extensionArtifact 存在多个文件, 为防止安全问题, 已禁止加载该扩展包:
-        """.trimIndent()
-        ).append('\n')
+        log.error {
+            val errMessage = StringBuilder(
+                """
+                [Bot ${bot.botUsername}] 扩展包 $extensionArtifact 存在多个文件, 为防止安全问题, 已禁止加载该扩展包:
+                """.trimIndent()
+            ).append('\n')
 
-        foundResult.forEach { (finder, files) ->
-            errMessage.append("\t- 搜索器 `").append(finder::class.simpleName).append("`")
-                .append("(Priority: ${finder.getPriority()})")
-                .append(" 找到了以下扩展包: \n")
-            for (file in files) {
-                errMessage.append("\t\t* ")
-                    .append(URLDecoder.decode(file.getRawUrl().toString(), StandardCharsets.UTF_8)).append('\n')
+            foundResult.forEach { (finder, files) ->
+                errMessage.append("\t- 搜索器 `").append(finder::class.simpleName).append("`")
+                    .append("(Priority: ${finder.getPriority()})")
+                    .append(" 找到了以下扩展包: \n")
+                for (file in files) {
+                    errMessage.append("\t\t* ")
+                        .append(URLDecoder.decode(file.getRawUrl().toString(), StandardCharsets.UTF_8)).append('\n')
+                }
             }
+            errMessage
         }
-        log.error { errMessage }
     }
 
     private fun getExtensionDataFolder(extensionArtifact: Artifact): File {
