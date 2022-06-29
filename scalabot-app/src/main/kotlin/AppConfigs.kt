@@ -111,7 +111,7 @@ internal enum class AppPaths(
         }
     }),
 
-    DEFAULT_CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
+    CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.botConfigGson.toJson(
@@ -127,7 +127,7 @@ internal enum class AppPaths(
             }
         }
     }),
-    DEFAULT_CONFIG_BOT({ "$DATA_ROOT/bot.json" }, {
+    CONFIG_BOT({ "$DATA_ROOT/bot.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.botConfigGson.toJson(
@@ -172,7 +172,7 @@ internal enum class AppPaths(
         return path
     }
 
-    private object PathConst {
+    object PathConst {
         const val PROP_DATA_PATH = "bot.path.data"
         const val ENV_DATA_PATH = "BOT_DATA_PATH"
     }
@@ -208,8 +208,8 @@ private fun AppPaths.defaultInitializer() {
 }
 
 internal fun initialFiles() {
-    val configFilesNotInitialized = !AppPaths.DEFAULT_CONFIG_APPLICATION.file.exists()
-            && !AppPaths.DEFAULT_CONFIG_BOT.file.exists()
+    val configFilesNotInitialized = !AppPaths.CONFIG_APPLICATION.file.exists()
+            && !AppPaths.CONFIG_BOT.file.exists()
 
     for (path in AppPaths.values()) {
         path.initial()
@@ -241,7 +241,7 @@ private object GsonConst {
         .create()
 }
 
-internal fun loadAppConfig(configFile: File = AppPaths.DEFAULT_CONFIG_APPLICATION.file): AppConfig {
+internal fun loadAppConfig(configFile: File = AppPaths.CONFIG_APPLICATION.file): AppConfig {
     try {
         configFile.bufferedReader(StandardCharsets.UTF_8).use {
             return GsonConst.appConfigGson.fromJson(it, AppConfig::class.java)!!
@@ -252,7 +252,7 @@ internal fun loadAppConfig(configFile: File = AppPaths.DEFAULT_CONFIG_APPLICATIO
     }
 }
 
-internal fun loadBotConfig(botConfigFile: File = AppPaths.DEFAULT_CONFIG_BOT.file): Set<BotConfig>? {
+internal fun loadBotConfig(botConfigFile: File = AppPaths.CONFIG_BOT.file): Set<BotConfig>? {
     try {
         botConfigFile.bufferedReader(StandardCharsets.UTF_8).use {
             return GsonConst.botConfigGson.fromJson(it, object : TypeToken<Set<BotConfig>>() {}.type)!!
