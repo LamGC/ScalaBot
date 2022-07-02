@@ -114,7 +114,7 @@ internal enum class AppPaths(
     CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
-                GsonConst.botConfigGson.toJson(
+                GsonConst.appConfigGson.toJson(
                     AppConfig(
                         mavenRepositories = listOf(
                             MavenRepositoryConfig(
