@@ -238,6 +238,7 @@ private object GsonConst {
         .registerTypeAdapter(ProxyType::class.java, ProxyTypeSerializer)
         .registerTypeAdapter(BotConfig::class.java, BotConfigSerializer)
         .registerTypeAdapter(Artifact::class.java, ArtifactSerializer)
+        .registerTypeAdapter(BotAccount::class.java, BotAccountSerializer)
         .create()
 }
 

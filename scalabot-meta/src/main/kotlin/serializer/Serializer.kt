@@ -13,6 +13,7 @@ import org.eclipse.aether.util.repository.AuthenticationBuilder
 import java.lang.reflect.Type
 import java.net.MalformedURLException
 import java.net.URL
+import java.util.regex.Pattern
 
 object ProxyTypeSerializer : JsonDeserializer<ProxyType>,
     JsonSerializer<ProxyType> {
@@ -261,3 +262,39 @@ object BotConfigSerializer : JsonSerializer<BotConfig>, JsonDeserializer<BotConf
     }
 }
 
+object BotAccountSerializer : JsonDeserializer<BotAccount> {
+
+    private val tokenCheckRegex = Pattern.compile("\\d{9}:[a-zA-Z\\d_-]{35}")
+
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): BotAccount {
+        if (json == null || json.isJsonNull) {
+            throw JsonParseException("Missing `account` field.")
+        } else if (!json.isJsonObject) {
+            throw JsonParseException("Invalid `account` field type.")
+        }
+        val jsonObj = json.asJsonObject
+
+        val name = jsonObj.getPrimitiveValueOrThrow("name").asString
+        val token = jsonObj.getPrimitiveValueOrThrow("token").asString.let {
+            if (it.isEmpty()) {
+                throw JsonParseException("`token` cannot be empty.")
+            } else if (!tokenCheckRegex.matcher(it).matches()) {
+                throw JsonParseException("`token` is invalid.")
+            } else {
+                it
+            }
+        }
+        val creatorId = try {
+            jsonObj.getPrimitiveValueOrThrow("creatorId").asLong
+        } catch (e: NumberFormatException) {
+            throw JsonParseException("`creatorId` must be a number.")
+        }.apply {
+            if (this < 0) {
+                throw JsonParseException("`creatorId` must be a positive number.")
+            }
+        }
+
+        return BotAccount(name, token, creatorId)
+    }
+
+}

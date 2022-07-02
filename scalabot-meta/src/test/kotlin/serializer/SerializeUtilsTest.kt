@@ -692,3 +692,161 @@ internal class UsernameAuthenticatorSerializerTest {
     }
 
 }
+
+internal class BotAccountSerializerTest {
+
+    private val expectToken = "123456789:AAHErDroUTznQsOd_oZPJ6cQEj4Z5mGHO10"
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(BotAccount::class.java, BotAccountSerializer)
+        .create()
+
+    @Test
+    fun `Invalid json type check test`() {
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(null, null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonNull.INSTANCE, null, null)
+        }
+
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonPrimitive("A STRING"), null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonArray(), null, null)
+        }
+    }
+
+    @Test
+    fun `Field missing test`() {
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonObject(), null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonObject().apply {
+                addProperty("token", expectToken)
+                addProperty("creatorId", 1)
+            }, null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonObject().apply {
+                addProperty("name", "testUser")
+                addProperty("creatorId", 1)
+            }, null, null)
+        }
+        assertThrows(JsonParseException::class.java) {
+            BotAccountSerializer.deserialize(JsonObject().apply {
+                addProperty("name", "testUser")
+                addProperty("token", expectToken)
+            }, null, null)
+        }
+
+        val account = BotAccountSerializer.deserialize(JsonObject().apply {
+            addProperty("name", "testUser")
+            addProperty("token", expectToken)
+            addProperty("creatorId", 1)
+        }, null, null)
+        assertNotNull(account)
+        assertEquals("testUser", account.name)
+        assertEquals(expectToken, account.token)
+        assertEquals(1, account.creatorId)
+    }
+
+    @Test
+    fun `'token' check test`() {
+        val jsonObject = JsonObject().apply {
+            addProperty("name", "testUser")
+            addProperty("token", expectToken)
+            addProperty("creatorId", 1)
+        }
+
+        val looksGoodAccount = BotAccountSerializer.deserialize(jsonObject, null, null)
+
+        assertNotNull(looksGoodAccount)
+        assertEquals("testUser", looksGoodAccount.name)
+        assertEquals(expectToken, looksGoodAccount.token)
+        assertEquals(1, looksGoodAccount.creatorId)
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("token", "")
+            }, null, null)
+            fail("Token 为空，但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`token` cannot be empty.", e.message)
+        }
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("token", "abcdefghijklmnopqrstuvwxyz")
+            }, null, null)
+            fail("Token 格式错误（基本格式错误），但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`token` is invalid.", e.message)
+        }
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("token", "abcdefgh:ijklmnopqrstuvwxyz-1234567890_abcde")
+            }, null, null)
+            fail("Token 格式错误（ID 不为数字），但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`token` is invalid.", e.message)
+        }
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("token", "0123456789:ijklmnopqrstu-vwxyz_123456")
+            }, null, null)
+            fail("Token 格式错误（授权令牌长度错误），但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`token` is invalid.", e.message)
+        }
+    }
+
+    @Test
+    fun `'creatorId' check test`() {
+        val jsonObject = JsonObject().apply {
+            addProperty("name", "testUser")
+            addProperty("token", expectToken)
+            addProperty("creatorId", 1)
+        }
+
+        val looksGoodAccount = gson.fromJson(jsonObject, BotAccount::class.java)
+        assertEquals(1, looksGoodAccount.creatorId)
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("creatorId", "A STRING")
+            }, null, null)
+            fail("creatorId 不是一个数字，但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`creatorId` must be a number.", e.message)
+        }
+
+        try {
+            BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
+                addProperty("creatorId", -1)
+            }, null, null)
+            fail("creatorId 不能为负数，但是没有抛出异常。")
+        } catch (e: JsonParseException) {
+            assertEquals("`creatorId` must be a positive number.", e.message)
+        }
+    }
+
+    @Test
+    fun `json deserialize test`() {
+        val jsonObject = JsonObject().apply {
+            addProperty("name", "testUser")
+            addProperty("token", expectToken)
+            addProperty("creatorId", 1)
+        }
+
+        val looksGoodAccount = gson.fromJson(jsonObject, BotAccount::class.java)
+
+        assertNotNull(looksGoodAccount)
+        assertEquals("testUser", looksGoodAccount.name)
+        assertEquals(expectToken, looksGoodAccount.token)
+        assertEquals(1, looksGoodAccount.creatorId)
+    }
+}
