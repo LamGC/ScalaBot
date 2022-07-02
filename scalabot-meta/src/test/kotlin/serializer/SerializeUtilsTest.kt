@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import net.lamgc.scalabot.config.*
+import net.lamgc.scalabot.config.serializer.SerializeUtils.getPrimitiveValueOrThrow
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.repository.Authentication
@@ -12,54 +13,39 @@ import org.eclipse.aether.repository.AuthenticationContext
 import org.eclipse.aether.repository.Proxy
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertThrows
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 import java.lang.reflect.Type
 import java.net.URL
 import kotlin.test.*
 
-internal class SerializersKtTest {
-
-    private val instance: Any
-    private val method: Method
-
-    init {
-        val clazz = Class.forName("net.lamgc.scalabot.config.serializer.SerializerUtils")
-        method = clazz.getDeclaredMethod("checkJsonKey", JsonObject::class.java, String::class.java)
-        method.isAccessible = true
-        instance = clazz.getDeclaredField("INSTANCE").apply {
-            isAccessible = true
-        }.get(null)
-    }
-
-    private fun invoke(json: JsonObject, key: String): String {
-        try {
-            return method.invoke(instance, json, key) as String
-        } catch (e: InvocationTargetException) {
-            throw e.targetException
-        }
-    }
+internal class SerializeUtilsTest {
 
     @Test
-    fun `Json key checker test`() {
+    fun `getPrimitiveValueOrThrow test`() {
         assertThrows(JsonParseException::class.java) {
-            invoke(JsonObject(), "NOT_EXIST_KEY")
-        }
-        assertThrows(JsonParseException::class.java) {
-            invoke(JsonObject().apply { add("NULL_KEY", JsonNull.INSTANCE) }, "NULL_KEY")
-        }
-        assertThrows(JsonParseException::class.java) {
-            invoke(JsonObject().apply { add("ARRAY_KEY", JsonArray()) }, "ARRAY_KEY")
-        }
-        assertThrows(JsonParseException::class.java) {
-            invoke(JsonObject().apply { add("OBJECT_KEY", JsonObject()) }, "OBJECT_KEY")
+            JsonObject().getPrimitiveValueOrThrow("NOT_EXIST_KEY")
         }
 
-        val expectKey = "TEST"
-        val expectString = "testString"
-        val json = JsonObject().apply { addProperty(expectKey, expectString) }
+        assertThrows(JsonParseException::class.java) {
+            JsonObject().apply {
+                add("testKey", JsonArray())
+            }.getPrimitiveValueOrThrow("testKey")
+        }
+        assertThrows(JsonParseException::class.java) {
+            JsonObject().apply {
+                add("testKey", JsonObject())
+            }.getPrimitiveValueOrThrow("testKey")
+        }
+        assertThrows(JsonParseException::class.java) {
+            JsonObject().apply {
+                add("testKey", JsonNull.INSTANCE)
+            }.getPrimitiveValueOrThrow("testKey")
+        }
 
-        assertEquals(expectString, invoke(json, expectKey))
+        val expectKey = "STRING_KEY"
+        val expectValue = JsonPrimitive("A STRING")
+        assertEquals(expectValue, JsonObject()
+            .apply { add(expectKey, expectValue) }
+            .getPrimitiveValueOrThrow(expectKey))
     }
 }
 

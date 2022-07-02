@@ -3,6 +3,7 @@ package net.lamgc.scalabot.config.serializer
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import net.lamgc.scalabot.config.*
+import net.lamgc.scalabot.config.serializer.SerializeUtils.getPrimitiveValueOrThrow
 import org.eclipse.aether.artifact.AbstractArtifact
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
@@ -81,8 +82,8 @@ object AuthenticationSerializer : JsonDeserializer<Authentication> {
         if (json !is JsonObject) {
             throw JsonParseException("Unsupported JSON type.")
         }
-        val username = SerializerUtils.checkJsonKey(json, "username")
-        val password = SerializerUtils.checkJsonKey(json, "password")
+        val username = json.getPrimitiveValueOrThrow("username").asString
+        val password = json.getPrimitiveValueOrThrow("password").asString
         val builder = AuthenticationBuilder()
         builder.addUsername(username)
         builder.addPassword(password)
@@ -91,14 +92,14 @@ object AuthenticationSerializer : JsonDeserializer<Authentication> {
 
 }
 
-private object SerializerUtils {
-    fun checkJsonKey(json: JsonObject, key: String): String {
-        if (!json.has(key)) {
-            throw JsonParseException("Required field does not exist: $key")
-        } else if (!json.get(key).isJsonPrimitive) {
-            throw JsonParseException("Wrong field `$key` type: ${json.get(key)::class.java}")
+internal object SerializeUtils {
+
+    fun JsonObject.getPrimitiveValueOrThrow(fieldName: String): JsonPrimitive {
+        val value = get(fieldName) ?: throw JsonParseException("Missing `$fieldName` field.")
+        if (value !is JsonPrimitive) {
+            throw JsonParseException("Invalid `account` field type.")
         }
-        return json.get(key).asString
+        return value
     }
 }
 
@@ -114,7 +115,7 @@ object MavenRepositoryConfigSerializer
             is JsonObject -> {
                 MavenRepositoryConfig(
                     id = json.get("id")?.asString,
-                    url = URL(SerializerUtils.checkJsonKey(json, "url")),
+                    url = URL(json.getPrimitiveValueOrThrow("url").asString),
                     proxy = if (json.has("proxy"))
                         context.deserialize<Proxy>(
                             json.get("proxy"), Proxy::class.java
