@@ -264,7 +264,7 @@ object BotConfigSerializer : JsonSerializer<BotConfig>, JsonDeserializer<BotConf
 
 object BotAccountSerializer : JsonDeserializer<BotAccount> {
 
-    private val tokenCheckRegex = Pattern.compile("\\d{9}:[a-zA-Z\\d_-]{35}")
+    private val tokenCheckRegex = Pattern.compile("\\d+:[a-zA-Z\\d_-]{35}")
 
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): BotAccount {
         if (json == null || json.isJsonNull) {

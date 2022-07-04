@@ -757,7 +757,7 @@ internal class BotAccountSerializerTest {
         val jsonObject = JsonObject().apply {
             addProperty("name", "testUser")
             addProperty("token", expectToken)
-            addProperty("creatorId", 1)
+            addProperty("creatorId", 123456789123456789)
         }
 
         val looksGoodAccount = BotAccountSerializer.deserialize(jsonObject, null, null)
@@ -765,7 +765,7 @@ internal class BotAccountSerializerTest {
         assertNotNull(looksGoodAccount)
         assertEquals("testUser", looksGoodAccount.name)
         assertEquals(expectToken, looksGoodAccount.token)
-        assertEquals(1, looksGoodAccount.creatorId)
+        assertEquals(123456789123456789, looksGoodAccount.creatorId)
 
         try {
             BotAccountSerializer.deserialize(jsonObject.deepCopy().apply {
