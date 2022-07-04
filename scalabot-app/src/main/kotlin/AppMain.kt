@@ -1,5 +1,6 @@
 package net.lamgc.scalabot
 
+import com.google.gson.JsonParseException
 import io.prometheus.client.exporter.HTTPServer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -110,22 +111,39 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
 
     @Synchronized
     fun launch(): Boolean {
-        val botConfigs = loadBotConfig() ?: return false
-        if (botConfigs.isEmpty()) {
+        val botConfigs = loadBotConfigJson() ?: return false
+        if (botConfigs.isEmpty) {
             log.warn { "尚未配置任何机器人, 请先配置机器人后再启动本程序." }
             return false
-        } else if (botConfigs.none { it.enabled }) {
-            log.warn { "配置文件中没有已启用的机器人, 请至少启用一个机器人." }
-            return false
         }
-        for (botConfig in botConfigs) {
+        var launchedCounts = 0
+        for (botConfigJson in botConfigs) {
+            val botConfig = try {
+                GsonConst.botConfigGson.fromJson(botConfigJson, BotConfig::class.java)
+            } catch (e: JsonParseException) {
+                val botName = try {
+                    botConfigJson.asJsonObject.get("account")?.asJsonObject?.get("name")?.asString ?: "Unknown"
+                } catch (e: Exception) {
+                    "Unknown"
+                }
+                log.error(e) { "机器人 `$botName` 配置有误, 跳过该机器人的启动." }
+                continue
+            }
+
             try {
                 launchBot(botConfig)
+                launchedCounts++
             } catch (e: Exception) {
                 log.error(e) { "机器人 `${botConfig.account.name}` 启动时发生错误." }
             }
         }
-        return true
+        return if (launchedCounts != 0) {
+            log.info { "已启动 $launchedCounts 个机器人." }
+            true
+        } else {
+            log.warn { "未启动任何机器人, 请检查配置并至少启用一个机器人." }
+            false
+        }
     }
 
     private fun launchBot(botConfig: BotConfig) {

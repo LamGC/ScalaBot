@@ -3,7 +3,7 @@ package net.lamgc.scalabot
 import ch.qos.logback.core.PropertyDefinerBase
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
+import com.google.gson.JsonArray
 import mu.KotlinLogging
 import net.lamgc.scalabot.config.*
 import net.lamgc.scalabot.config.serializer.*
@@ -221,8 +221,8 @@ internal fun initialFiles() {
     }
 }
 
-private object GsonConst {
-    val baseGson: Gson = GsonBuilder()
+internal object GsonConst {
+    private val baseGson: Gson = GsonBuilder()
         .setPrettyPrinting()
         .serializeNulls()
         .create()
@@ -253,10 +253,10 @@ internal fun loadAppConfig(configFile: File = AppPaths.CONFIG_APPLICATION.file):
     }
 }
 
-internal fun loadBotConfig(botConfigFile: File = AppPaths.CONFIG_BOT.file): Set<BotConfig>? {
+internal fun loadBotConfigJson(botConfigFile: File = AppPaths.CONFIG_BOT.file): JsonArray? {
     try {
         botConfigFile.bufferedReader(StandardCharsets.UTF_8).use {
-            return GsonConst.botConfigGson.fromJson(it, object : TypeToken<Set<BotConfig>>() {}.type)!!
+            return GsonConst.botConfigGson.fromJson(it, JsonArray::class.java)!!
         }
     } catch (e: Exception) {
         log.error(e) { "读取 Bot 配置文件 (bot.json) 时发生错误, 请检查配置格式是否正确." }
