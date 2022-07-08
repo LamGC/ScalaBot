@@ -14,6 +14,18 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
+/**
+ * 扩展加载器.
+ *
+ * 扩展加载器并非负责加载扩展的 Class, 而是委派搜索器发现并获取扩展, 然后加载扩展实例.
+ *
+ * 注意, 扩展加载器将内置两个 Finder: [FileNameFinder] 和 [MavenMetaInformationFinder].
+ *
+ * @param bot 扩展加载器所负责的 ScalaBot 实例.
+ * @param extensionsDataFolder 提供给扩展用于数据存储的根目录(实际目录为 `{root}/{group...}/{artifact}`).
+ * @param extensionsPath 提供给 Finder 用于搜索扩展的本地扩展包存放路径.
+ * @param extensionFinders 加载器所使用的搜索器集合. 加载扩展时将使用所提供的的加载器.
+ */
 internal class ExtensionLoader(
     private val bot: ScalaBot,
     private val extensionsDataFolder: File = AppPaths.DATA_EXTENSIONS.file,
@@ -27,6 +39,13 @@ internal class ExtensionLoader(
         MavenMetaInformationFinder
     ).apply { addAll(extensionFinders) }.toSet()
 
+    /**
+     * 加载扩展, 并返回扩展项.
+     *
+     * 调用本方法后, 将会指派提供的 Finder 搜索 ScalaBot 配置的扩展包.
+     *
+     * @return 返回存放了所有已加载扩展项的 Set. 可通过 [LoadedExtensionEntry] 获取扩展的有关信息.
+     */
     fun getExtensions(): Set<LoadedExtensionEntry> {
         val extensionEntries = mutableSetOf<LoadedExtensionEntry>()
         for (extensionArtifact in bot.extensions) {
@@ -52,6 +71,17 @@ internal class ExtensionLoader(
 
     /**
      * 检查是否发生冲突.
+     *
+     * 扩展包冲突有两种情况:
+     * 1. 有多个同为最高优先级的搜索器搜索到了扩展包.
+     * 2. 唯一的最高优先级搜索器搜索到了多个扩展包.
+     *
+     * 扩展包冲突指的是**有多个具有相同构件坐标的扩展包被搜索到**,
+     * 如果不顾扩展包冲突直接加载的话, 将会出现安全隐患,
+     * 因此在加载器发现冲突的情况下将输出相关信息, 提示用户进行排查.
+     *
+     * @param foundResult 扩展包搜索结果.
+     *
      * @return 如果出现冲突, 返回 `true`.
      */
     private fun checkConflict(foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Boolean {
@@ -68,6 +98,9 @@ internal class ExtensionLoader(
         }
     }
 
+    /**
+     * 从结果中过滤出由最高优先级的搜索器搜索到的扩展包.
+     */
     private fun filterHighPriorityResult(foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>)
             : Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
         val finders: List<ExtensionPackageFinder> = foundResult.keys
@@ -102,6 +135,11 @@ internal class ExtensionLoader(
         return factories.toSet()
     }
 
+    /**
+     * 只是用来统计扩展包搜索结果的数量而已.
+     *
+     * @return 返回扩展包的数量.
+     */
     private fun allFoundedPackageNumber(filesMap: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>): Int {
         var number = 0
         for (files in filesMap.values) {
@@ -110,6 +148,14 @@ internal class ExtensionLoader(
         return number
     }
 
+    /**
+     * 搜索指定构件坐标的依赖包.
+     *
+     * 搜索扩展包将根据搜索器优先级从高到低依次搜索, 当某一个优先级的搜索器搜到扩展包后将停止搜索.
+     * 可以根据不同优先级的搜索器, 配置扩展包的主用与备用文件.
+     *
+     * @return 返回各个搜索器返回的搜索结果.
+     */
     private fun findExtensionPackage(
         extensionArtifact: Artifact,
     ): Map<ExtensionPackageFinder, Set<FoundExtensionPackage>> {
@@ -138,9 +184,16 @@ internal class ExtensionLoader(
         return result
     }
 
+    /**
+     * 检查扩展包搜索器是否设置了 [FinderRules] 注解.
+     * @return 如果已设置注解, 则返回 `true`.
+     */
     private fun checkExtensionPackageFinder(finder: ExtensionPackageFinder): Boolean =
         finder::class.java.getDeclaredAnnotation(FinderRules::class.java) != null
 
+    /**
+     * 在日志中输出有关扩展包冲突的错误信息.
+     */
     private fun printExtensionFileConflictError(
         extensionArtifact: Artifact,
         foundResult: Map<ExtensionPackageFinder, Set<FoundExtensionPackage>>
@@ -165,6 +218,11 @@ internal class ExtensionLoader(
         }
     }
 
+    /**
+     * 创建扩展数据目录, 并返回 [File] 对象.
+     * @param extensionArtifact 扩展包构件坐标.
+     * @return 返回对应的数据存储目录.
+     */
     private fun getExtensionDataFolder(extensionArtifact: Artifact): File {
         val dataFolder =
             File(extensionsDataFolder, "${extensionArtifact.groupId}/${extensionArtifact.artifactId}")
@@ -174,6 +232,12 @@ internal class ExtensionLoader(
         return dataFolder
     }
 
+    /**
+     * 已加载扩展项.
+     * @property extensionArtifact 扩展的构件坐标([Artifact]).
+     * @property factoryClass 扩展的工厂类.
+     * @property extension 扩展实例.
+     */
     data class LoadedExtensionEntry(
         val extensionArtifact: Artifact,
         val factoryClass: Class<out BotExtensionFactory>,
@@ -183,6 +247,10 @@ internal class ExtensionLoader(
 }
 
 /**
+ * 扩展的类加载器清除器.
+ *
+ * 原计划是用来通过关闭 ClassLoader 来卸载扩展的, 但似乎并没有这么做.
+ *
  * 该类为保留措施, 尚未启用.
  */
 internal object ExtensionClassLoaderCleaner {
@@ -259,7 +327,7 @@ internal interface ExtensionPackageFinder {
 
 /**
  * 已找到的扩展包信息.
- * 通过实现该接口, 以寻找远端文件的 [ExtensionPackageFinder]
+ * 通过实现该接口, 以寻找远端文件的 [ExtensionPackageFinder];
  * 可以在适当的时候将扩展包下载到本地, 而无需在搜索阶段下载扩展包.
  */
 internal interface FoundExtensionPackage {
@@ -298,6 +366,7 @@ private fun FoundExtensionPackage.createClassLoader(): ExtensionClassLoader =
  * 已找到的扩展包文件.
  * @param artifact 扩展包构件坐标.
  * @param file 已找到的扩展包文件.
+ * @param finder 搜索到该扩展包的搜索器.
  */
 internal class FileFoundExtensionPackage(
     private val artifact: Artifact,
