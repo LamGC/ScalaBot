@@ -18,7 +18,6 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.system.exitProcess
 
 private val log = KotlinLogging.logger { }
 
@@ -207,7 +206,12 @@ private fun AppPaths.defaultInitializer() {
     }
 }
 
-internal fun initialFiles() {
+/**
+ * 执行 AppPaths 所有项目的初始化, 并检查是否停止运行, 让用户编辑配置.
+ *
+ * @return 如果需要让用户编辑配置, 则返回 `true`.
+ */
+internal fun initialFiles(): Boolean {
     val configFilesNotInitialized = !AppPaths.CONFIG_APPLICATION.file.exists()
             && !AppPaths.CONFIG_BOT.file.exists()
 
@@ -217,8 +221,9 @@ internal fun initialFiles() {
 
     if (configFilesNotInitialized) {
         log.warn { "配置文件已初始化, 请根据需要修改配置文件后重新启动本程序." }
-        exitProcess(1)
+        return true
     }
+    return false
 }
 
 internal object GsonConst {
