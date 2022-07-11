@@ -167,6 +167,21 @@ internal enum class AppPaths(
         }
     }
 
+    /**
+     * 一个内部方法, 用于将 [initialized] 状态重置.
+     *
+     * 如果不重置该状态, 将使得单元测试无法让 AppPath 重新初始化文件.
+     *
+     * 警告: 该方法不应该被非测试代码调用.
+     */
+    @Suppress("unused")
+    private fun reset() {
+        log.warn {
+            "初始化状态已重置: `${this.name}`, 如果在非测试环境中重置状态, 请报告该问题."
+        }
+        initialized.set(false)
+    }
+
     override fun toString(): String {
         return path
     }
