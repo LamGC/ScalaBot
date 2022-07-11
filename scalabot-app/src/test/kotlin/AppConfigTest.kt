@@ -16,6 +16,7 @@ import java.io.IOException
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.deleteExisting
 import kotlin.test.*
 
 internal class AppPathsTest {
@@ -319,6 +320,7 @@ internal class AppPathsTest {
         }
 
         val fullInitializeDir = Files.createTempDirectory(testDir, "fullInitialize")
+        fullInitializeDir.deleteExisting()
         System.setProperty(AppPaths.PathConst.PROP_DATA_PATH, fullInitializeDir.toString())
         assertEquals(fullInitializeDir.toString(), AppPaths.DATA_ROOT.path, "测试路径设定失败.")
 
@@ -376,8 +378,19 @@ internal class AppPathsTest {
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")
             }
-            path.reset()
         }
+
+        AppPaths.CONFIG_APPLICATION.file.writeText("Test-APPLICATION")
+        AppPaths.CONFIG_BOT.file.writeText("Test-BOT")
+        assertFalse(initialFiles(), "方法试图在部分配置已初始化的情况下提醒用户编辑初始配置文件.")
+        assertEquals(
+            "Test-APPLICATION", AppPaths.CONFIG_APPLICATION.file.readText(),
+            "config.json 被覆盖. initialized 并未阻止重复初始化."
+        )
+        assertEquals(
+            "Test-BOT", AppPaths.CONFIG_BOT.file.readText(),
+            "bot.json 被覆盖. initialized 并未阻止重复初始化."
+        )
 
         System.getProperties().remove(AppPaths.PathConst.PROP_DATA_PATH)
     }
