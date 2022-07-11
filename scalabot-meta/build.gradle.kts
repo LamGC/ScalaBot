@@ -8,12 +8,12 @@ plugins {
 
 dependencies {
     val aetherVersion = "1.1.0"
-    implementation("org.eclipse.aether:aether-api:$aetherVersion")
+    api("org.eclipse.aether:aether-api:$aetherVersion")
     implementation("org.eclipse.aether:aether-util:$aetherVersion")
 
     implementation("org.telegram:telegrambots-meta:6.0.1")
 
-    implementation("com.google.code.gson:gson:2.9.0")
+    api("com.google.code.gson:gson:2.9.0")
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.12.4")
