@@ -72,8 +72,16 @@ enum class ProxyType {
 data class ProxyConfig(
     val type: ProxyType = ProxyType.NO_PROXY,
     val host: String = "127.0.0.1",
-    val port: Int = 1080
-)
+    val port: Int = 1080,
+) {
+    override fun toString(): String {
+        return if (type != ProxyType.NO_PROXY) {
+            "$type://$host:$port"
+        } else {
+            "NO_PROXY"
+        }
+    }
+}
 
 /**
  * ScalaBot 的运行指标公开配置.
