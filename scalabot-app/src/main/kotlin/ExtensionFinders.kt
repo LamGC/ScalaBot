@@ -257,29 +257,34 @@ internal class MavenRepositoryExtensionFinder(
     }
 
     override fun findByArtifact(extensionArtifact: Artifact, extensionsPath: File): Set<FoundExtensionPackage> {
+        val repositories = repositorySystem.newResolutionRepositories(repoSystemSession, remoteRepositories).toList()
         log.debug {
             StringBuilder().apply {
                 append("构件 $extensionArtifact 将在以下仓库拉取: \n")
-                remoteRepositories.forEach {
-                    append("\t- ${it}\n")
+                repositories.forEach {
+                    append("\t- $it\n")
                 }
             }
         }
+
         val extensionArtifactResult = repositorySystem.resolveArtifact(
             repoSystemSession,
             ArtifactRequest(
                 extensionArtifact,
-                repositorySystem.newResolutionRepositories(repoSystemSession, remoteRepositories),
+                repositories,
                 null
             )
         )
-        val extResolvedArtifact = extensionArtifactResult.artifact
+        val resolvedArtifact: Artifact? = extensionArtifactResult.artifact
         if (!extensionArtifactResult.isResolved) {
             if (extensionArtifactResult.isMissing) {
                 log.warn { "在指定的仓库中找不到构件: ${extensionArtifactResult.artifact}" }
             } else {
                 printArtifactResultExceptions(extensionArtifactResult.exceptions)
             }
+            return emptySet()
+        } else if (resolvedArtifact == null) {
+            log.warn { "无法在指定的仓库中解析构件: $extensionArtifact" }
             return emptySet()
         }
 
@@ -290,14 +295,14 @@ internal class MavenRepositoryExtensionFinder(
         }
 
         val request = DependencyRequest(
-            CollectRequest(Dependency(extResolvedArtifact, null), remoteRepositories),
+            CollectRequest(Dependency(resolvedArtifact, null), repositories),
             ScopeDependencyFilter(setOf("runtime", "compile", "provided"), null)
         )
         val dependencyResult = repositorySystem.resolveDependencies(repoSystemSession, request)
         val dependencies = checkAndCollectDependencyArtifacts(extensionArtifact, dependencyResult.artifactResults)
             ?: return emptySet()
 
-        return setOf(MavenExtensionPackage(this, extResolvedArtifact, extensionArtifactResult.repository, dependencies))
+        return setOf(MavenExtensionPackage(this, resolvedArtifact, extensionArtifactResult.repository, dependencies))
     }
 
     private fun checkAndCollectDependencyArtifacts(
