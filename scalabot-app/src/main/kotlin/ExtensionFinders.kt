@@ -283,6 +283,12 @@ internal class MavenRepositoryExtensionFinder(
             return emptySet()
         }
 
+        log.info {
+            "已从 Maven 仓库 `${extensionArtifactResult.repository.id}` 中找到" +
+                    "扩展包 `${resolvedArtifact.groupId}:${resolvedArtifact.artifactId}` " +
+                    "版本号 `${resolvedArtifact.version}`."
+        }
+
         val request = DependencyRequest(
             CollectRequest(Dependency(extResolvedArtifact, null), remoteRepositories),
             ScopeDependencyFilter(setOf("runtime", "compile", "provided"), null)
