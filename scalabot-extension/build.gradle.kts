@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    api("org.telegram:telegrambots-abilities:6.0.1")
+    api("org.telegram:telegrambots-abilities:6.1.0")
     api("org.slf4j:slf4j-api:1.7.36")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")

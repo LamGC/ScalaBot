@@ -29,8 +29,8 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:6.0.1")
-    implementation("org.telegram:telegrambots:6.0.1")
+    implementation("org.telegram:telegrambots-abilities:6.1.0")
+    implementation("org.telegram:telegrambots:6.1.0")
 
     implementation("io.prometheus:simpleclient:0.15.0")
     implementation("io.prometheus:simpleclient_httpserver:0.15.0")
