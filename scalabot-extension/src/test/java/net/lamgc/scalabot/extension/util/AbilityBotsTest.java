@@ -16,8 +16,8 @@ import static org.mockito.Mockito.*;
 
 public class AbilityBotsTest {
 
-    public static final User USER = new User(1L, "first", false, "last", "username", null, false, false, false);
-    public static final User CREATOR = new User(1337L, "creatorFirst", false, "creatorLast", "creatorUsername", null, false, false, false);
+    public static final User USER = new User(1L, "first", false, "last", "username", null, false, false, false, false, false);
+    public static final User CREATOR = new User(1337L, "creatorFirst", false, "creatorLast", "creatorUsername", null, false, false, false, false, false);
 
     static Update mockFullUpdate(BaseAbilityBot bot, User user, String args) {
         bot.users().put(USER.getId(), USER);
@@ -56,8 +56,8 @@ public class AbilityBotsTest {
 
     @Test
     void cancelReplyStateTest() {
-        User userA = new User(10001L, "first", false, "last", "username", null, false, false, false);
-        User userB = new User(10101L, "first", false, "last", "username", null, false, false, false);
+        User userA = new User(10001L, "first", false, "last", "username", null, false, false, false, false, false);
+        User userB = new User(10101L, "first", false, "last", "username", null, false, false, false, false, false);
         SilentSender silent = mock(SilentSender.class);
         BaseAbilityBot bot = new TestingAbilityBot("", "", silent);
         bot.onRegister();
@@ -94,6 +94,7 @@ public class AbilityBotsTest {
             this.silent = silentSender;
         }
 
+        @SuppressWarnings("unused")
         public Ability setReply() {
             return Ability.builder()
                     .name("set_reply")
