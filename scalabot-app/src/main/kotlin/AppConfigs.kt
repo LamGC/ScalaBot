@@ -40,13 +40,28 @@ internal fun ProxyConfig.toAetherProxy(): Proxy? {
     return Proxy(typeStr, host, port)
 }
 
-internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig): RemoteRepository {
-    val builder =
-        RemoteRepository.Builder(id ?: createDefaultRepositoryId(), checkRepositoryLayout(layout), url.toString())
+internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig? = null): RemoteRepository {
+    val repositoryId = if (id == null) {
+        val generatedRepoId = createDefaultRepositoryId()
+        log.debug { "仓库 Url `$url` 未设置仓库 Id, 已分配缺省 Id: $generatedRepoId" }
+        generatedRepoId
+    } else {
+        id
+    }
+    val builder = RemoteRepository.Builder(repositoryId, checkRepositoryLayout(layout), url.toString())
     if (proxy != null) {
-        builder.setProxy(proxy)
-    } else if (proxyConfig.type == ProxyType.HTTP) {
-        builder.setProxy(proxyConfig.toAetherProxy())
+        val selfProxy = proxy!!
+        builder.setProxy(selfProxy)
+        log.debug { "仓库 $repositoryId 已使用独立的代理配置: ${selfProxy.type}://${selfProxy.host}:${selfProxy.port}" }
+    } else if (proxyConfig != null) {
+        if (proxyConfig.type in (ProxyType.HTTP..ProxyType.HTTPS)) {
+            builder.setProxy(proxyConfig.toAetherProxy())
+            log.debug { "仓库 $repositoryId 已使用 全局/Bot 代理配置: $proxyConfig" }
+        } else {
+            log.debug { "仓库 $repositoryId 不支持 全局/Bot 的代理配置: `$proxyConfig` (仅支持 HTTP 和 HTTPS)" }
+        }
+    } else {
+        log.debug { "仓库 $repositoryId 不使用代理." }
     }
 
     builder.setReleasePolicy(

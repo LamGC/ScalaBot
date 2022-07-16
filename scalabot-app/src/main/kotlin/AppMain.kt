@@ -4,10 +4,7 @@ import com.google.gson.JsonParseException
 import io.prometheus.client.exporter.HTTPServer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import net.lamgc.scalabot.config.AppConfig
-import net.lamgc.scalabot.config.BotConfig
-import net.lamgc.scalabot.config.MetricsConfig
-import net.lamgc.scalabot.config.ProxyType
+import net.lamgc.scalabot.config.*
 import net.lamgc.scalabot.util.registerShutdownHook
 import org.eclipse.aether.repository.LocalRepository
 import org.telegram.telegrambots.bots.DefaultBotOptions
@@ -154,16 +151,20 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
             return
         }
         log.info { "正在启动机器人 `${botConfig.account.name}`..." }
+        val proxyConfig =
+            if (botConfig.proxy.type != ProxyType.NO_PROXY) {
+                log.debug { "[Bot ${botConfig.account.name}] 使用独立代理: ${botConfig.proxy.type}" }
+                botConfig.proxy
+            } else if (config.proxy.type != ProxyType.NO_PROXY) {
+                log.debug { "[Bot ${botConfig.account.name}] 使用全局代理: ${botConfig.proxy.type}" }
+                config.proxy
+            } else {
+                log.debug { "[Bot ${botConfig.account.name}] 不使用代理." }
+                ProxyConfig(type = ProxyType.NO_PROXY)
+            }
+
         val botOption = DefaultBotOptions().apply {
-            val proxyConfig =
-                if (botConfig.proxy.type != ProxyType.NO_PROXY) {
-                    botConfig.proxy
-                } else if (config.proxy.type != ProxyType.NO_PROXY) {
-                    config.proxy
-                } else {
-                    null
-                }
-            if (proxyConfig != null) {
+            if (proxyConfig.type != ProxyType.NO_PROXY) {
                 proxyType = proxyConfig.type.toTelegramBotsType()
                 proxyHost = config.proxy.host
                 proxyPort = config.proxy.port
@@ -175,7 +176,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
         val account = botConfig.account
 
         val remoteRepositories = config.mavenRepositories
-            .map { it.toRemoteRepository(config.proxy) }
+            .map { it.toRemoteRepository(proxyConfig) }
             .toMutableList().apply {
                 if (this.none {
                         it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL
