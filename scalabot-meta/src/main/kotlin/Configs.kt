@@ -28,6 +28,13 @@ data class BotAccount(
 
 /**
  * 机器人配置.
+ *
+ * 使用 Gson 解析时, 请添加以下类型适配器:
+ * - [net.lamgc.scalabot.config.serializer.ProxyTypeSerializer]
+ * - [net.lamgc.scalabot.config.serializer.BotConfigSerializer]
+ * - [net.lamgc.scalabot.config.serializer.BotAccountSerializer]
+ * - [net.lamgc.scalabot.config.serializer.ArtifactSerializer]
+ *
  * @property enabled 是否启用机器人.
  * @property account 机器人帐号信息, 用于访问 API.
  * @property disableBuiltInAbility 是否禁用 AbilityBot 自带命令.
@@ -126,6 +133,13 @@ data class MavenRepositoryConfig(
  * ScalaBot App 配置.
  *
  * App 配置信息与 BotConfig 分开, 分别存储在各自单独的文件中.
+ *
+ * 使用 Gson 解析时, 请添加以下类型适配器:
+ * - [net.lamgc.scalabot.config.serializer.ProxyTypeSerializer]
+ * - [net.lamgc.scalabot.config.serializer.MavenRepositoryConfigSerializer]
+ * - [net.lamgc.scalabot.config.serializer.AuthenticationSerializer]
+ * - [net.lamgc.scalabot.config.serializer.UsernameAuthenticatorSerializer]
+ *
  * @property proxy Telegram API 代理配置.
  * @property metrics 运行指标数据配置. 可通过时序数据库记录运行数据.
  * @property mavenRepositories Maven 远端仓库配置.
