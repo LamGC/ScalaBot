@@ -182,7 +182,7 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
                         it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL
                                 || it.url == MavenRepositoryExtensionFinder.MAVEN_CENTRAL_URL.trimEnd('/')
                     }) {
-                    add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = config.proxy.toAetherProxy()))
+                    add(MavenRepositoryExtensionFinder.getMavenCentralRepository(proxy = proxyConfig.toAetherProxy()))
                 }
             }.toList()
         val extensionPackageFinders = setOf(
