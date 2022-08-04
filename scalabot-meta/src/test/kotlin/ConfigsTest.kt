@@ -219,6 +219,12 @@ internal class ProxyConfigTest {
         assertEquals(8080, actualConfig.port)
         assertEquals(ProxyType.HTTP, actualConfig.type)
     }
+
+    @Test
+    fun `toString test`() {
+        assertEquals("NO_PROXY", ProxyConfig(ProxyType.NO_PROXY).toString())
+        assertEquals("HTTP://example.org:1008", ProxyConfig(ProxyType.HTTP, "example.org", 1008).toString())
+    }
 }
 
 internal class MetricsConfigTest {
