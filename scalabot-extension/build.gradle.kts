@@ -31,6 +31,11 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
 publishing {
     repositories {
         if (project.version.toString().endsWith("-SNAPSHOT")) {

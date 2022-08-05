@@ -36,6 +36,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }

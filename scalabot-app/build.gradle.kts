@@ -56,3 +56,8 @@ application {
 tasks.jar.configure {
     exclude("**/logback-test.xml")
 }
+
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
