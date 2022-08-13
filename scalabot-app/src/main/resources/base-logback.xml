@@ -24,7 +24,7 @@
     <appender name="FILE_OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${DATA_LOGS}/latest.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>data/logs/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>${DATA_LOGS}/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
