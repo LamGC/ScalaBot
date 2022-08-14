@@ -413,14 +413,14 @@ internal class ExtensionClassLoader(urls: Array<URL>, dependencyLoader: ClassLoa
     // 以免使用了不来自扩展包的机器人扩展.
 
     override fun getResources(name: String?): Enumeration<URL> {
-        if (BotExtensionFactory::class.java.equals(name)) {
+        if ("META-INF/services/${BotExtensionFactory::class.java.name}" == name) {
             return findResources(name)
         }
         return super.getResources(name)
     }
 
     override fun getResource(name: String?): URL? {
-        if (BotExtensionFactory::class.java.equals(name)) {
+        if ("META-INF/services/${BotExtensionFactory::class.java}" == name) {
             return findResource(name)
         }
         return super.getResource(name)
