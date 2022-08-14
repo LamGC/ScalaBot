@@ -17,7 +17,8 @@ import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Supplier
+import kotlin.reflect.KProperty
 
 private val log = KotlinLogging.logger { }
 
@@ -102,9 +103,9 @@ private fun createDefaultRepositoryId(): String {
  * 必须提供 `pathSupplier` 或 `fileSupplier` 其中一个, 才能正常提供路径.
  */
 internal enum class AppPaths(
-    private val pathSupplier: () -> String = { fileSupplier.invoke().canonicalPath },
+    private val pathSupplier: PathSupplier,
     private val initializer: AppPaths.() -> Unit = AppPaths::defaultInitializer,
-    private val fileSupplier: () -> File = { File(pathSupplier()) }
+    private val fileSupplier: FileSupplier,
 ) {
     /**
      * 数据根目录.
@@ -113,7 +114,7 @@ internal enum class AppPaths(
      *
      * 提示: 结尾不带 `/`.
      */
-    DATA_ROOT(fileSupplier = {
+    DATA_ROOT(fileSupplier = FileSupplier {
         File(
             System.getProperty(PathConst.PROP_DATA_PATH) ?: System.getenv(PathConst.ENV_DATA_PATH)
             ?: System.getProperty("user.dir") ?: "."
@@ -125,7 +126,7 @@ internal enum class AppPaths(
         }
     }),
 
-    CONFIG_APPLICATION({ "$DATA_ROOT/config.json" }, {
+    CONFIG_APPLICATION(PathSupplier { "$DATA_ROOT/config.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.appConfigGson.toJson(
@@ -141,7 +142,7 @@ internal enum class AppPaths(
             }
         }
     }),
-    CONFIG_BOT({ "$DATA_ROOT/bot.json" }, {
+    CONFIG_BOT(PathSupplier { "$DATA_ROOT/bot.json" }, {
         if (!file.exists()) {
             file.bufferedWriter(StandardCharsets.UTF_8).use {
                 GsonConst.botConfigGson.toJson(
@@ -167,10 +168,25 @@ internal enum class AppPaths(
     TEMP({ "$DATA_ROOT/tmp/" })
     ;
 
-    val file: File
-        get() = fileSupplier.invoke()
-    val path: String
-        get() = pathSupplier.invoke()
+    constructor(pathSupplier: PathSupplier, initializer: AppPaths.() -> Unit = AppPaths::defaultInitializer) : this(
+        fileSupplier = FileSupplier { File(pathSupplier.path).canonicalFile },
+        pathSupplier = pathSupplier,
+        initializer = initializer
+    )
+
+    constructor(fileSupplier: FileSupplier, initializer: AppPaths.() -> Unit = AppPaths::defaultInitializer) : this(
+        fileSupplier = fileSupplier,
+        pathSupplier = PathSupplier { fileSupplier.file.canonicalPath },
+        initializer = initializer
+    )
+
+    constructor(pathSupplier: () -> String) : this(
+        fileSupplier = FileSupplier { File(pathSupplier.invoke()).canonicalFile },
+        pathSupplier = PathSupplier { pathSupplier.invoke() }
+    )
+
+    val file: File by fileSupplier
+    val path: String by pathSupplier
 
     private val initialized = AtomicBoolean(false)
 
@@ -204,6 +220,20 @@ internal enum class AppPaths(
     object PathConst {
         const val PROP_DATA_PATH = "bot.path.data"
         const val ENV_DATA_PATH = "BOT_DATA_PATH"
+    }
+
+    private class FileSupplier(private val supplier: Supplier<File>) {
+        operator fun getValue(appPaths: AppPaths, property: KProperty<*>): File = supplier.get()
+
+        val file: File
+            get() = supplier.get()
+    }
+
+    private class PathSupplier(private val supplier: Supplier<String>) {
+        operator fun getValue(appPaths: AppPaths, property: KProperty<*>): String = supplier.get()
+
+        val path: String
+            get() = supplier.get()
     }
 
 }

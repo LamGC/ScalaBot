@@ -22,6 +22,17 @@ import kotlin.test.*
 internal class AppPathsTest {
 
     @Test
+    fun `Consistency check`() {
+        for (path in AppPaths.values()) {
+            assertEquals(
+                File(path.path).canonicalPath,
+                path.file.canonicalPath,
+                "路径 File 与 Path 不一致: ${path.name}"
+            )
+        }
+    }
+
+    @Test
     fun `Data root path priority`() {
         System.setProperty(AppPaths.PathConst.PROP_DATA_PATH, "fromSystemProperties")
 
