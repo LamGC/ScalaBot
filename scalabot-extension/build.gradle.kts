@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     java
+    jacoco
     `maven-publish`
     signing
 }
@@ -29,6 +30,11 @@ java {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
