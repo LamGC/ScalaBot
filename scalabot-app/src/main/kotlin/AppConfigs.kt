@@ -1,6 +1,7 @@
 package net.lamgc.scalabot
 
 import ch.qos.logback.core.PropertyDefinerBase
+import com.google.common.net.InternetDomainName
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
@@ -15,6 +16,7 @@ import org.eclipse.aether.repository.RepositoryPolicy
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.io.File
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Supplier
@@ -43,7 +45,7 @@ internal fun ProxyConfig.toAetherProxy(): Proxy? {
 
 internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig? = null): RemoteRepository {
     val repositoryId = if (id == null) {
-        val generatedRepoId = createDefaultRepositoryId()
+        val generatedRepoId = createDefaultRepositoryId(url)
         log.debug { "仓库 Url `$url` 未设置仓库 Id, 已分配缺省 Id: $generatedRepoId" }
         generatedRepoId
     } else {
@@ -91,10 +93,11 @@ private fun checkRepositoryLayout(layoutType: String): String {
     return type
 }
 
-private val repoNumberGenerator = AtomicInteger(1)
-
-private fun createDefaultRepositoryId(): String {
-    return "Repository-${repoNumberGenerator.getAndIncrement()}"
+private fun createDefaultRepositoryId(url: URL): String {
+    val topPrivateDomain = InternetDomainName.from(url.host).topPrivateDomain().toString()
+    return "Repository-${URLEncoder.encode(topPrivateDomain, StandardCharsets.UTF_8)}-${
+        url.toString().hashCode().toString(16)
+    }"
 }
 
 /**
