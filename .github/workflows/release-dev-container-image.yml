@@ -1,4 +1,4 @@
-name: Build container image
+name: Build development version container image
 
 on:
   push:
