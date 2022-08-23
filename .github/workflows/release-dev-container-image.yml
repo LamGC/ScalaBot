@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    timeout-minutes: 8
+    timeout-minutes: 15
     runs-on: ubuntu-latest
 
     steps:
