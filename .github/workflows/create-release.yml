@@ -10,6 +10,9 @@ on:
 # 2. 创建 Release, 并标记为 Draft(草稿);
 # 3. 上传 Application 发行包;
 
+permissions:
+  contents: write
+
 jobs:
   build:
     timeout-minutes: 10
