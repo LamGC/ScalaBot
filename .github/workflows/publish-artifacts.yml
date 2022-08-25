@@ -1,4 +1,4 @@
-name: Release container image
+name: Publish artifacts
 
 on:
   release:
@@ -9,7 +9,7 @@ env:
   IMAGE_NAME: lamgc/scalabot
 
 jobs:
-  release-image:
+  publish-container-image:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
