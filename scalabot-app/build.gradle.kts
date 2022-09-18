@@ -10,9 +10,9 @@ dependencies {
     implementation(project(":scalabot-meta"))
     implementation(project(":scalabot-extension"))
 
-    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("org.slf4j:slf4j-api:2.0.0")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
+    implementation("ch.qos.logback:logback-classic:1.4.0")
 
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
@@ -23,7 +23,7 @@ dependencies {
     implementation("org.eclipse.aether:aether-connector-basic:$aetherVersion")
     implementation("org.apache.maven:maven-aether-provider:3.3.9")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.20")
     implementation("com.google.code.gson:gson:2.9.0")
 
@@ -32,11 +32,11 @@ dependencies {
     implementation("org.telegram:telegrambots-abilities:6.1.0")
     implementation("org.telegram:telegrambots:6.1.0")
 
-    implementation("io.prometheus:simpleclient:0.15.0")
-    implementation("io.prometheus:simpleclient_httpserver:0.15.0")
+    implementation("io.prometheus:simpleclient:0.16.0")
+    implementation("io.prometheus:simpleclient_httpserver:0.16.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.12.4")
+    testImplementation("io.mockk:mockk:1.12.7")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.1")
 }
 

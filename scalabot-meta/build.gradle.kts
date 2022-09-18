@@ -16,11 +16,11 @@ dependencies {
     api("com.google.code.gson:gson:2.9.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.12.4")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("io.mockk:mockk:1.12.7")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.7.0")
+    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.7.10")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
