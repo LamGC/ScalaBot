@@ -14,6 +14,10 @@ dependencies {
 
     implementation("org.telegram:telegrambots-meta:6.1.0")
 
+    // Added as a mitigation measure for vulnerabilities.
+    // When the relevant reference dependency updates it, it will be removed.
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+
     api("com.google.code.gson:gson:2.9.0")
 
     testImplementation(kotlin("test"))
