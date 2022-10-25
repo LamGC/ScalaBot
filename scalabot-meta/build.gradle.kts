@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     id("org.jetbrains.kotlinx.kover")
-    id("org.jetbrains.dokka") version "1.7.0"
+    id("org.jetbrains.dokka") version "1.7.20"
     `maven-publish`
     signing
     id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
@@ -21,11 +21,11 @@ dependencies {
     api("com.google.code.gson:gson:2.9.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.12.7")
+    testImplementation("io.mockk:mockk:1.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.7.10")
+    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.7.20")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

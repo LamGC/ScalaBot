@@ -10,14 +10,14 @@ plugins {
 dependencies {
     implementation("commons-codec:commons-codec:1.15")
     api("org.telegram:telegrambots-abilities:6.1.0")
-    api("org.slf4j:slf4j-api:2.0.0")
+    api("org.slf4j:slf4j-api:2.0.3")
 
     // Added as a mitigation measure for vulnerabilities.
     // When the relevant reference dependency updates it, it will be removed.
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testImplementation("org.mockito:mockito-core:4.7.0")
+    testImplementation("org.mockito:mockito-core:4.8.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 

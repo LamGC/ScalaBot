@@ -10,9 +10,9 @@ dependencies {
     implementation(project(":scalabot-meta"))
     implementation(project(":scalabot-extension"))
 
-    implementation("org.slf4j:slf4j-api:2.0.0")
-    implementation("io.github.microutils:kotlin-logging:2.1.23")
-    implementation("ch.qos.logback:logback-classic:1.4.0")
+    implementation("org.slf4j:slf4j-api:2.0.3")
+    implementation("io.github.microutils:kotlin-logging:3.0.2")
+    implementation("ch.qos.logback:logback-classic:1.4.4")
 
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
@@ -40,7 +40,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_httpserver:0.16.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.12.7")
+    testImplementation("io.mockk:mockk:1.13.2")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.1")
 }
 
