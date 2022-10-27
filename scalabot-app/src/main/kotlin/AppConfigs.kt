@@ -250,6 +250,7 @@ internal class LogDirectorySupplier : PropertyDefinerBase() {
 
 internal object Const {
     val config = loadAppConfig()
+    const val METRICS_NAMESPACE = "scalabot"
 }
 
 private fun AppPaths.defaultInitializer() {

@@ -135,6 +135,7 @@ internal class ScalaBot(
             .name("updates_total")
             .help("Total number of updates received by all bots.")
             .labelNames("bot_name")
+            .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
 
@@ -143,6 +144,7 @@ internal class ScalaBot(
             .name("updates_in_progress")
             .help("Number of updates in process by all bots.")
             .labelNames("bot_name")
+            .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
 
@@ -150,6 +152,7 @@ internal class ScalaBot(
         private val onlineBotGauge = Gauge.build()
             .name("bots_online")
             .help("Number of bots Online.")
+            .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
 
@@ -162,6 +165,7 @@ internal class ScalaBot(
                         "It is not recommended to use it as the accurate execution time of ability)"
             )
             .labelNames("bot_name")
+            .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
 
@@ -170,6 +174,7 @@ internal class ScalaBot(
             .name("updates_exception_handling")
             .help("Number of exceptions during processing.")
             .labelNames("bot_name")
+            .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
     }
