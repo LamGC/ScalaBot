@@ -61,7 +61,10 @@ internal fun startMetricsServer(config: MetricsConfig = Const.config.metrics): H
     return httpServer
 }
 
-internal class Launcher(private val config: AppConfig = Const.config) : AutoCloseable {
+internal class Launcher(
+    private val config: AppConfig = Const.config,
+    private val configFile: File = AppPaths.CONFIG_APPLICATION.file,
+) : AutoCloseable {
 
     companion object {
         @JvmStatic
@@ -75,27 +78,25 @@ internal class Launcher(private val config: AppConfig = Const.config) : AutoClos
     private fun getMavenLocalRepository(): LocalRepository {
         val localPath =
             if (config.mavenLocalRepository != null && config.mavenLocalRepository!!.isNotEmpty()) {
-                val repoPath = AppPaths.DATA_ROOT.file.toPath()
-                    .resolve(config.mavenLocalRepository!!)
-                    .apply {
-                        if (!exists()) {
-                            if (!parent.isWritable() || !parent.isReadable()) {
-                                throw IOException("Unable to read and write the directory where Maven repository is located.")
-                            }
-                            if (System.getProperty("os.name").lowercase().startsWith("windows")) {
-                                createDirectories()
-                            } else {
-                                val fileAttributes = setOf(
-                                    PosixFilePermission.OWNER_READ,
-                                    PosixFilePermission.OWNER_WRITE,
-                                    PosixFilePermission.GROUP_READ,
-                                    PosixFilePermission.GROUP_WRITE,
-                                    PosixFilePermission.OTHERS_READ,
-                                )
-                                createDirectories(PosixFilePermissions.asFileAttribute(fileAttributes))
-                            }
+                val repoPath = configFile.toPath().resolve(config.mavenLocalRepository!!).apply {
+                    if (!exists()) {
+                        if (!parent.isWritable() || !parent.isReadable()) {
+                            throw IOException("Unable to read and write the directory where Maven repository is located.")
+                        }
+                        if (System.getProperty("os.name").lowercase().startsWith("windows")) {
+                            createDirectories()
+                        } else {
+                            val fileAttributes = setOf(
+                                PosixFilePermission.OWNER_READ,
+                                PosixFilePermission.OWNER_WRITE,
+                                PosixFilePermission.GROUP_READ,
+                                PosixFilePermission.GROUP_WRITE,
+                                PosixFilePermission.OTHERS_READ,
+                            )
+                            createDirectories(PosixFilePermissions.asFileAttribute(fileAttributes))
                         }
                     }
+                }
                     .toRealPath()
                     .toFile()
                 repoPath
