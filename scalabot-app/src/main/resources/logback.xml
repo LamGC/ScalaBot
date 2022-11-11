@@ -1,7 +1,14 @@
 <configuration scan="false" debug="false">
     <include resource="base-logback.xml"/>
 
-    <root level="INFO">
+    <logger name="org.apache.http" level="${NETWORK_LOG_LEVEL}"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultTransporterProvider" level="${NETWORK_LOG_LEVEL}"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultRepositoryConnectorProvider" level="${NETWORK_LOG_LEVEL}"/>
+    <logger name="org.eclipse.aether.internal.impl.EnhancedLocalRepositoryManager" level="${NETWORK_LOG_LEVEL}"/>
+    <logger name="org.telegram.telegrambots.facilities.proxysocketfactorys" level="${NETWORK_LOG_LEVEL}"/>
+    <logger name="org.eclipse.aether.internal.impl.DefaultUpdateCheckManager" level="${NETWORK_LOG_LEVEL}"/>
+
+    <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE_OUT"/>
         <appender-ref ref="STD_ERR"/>
         <appender-ref ref="STD_OUT"/>

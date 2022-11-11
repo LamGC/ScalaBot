@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <included>
     <define name="DATA_LOGS" class="net.lamgc.scalabot.LogDirectorySupplier"/>
+    <define name="LOG_LEVEL" class="net.lamgc.scalabot.LogLevelSupplier"/>
+    <define name="NETWORK_LOG_LEVEL" class="net.lamgc.scalabot.NetworkVerboseLogSupplier"/>
 
     <appender name="STD_OUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

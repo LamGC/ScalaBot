@@ -12,6 +12,7 @@ import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.repository.RemoteRepository
 import org.eclipse.aether.repository.RepositoryPolicy
+import org.slf4j.event.Level
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.io.File
 import java.net.URL
@@ -245,6 +246,34 @@ internal enum class AppPaths(
 internal class LogDirectorySupplier : PropertyDefinerBase() {
     override fun getPropertyValue(): String {
         return AppPaths.DATA_LOGS.path
+    }
+}
+
+internal class LogLevelSupplier : PropertyDefinerBase() {
+    override fun getPropertyValue(): String {
+        val property = System.getProperty("scalabot.log.level", System.getenv("BOT_LOG_LEVEL"))
+        val level = if (property != null) {
+            try {
+                Level.valueOf(property.uppercase())
+            } catch (e: IllegalArgumentException) {
+                addWarn("Invalid log level: `$property`, the log will be output using the Info log level.")
+                Level.INFO
+            }
+        } else {
+            Level.INFO
+        }
+        return level.name
+    }
+}
+
+internal class NetworkVerboseLogSupplier : PropertyDefinerBase() {
+    override fun getPropertyValue(): String {
+        val propertyValue = System.getProperty("scalabot.log.network.verbose", "false")
+        return if (propertyValue.toBoolean()) {
+            "DEBUG"
+        } else {
+            "INFO"
+        }
     }
 }
 
