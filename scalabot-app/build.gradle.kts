@@ -29,8 +29,8 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:6.1.0")
-    implementation("org.telegram:telegrambots:6.1.0")
+    implementation("org.telegram:telegrambots-abilities:6.3.0")
+    implementation("org.telegram:telegrambots:6.3.0")
 
     // Added as a mitigation measure for vulnerabilities.
     // When the relevant reference dependency updates it, it will be removed.
