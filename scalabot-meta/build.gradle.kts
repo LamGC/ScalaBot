@@ -12,11 +12,7 @@ dependencies {
     api("org.eclipse.aether:aether-api:$aetherVersion")
     implementation("org.eclipse.aether:aether-util:$aetherVersion")
 
-    implementation("org.telegram:telegrambots-meta:6.3.0")
-
-    // Added as a mitigation measure for vulnerabilities.
-    // When the relevant reference dependency updates it, it will be removed.
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    implementation("org.telegram:telegrambots-meta:6.5.0")
 
     api("com.google.code.gson:gson:2.9.0")
 

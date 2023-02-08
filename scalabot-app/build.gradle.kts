@@ -29,12 +29,8 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:6.3.0")
-    implementation("org.telegram:telegrambots:6.3.0")
-
-    // Added as a mitigation measure for vulnerabilities.
-    // When the relevant reference dependency updates it, it will be removed.
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    implementation("org.telegram:telegrambots-abilities:6.5.0")
+    implementation("org.telegram:telegrambots:6.5.0")
 
     implementation("io.prometheus:simpleclient:0.16.0")
     implementation("io.prometheus:simpleclient_httpserver:0.16.0")
