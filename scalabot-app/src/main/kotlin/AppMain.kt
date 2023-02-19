@@ -26,6 +26,7 @@ private val log = KotlinLogging.logger { }
 fun main(args: Array<String>): Unit = runBlocking {
     log.info { "ScalaBot 正在启动中..." }
     log.info { "数据目录: ${AppPaths.DATA_ROOT}" }
+    log.debug { "Kotlin: ${KotlinVersion.CURRENT}, JVM: ${Runtime.version()}" }
     log.debug { "启动参数: ${args.joinToString(prefix = "[", postfix = "]")}" }
     if (initialFiles()) {
         exitProcess(1)
