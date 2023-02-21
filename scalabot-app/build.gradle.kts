@@ -10,9 +10,9 @@ dependencies {
     implementation(project(":scalabot-meta"))
     implementation(project(":scalabot-extension"))
 
-    implementation("org.slf4j:slf4j-api:2.0.3")
-    implementation("io.github.microutils:kotlin-logging:3.0.2")
-    implementation("ch.qos.logback:logback-classic:1.4.4")
+    implementation("org.slf4j:slf4j-api:2.0.6")
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("ch.qos.logback:logback-classic:1.4.5")
 
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
