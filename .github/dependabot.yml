@@ -15,19 +15,19 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "gradle"
-    directory: "/scalabot-app"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gradle"
-    directory: "/scalabot-meta"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gradle"
-    directory: "/scalabot-extension"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gradle"
-    directory: "/scalabot-ext-example"
-    schedule:
-      interval: "weekly"
+#  - package-ecosystem: "gradle"
+#    directory: "/scalabot-app"
+#    schedule:
+#      interval: "weekly"
+#  - package-ecosystem: "gradle"
+#    directory: "/scalabot-meta"
+#    schedule:
+#      interval: "weekly"
+#  - package-ecosystem: "gradle"
+#    directory: "/scalabot-extension"
+#    schedule:
+#      interval: "weekly"
+#  - package-ecosystem: "gradle"
+#    directory: "/scalabot-ext-example"
+#    schedule:
+#      interval: "weekly"
