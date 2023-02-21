@@ -14,7 +14,7 @@ dependencies {
 
     implementation("org.telegram:telegrambots-meta:6.5.0")
 
-    api("com.google.code.gson:gson:2.9.0")
+    api("com.google.code.gson:gson:2.10.1")
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.2")
