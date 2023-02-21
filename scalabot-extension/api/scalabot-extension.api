@@ -1,0 +1,9 @@
+public abstract interface class net/lamgc/scalabot/extension/BotExtensionFactory {
+	public abstract fun createExtensionInstance (Lorg/telegram/abilitybots/api/bot/BaseAbilityBot;Ljava/io/File;)Lorg/telegram/abilitybots/api/util/AbilityExtension;
+}
+
+public class net/lamgc/scalabot/extension/util/AbilityBots {
+	public static fun cancelReplyState (Lorg/telegram/abilitybots/api/bot/BaseAbilityBot;J)Z
+	public static fun getBotAccountId (Lorg/telegram/abilitybots/api/bot/BaseAbilityBot;)J
+}
+

@@ -1,0 +1,36 @@
+name: Binary compatibility verification (for API)
+
+on:
+  push:
+    paths:
+      - 'scalabot-meta/**'
+      - 'scalabot-extension/**'
+  pull_request:
+    paths:
+      - 'scalabot-meta/**'
+      - 'scalabot-extension/**'
+
+permissions:
+  contents: read
+
+jobs:
+  apiCompatibilityCheck:
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt-hotspot'
+          cache: 'gradle'
+      - uses: gradle/wrapper-validation-action@v1
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build and run binary compatibility verification
+        uses: gradle/gradle-build-action@v2.4.0
+        with:
+          gradle-version: 'wrapper'
+          arguments: apiCheck
