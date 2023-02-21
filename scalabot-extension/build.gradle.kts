@@ -12,7 +12,7 @@ dependencies {
     api("org.telegram:telegrambots-abilities:6.5.0")
     api("org.slf4j:slf4j-api:2.0.3")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testImplementation("org.mockito:mockito-core:4.8.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
