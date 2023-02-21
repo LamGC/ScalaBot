@@ -1,0 +1,195 @@
+public final class net/lamgc/scalabot/config/AppConfig {
+	public fun <init> ()V
+	public fun <init> (Lnet/lamgc/scalabot/config/ProxyConfig;Lnet/lamgc/scalabot/config/MetricsConfig;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Lnet/lamgc/scalabot/config/ProxyConfig;Lnet/lamgc/scalabot/config/MetricsConfig;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lnet/lamgc/scalabot/config/ProxyConfig;
+	public final fun component2 ()Lnet/lamgc/scalabot/config/MetricsConfig;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lnet/lamgc/scalabot/config/ProxyConfig;Lnet/lamgc/scalabot/config/MetricsConfig;Ljava/util/List;Ljava/lang/String;)Lnet/lamgc/scalabot/config/AppConfig;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/AppConfig;Lnet/lamgc/scalabot/config/ProxyConfig;Lnet/lamgc/scalabot/config/MetricsConfig;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lnet/lamgc/scalabot/config/AppConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMavenLocalRepository ()Ljava/lang/String;
+	public final fun getMavenRepositories ()Ljava/util/List;
+	public final fun getMetrics ()Lnet/lamgc/scalabot/config/MetricsConfig;
+	public final fun getProxy ()Lnet/lamgc/scalabot/config/ProxyConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/BotAccount {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;J)Lnet/lamgc/scalabot/config/BotAccount;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/BotAccount;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lnet/lamgc/scalabot/config/BotAccount;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatorId ()J
+	public final fun getId ()J
+	public final fun getName ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/BotConfig {
+	public fun <init> (ZLnet/lamgc/scalabot/config/BotAccount;ZZLjava/util/Set;Lnet/lamgc/scalabot/config/ProxyConfig;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLnet/lamgc/scalabot/config/BotAccount;ZZLjava/util/Set;Lnet/lamgc/scalabot/config/ProxyConfig;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lnet/lamgc/scalabot/config/BotAccount;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Lnet/lamgc/scalabot/config/ProxyConfig;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (ZLnet/lamgc/scalabot/config/BotAccount;ZZLjava/util/Set;Lnet/lamgc/scalabot/config/ProxyConfig;Ljava/lang/String;)Lnet/lamgc/scalabot/config/BotConfig;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/BotConfig;ZLnet/lamgc/scalabot/config/BotAccount;ZZLjava/util/Set;Lnet/lamgc/scalabot/config/ProxyConfig;Ljava/lang/String;ILjava/lang/Object;)Lnet/lamgc/scalabot/config/BotConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount ()Lnet/lamgc/scalabot/config/BotAccount;
+	public final fun getAutoUpdateCommandList ()Z
+	public final fun getBaseApiUrl ()Ljava/lang/String;
+	public final fun getDisableBuiltInAbility ()Z
+	public final fun getEnabled ()Z
+	public final fun getExtensions ()Ljava/util/Set;
+	public final fun getProxy ()Lnet/lamgc/scalabot/config/ProxyConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/MavenRepositoryConfig {
+	public fun <init> (Ljava/lang/String;Ljava/net/URL;Lorg/eclipse/aether/repository/Proxy;Ljava/lang/String;ZZLorg/eclipse/aether/repository/Authentication;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/net/URL;Lorg/eclipse/aether/repository/Proxy;Ljava/lang/String;ZZLorg/eclipse/aether/repository/Authentication;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/net/URL;
+	public final fun component3 ()Lorg/eclipse/aether/repository/Proxy;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun component7 ()Lorg/eclipse/aether/repository/Authentication;
+	public final fun copy (Ljava/lang/String;Ljava/net/URL;Lorg/eclipse/aether/repository/Proxy;Ljava/lang/String;ZZLorg/eclipse/aether/repository/Authentication;)Lnet/lamgc/scalabot/config/MavenRepositoryConfig;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/MavenRepositoryConfig;Ljava/lang/String;Ljava/net/URL;Lorg/eclipse/aether/repository/Proxy;Ljava/lang/String;ZZLorg/eclipse/aether/repository/Authentication;ILjava/lang/Object;)Lnet/lamgc/scalabot/config/MavenRepositoryConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuthentication ()Lorg/eclipse/aether/repository/Authentication;
+	public final fun getEnableReleases ()Z
+	public final fun getEnableSnapshots ()Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLayout ()Ljava/lang/String;
+	public final fun getProxy ()Lorg/eclipse/aether/repository/Proxy;
+	public final fun getUrl ()Ljava/net/URL;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/MetricsConfig {
+	public fun <init> ()V
+	public fun <init> (ZILjava/lang/String;Lnet/lamgc/scalabot/config/UsernameAuthenticator;)V
+	public synthetic fun <init> (ZILjava/lang/String;Lnet/lamgc/scalabot/config/UsernameAuthenticator;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lnet/lamgc/scalabot/config/UsernameAuthenticator;
+	public final fun copy (ZILjava/lang/String;Lnet/lamgc/scalabot/config/UsernameAuthenticator;)Lnet/lamgc/scalabot/config/MetricsConfig;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/MetricsConfig;ZILjava/lang/String;Lnet/lamgc/scalabot/config/UsernameAuthenticator;ILjava/lang/Object;)Lnet/lamgc/scalabot/config/MetricsConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuthenticator ()Lnet/lamgc/scalabot/config/UsernameAuthenticator;
+	public final fun getBindAddress ()Ljava/lang/String;
+	public final fun getEnable ()Z
+	public final fun getPort ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/ProxyConfig {
+	public fun <init> ()V
+	public fun <init> (Lnet/lamgc/scalabot/config/ProxyType;Ljava/lang/String;I)V
+	public synthetic fun <init> (Lnet/lamgc/scalabot/config/ProxyType;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lnet/lamgc/scalabot/config/ProxyType;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun copy (Lnet/lamgc/scalabot/config/ProxyType;Ljava/lang/String;I)Lnet/lamgc/scalabot/config/ProxyConfig;
+	public static synthetic fun copy$default (Lnet/lamgc/scalabot/config/ProxyConfig;Lnet/lamgc/scalabot/config/ProxyType;Ljava/lang/String;IILjava/lang/Object;)Lnet/lamgc/scalabot/config/ProxyConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getPort ()I
+	public final fun getType ()Lnet/lamgc/scalabot/config/ProxyType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/ProxyType : java/lang/Enum {
+	public static final field HTTP Lnet/lamgc/scalabot/config/ProxyType;
+	public static final field HTTPS Lnet/lamgc/scalabot/config/ProxyType;
+	public static final field NO_PROXY Lnet/lamgc/scalabot/config/ProxyType;
+	public static final field SOCKS4 Lnet/lamgc/scalabot/config/ProxyType;
+	public static final field SOCKS5 Lnet/lamgc/scalabot/config/ProxyType;
+	public static fun valueOf (Ljava/lang/String;)Lnet/lamgc/scalabot/config/ProxyType;
+	public static fun values ()[Lnet/lamgc/scalabot/config/ProxyType;
+}
+
+public final class net/lamgc/scalabot/config/UsernameAuthenticator : com/sun/net/httpserver/BasicAuthenticator {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun checkCredentials (Ljava/lang/String;Ljava/lang/String;)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun toJsonObject ()Lcom/google/gson/JsonObject;
+}
+
+public final class net/lamgc/scalabot/config/serializer/ArtifactSerializer : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/ArtifactSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lorg/eclipse/aether/artifact/Artifact;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lorg/eclipse/aether/artifact/Artifact;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class net/lamgc/scalabot/config/serializer/AuthenticationSerializer : com/google/gson/JsonDeserializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/AuthenticationSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lorg/eclipse/aether/repository/Authentication;
+}
+
+public final class net/lamgc/scalabot/config/serializer/BotAccountSerializer : com/google/gson/JsonDeserializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/BotAccountSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/BotAccount;
+}
+
+public final class net/lamgc/scalabot/config/serializer/BotConfigSerializer : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/BotConfigSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/BotConfig;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lnet/lamgc/scalabot/config/BotConfig;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class net/lamgc/scalabot/config/serializer/MavenRepositoryConfigSerializer : com/google/gson/JsonDeserializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/MavenRepositoryConfigSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/MavenRepositoryConfig;
+}
+
+public final class net/lamgc/scalabot/config/serializer/ProxyConfigSerializer : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/ProxyConfigSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/ProxyConfig;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lnet/lamgc/scalabot/config/ProxyConfig;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class net/lamgc/scalabot/config/serializer/ProxyTypeSerializer : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/ProxyTypeSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/ProxyType;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lnet/lamgc/scalabot/config/ProxyType;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class net/lamgc/scalabot/config/serializer/UsernameAuthenticatorSerializer : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public static final field INSTANCE Lnet/lamgc/scalabot/config/serializer/UsernameAuthenticatorSerializer;
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/lamgc/scalabot/config/UsernameAuthenticator;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lnet/lamgc/scalabot/config/UsernameAuthenticator;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
