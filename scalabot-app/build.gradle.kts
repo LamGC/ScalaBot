@@ -11,7 +11,7 @@ dependencies {
     implementation(project(":scalabot-extension"))
 
     implementation("org.slf4j:slf4j-api:2.0.3")
-    implementation("io.github.microutils:kotlin-logging:3.0.2")
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.4")
 
     val aetherVersion = "1.1.0"
