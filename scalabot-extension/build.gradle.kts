@@ -4,7 +4,7 @@ plugins {
     jacoco
     `maven-publish`
     signing
-    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 dependencies {
