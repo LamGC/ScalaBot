@@ -50,6 +50,8 @@ internal class ScalaBot(
         extensionFinders = extensionFinders
     )
 
+    private val accountIdString = accountId.toString()
+
     init {
         log.info { "[Bot $botUsername] 正在加载扩展..." }
         val extensionEntries = extensionLoader.getExtensions()
@@ -66,18 +68,18 @@ internal class ScalaBot(
     override fun creatorId(): Long = creatorId
 
     override fun onUpdateReceived(update: Update?) {
-        botUpdateCounter.labels(botUsername).inc()
-        botUpdateGauge.labels(botUsername).inc()
+        botUpdateCounter.labels(botUsername, accountIdString).inc()
+        botUpdateGauge.labels(botUsername, accountIdString).inc()
 
-        val timer = updateProcessTime.labels(botUsername).startTimer()
+        val timer = updateProcessTime.labels(botUsername, accountIdString).startTimer()
         try {
             super.onUpdateReceived(update)
         } catch (e: Exception) {
-            exceptionHandlingCounter.labels(botUsername).inc()
+            exceptionHandlingCounter.labels(botUsername, accountIdString).inc()
             throw e
         } finally {
             timer.observeDuration()
-            botUpdateGauge.labels(botUsername).dec()
+            botUpdateGauge.labels(botUsername, accountIdString).dec()
         }
     }
 
@@ -134,7 +136,7 @@ internal class ScalaBot(
         private val botUpdateCounter = Counter.build()
             .name("updates_total")
             .help("Total number of updates received by all bots.")
-            .labelNames("bot_name")
+            .labelNames("bot_name", "bot_id")
             .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
@@ -143,7 +145,7 @@ internal class ScalaBot(
         private val botUpdateGauge = Gauge.build()
             .name("updates_in_progress")
             .help("Number of updates in process by all bots.")
-            .labelNames("bot_name")
+            .labelNames("bot_name", "bot_id")
             .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
@@ -164,7 +166,7 @@ internal class ScalaBot(
                         "so it may be different from the actual execution time of ability. " +
                         "It is not recommended to use it as the accurate execution time of ability)"
             )
-            .labelNames("bot_name")
+            .labelNames("bot_name", "bot_id")
             .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
@@ -173,7 +175,7 @@ internal class ScalaBot(
         private val exceptionHandlingCounter = Counter.build()
             .name("updates_exception_handling")
             .help("Number of exceptions during processing.")
-            .labelNames("bot_name")
+            .labelNames("bot_name", "bot_id")
             .namespace(Const.METRICS_NAMESPACE)
             .subsystem("telegrambots")
             .register()
