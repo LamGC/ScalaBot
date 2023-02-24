@@ -24,7 +24,9 @@ public class AbilityBots {
      * @return 返回 AbilityBot 的账户 Id.
      * @throws IllegalArgumentException 当 AbilityBot 的 botToken 格式错误时抛出该异常.
      */
+    @SuppressWarnings("deprecation")
     public static long getBotAccountId(BaseAbilityBot bot) {
+        // 根据文档说明, 弃用仅针对重写方法, 使用该方法并无大碍.
         String botToken = bot.getBotToken();
         Matcher matcher = botTokenPattern.matcher(botToken);
         if (!matcher.matches()) {
