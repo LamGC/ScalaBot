@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm")
-    java
+    `java-library`
     jacoco
     `maven-publish`
     signing
