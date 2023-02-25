@@ -44,19 +44,21 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 
 publishing {
     repositories {
-        if (project.version.toString().endsWith("-SNAPSHOT")) {
-            maven("https://nexus.kuku.me/repository/maven-snapshots/") {
-                credentials {
-                    username = project.properties["repo.credentials.private.username"].toString()
-                    password = project.properties["repo.credentials.private.password"].toString()
-                }
+        maven("https://git.lamgc.me/api/packages/LamGC/maven") {
+            credentials {
+                username = project.properties["repo.credentials.self-git.username"].toString()
+                password = project.properties["repo.credentials.self-git.password"].toString()
             }
+        }
+        val kukuRepoUrl = if (project.version.toString().endsWith("-SNAPSHOT", ignoreCase = true)) {
+            "https://nexus.kuku.me/repository/maven-snapshots/"
         } else {
-            maven("https://nexus.kuku.me/repository/maven-releases/") {
-                credentials {
-                    username = project.properties["repo.credentials.private.username"].toString()
-                    password = project.properties["repo.credentials.private.password"].toString()
-                }
+            "https://nexus.kuku.me/repository/maven-releases/"
+        }
+        maven(kukuRepoUrl) {
+            credentials {
+                username = project.properties["repo.credentials.kuku-repo.username"].toString()
+                password = project.properties["repo.credentials.kuku-repo.password"].toString()
             }
         }
     }
