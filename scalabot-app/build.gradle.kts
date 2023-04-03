@@ -24,7 +24,7 @@ dependencies {
     implementation("org.apache.maven:maven-aether-provider:3.3.9")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("org.jdom:jdom2:2.0.6.1")
