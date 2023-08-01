@@ -26,7 +26,7 @@ jobs:
       # 创建更新日志.
       - name: 'Get Previous tag'
         id: previous-tag
-        uses: younited/get-previous-tag-action@v1.0.0
+        uses: younited/get-previous-tag-action@v1.1.0
         with:
           match: "v*.*.*"
       - name: Set up Python 3
