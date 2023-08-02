@@ -48,6 +48,10 @@ internal fun MavenRepositoryConfig.toRemoteRepository(proxyConfig: ProxyConfig? 
         val generatedRepoId = createDefaultRepositoryId()
         log.debug { "仓库 Url `$url` 未设置仓库 Id, 已分配缺省 Id: $generatedRepoId" }
         generatedRepoId
+    } else if ("local".contentEquals(id, ignoreCase = true)) {
+        val generatedRepoId = createDefaultRepositoryId()
+        log.debug { "仓库 Url `$url` 不允许使用 `local` 作为仓库 Id, 已分配缺省 Id: $generatedRepoId" }
+        generatedRepoId
     } else {
         id
     }
