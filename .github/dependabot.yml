@@ -8,12 +8,12 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
 
 #  - package-ecosystem: "gradle"
 #    directory: "/scalabot-app"
