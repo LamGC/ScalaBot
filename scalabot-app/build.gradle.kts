@@ -23,7 +23,7 @@ dependencies {
     implementation("org.eclipse.aether:aether-connector-basic:$aetherVersion")
     implementation("org.apache.maven:maven-aether-provider:3.3.9")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
