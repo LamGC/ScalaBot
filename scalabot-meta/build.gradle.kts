@@ -21,7 +21,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.8.10")
+    dokkaHtmlPlugin("org.jetbrains.dokka:javadoc-plugin:1.8.20")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
