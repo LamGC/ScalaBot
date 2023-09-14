@@ -12,7 +12,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:2.0.7")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
-    implementation("ch.qos.logback:logback-classic:1.4.8")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
 
     val aetherVersion = "1.1.0"
     implementation("org.eclipse.aether:aether-api:$aetherVersion")
