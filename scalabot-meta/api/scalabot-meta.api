@@ -123,6 +123,7 @@ public final class net/lamgc/scalabot/config/ProxyType : java/lang/Enum {
 	public static final field NO_PROXY Lnet/lamgc/scalabot/config/ProxyType;
 	public static final field SOCKS4 Lnet/lamgc/scalabot/config/ProxyType;
 	public static final field SOCKS5 Lnet/lamgc/scalabot/config/ProxyType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lnet/lamgc/scalabot/config/ProxyType;
 	public static fun values ()[Lnet/lamgc/scalabot/config/ProxyType;
 }
