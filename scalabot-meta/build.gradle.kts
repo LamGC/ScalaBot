@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     id("org.jetbrains.kotlinx.kover")
-    id("org.jetbrains.dokka") version "1.8.20"
+    id("org.jetbrains.dokka") version "1.9.0"
     `maven-publish`
     signing
     id("org.jetbrains.kotlinx.binary-compatibility-validator")
