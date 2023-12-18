@@ -9,6 +9,8 @@ import net.lamgc.scalabot.util.registerShutdownHook
 import org.eclipse.aether.repository.LocalRepository
 import org.telegram.telegrambots.bots.DefaultBotOptions
 import org.telegram.telegrambots.meta.TelegramBotsApi
+import org.telegram.telegrambots.meta.api.methods.GetMe
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException
 import org.telegram.telegrambots.meta.generics.BotSession
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.io.File
@@ -135,7 +137,11 @@ internal class Launcher(
                 launchBot(botConfig)
                 launchedCounts++
             } catch (e: Exception) {
-                log.error(e) { "机器人 `${botConfig.account.name}` 启动时发生错误." }
+                if (e is TelegramApiRequestException && e.errorCode == 401) {
+                    log.error { "机器人 `${botConfig.account.name}` 的 Bot Token 无效, 请检查配置: [${e.errorCode}] ${e.apiResponse}" }
+                } else {
+                    log.error(e) { "机器人 `${botConfig.account.name}` 启动时发生错误." }
+                }
             }
         }
         return if (launchedCounts != 0) {
@@ -201,6 +207,10 @@ internal class Launcher(
             extensionPackageFinders,
             botConfig
         )
+
+        val botUser = bot.execute(GetMe())
+        log.debug { "已验证 Bot Token 有效性, Bot Username: ${botUser.userName}" }
+
         botSessionMap[bot] = botApi.registerBot(bot)
         log.info { "机器人 `${bot.botUsername}` 已启动." }
 
