@@ -10,7 +10,7 @@ dependencies {
     implementation("commons-codec:commons-codec:1.16.0")
     api("org.telegram:telegrambots-abilities:6.8.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
