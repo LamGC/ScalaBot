@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":scalabot-meta"))
     implementation(project(":scalabot-extension"))
 
-    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-api:2.0.10")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
