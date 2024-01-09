@@ -1,6 +1,7 @@
 package net.lamgc.scalabot
 
 import mu.KotlinLogging
+import net.lamgc.scalabot.extension.BotExtensionCreateOptions
 import net.lamgc.scalabot.extension.BotExtensionFactory
 import net.lamgc.scalabot.util.getPriority
 import org.eclipse.aether.artifact.Artifact
@@ -122,7 +123,12 @@ internal class ExtensionLoader(
         for (factory in extClassLoader.serviceLoader) {
             try {
                 val extension =
-                    factory.createExtensionInstance(bot, getExtensionDataFolder(extensionArtifact))
+                    factory.createExtensionInstance(
+                        bot, getExtensionDataFolder(extensionArtifact),
+                        BotExtensionCreateOptions(
+                            bot.botConfig.proxy.copy()
+                        )
+                    )
                 if (extension == null) {
                     log.debug { "Factory ${factory::class.java} 创建插件时返回了 null, 已跳过. (BotName: ${bot.botUsername})" }
                     continue
