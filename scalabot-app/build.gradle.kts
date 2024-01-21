@@ -29,7 +29,7 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:6.8.0")
+    implementation("org.telegram:telegrambots-abilities:6.9.7.0")
     implementation("org.telegram:telegrambots:6.8.0")
 
     implementation("io.prometheus:simpleclient:0.16.0")
