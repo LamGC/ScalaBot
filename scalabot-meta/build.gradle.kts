@@ -12,7 +12,7 @@ dependencies {
     api("org.eclipse.aether:aether-api:$aetherVersion")
     implementation("org.eclipse.aether:aether-util:$aetherVersion")
 
-    implementation("org.telegram:telegrambots-meta:6.8.0")
+    implementation("org.telegram:telegrambots-meta:6.9.7.0")
 
     api("com.google.code.gson:gson:2.10.1")
 
