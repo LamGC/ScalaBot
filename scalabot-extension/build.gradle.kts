@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     implementation("commons-codec:commons-codec:1.16.0")
-    api("org.telegram:telegrambots-abilities:6.8.0")
+    api("org.telegram:telegrambots-abilities:6.9.7.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.mockito:mockito-core:5.11.0")
