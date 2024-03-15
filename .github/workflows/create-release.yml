@@ -56,7 +56,7 @@ jobs:
 
       # 创建新的发行版本
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           body_path: ${{ github.workspace }}/CURRENT_CHANGELOG.md
