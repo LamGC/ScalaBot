@@ -37,7 +37,7 @@ public interface BotExtensionFactory {
      */
     @Deprecated(since = "0.7.0", forRemoval = true)
     default AbilityExtension createExtensionInstance(BaseAbilityBot bot, File shareDataFolder) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("The method has not been implemented.");
     }
 
     /**
