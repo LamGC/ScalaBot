@@ -1,4 +1,4 @@
-FROM openjdk:18
+FROM eclipse-temurin:21-jdk-alpine
 
 ENV BOT_DATA_PATH /scalabot/data/
 WORKDIR /scalabot/run/
