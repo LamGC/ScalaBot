@@ -29,7 +29,7 @@ internal class ScalaBot(
     db: DBContext,
     options: DefaultBotOptions,
     extensionFinders: Set<ExtensionPackageFinder>,
-    botConfig: BotConfig,
+    val botConfig: BotConfig,
     private val creatorId: Long = botConfig.account.creatorId,
     val accountId: Long = botConfig.account.id,
     val extensions: Set<Artifact> = botConfig.extensions
