@@ -17,7 +17,7 @@ dependencies {
     api("com.google.code.gson:gson:2.10.1")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.mockk:mockk:1.13.10")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
 
