@@ -20,9 +20,8 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt-hotspot'
-      - uses: gradle/actions/wrapper-validation@v3
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build project and install Distribution package
