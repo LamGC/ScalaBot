@@ -20,15 +20,13 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt-hotspot'
-          cache: 'gradle'
       - uses: gradle/actions/wrapper-validation@v3
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build project and install Distribution package
-        uses: gradle/gradle-build-action@v3.1.0
-        with:
-          gradle-version: 'wrapper'
-          arguments: installDist
+        run: ./gradlew clean test installDist
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker BuildX
