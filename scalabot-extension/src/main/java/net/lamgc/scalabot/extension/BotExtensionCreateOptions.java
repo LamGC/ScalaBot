@@ -10,13 +10,29 @@ import net.lamgc.scalabot.config.ProxyConfig;
 @SuppressWarnings("unused")
 public class BotExtensionCreateOptions {
 
+    private final long botAccountId;
     private final ProxyConfig proxy;
 
-    public BotExtensionCreateOptions(ProxyConfig proxy) {
+    public BotExtensionCreateOptions(long botAccountId, ProxyConfig proxy) {
+        this.botAccountId = botAccountId;
         this.proxy = proxy;
     }
 
+    /**
+     * 获取 Bot 使用的代理信息.
+     *
+     * @return 返回 Bot 中 TelegramClient 所使用的代理配置.
+     */
     public ProxyConfig getProxy() {
         return proxy;
+    }
+
+    /**
+     * 获取 Bot 的账户 Id.
+     *
+     * @return 返回 Bot 的账户 Id.
+     */
+    public long getBotAccountId() {
+        return botAccountId;
     }
 }

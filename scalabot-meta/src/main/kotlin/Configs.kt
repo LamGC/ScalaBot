@@ -3,7 +3,8 @@ package net.lamgc.scalabot.config
 import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.repository.Authentication
 import org.eclipse.aether.repository.Proxy
-import org.telegram.telegrambots.meta.ApiConstants
+import org.telegram.telegrambots.meta.TelegramUrl
+import java.net.URI
 import java.net.URL
 
 /**
@@ -25,6 +26,13 @@ data class BotAccount(
         // 虽然能过单元测试, 但实际使用过程是不能正常用的.
         get() = token.substringBefore(":").toLong()
 }
+
+val defaultTelegramApiUrl: String = URL(
+    TelegramUrl.DEFAULT_URL.schema,
+    TelegramUrl.DEFAULT_URL.host,
+    TelegramUrl.DEFAULT_URL.port,
+    "/"
+).toExternalForm()
 
 /**
  * 机器人配置.
@@ -56,8 +64,22 @@ data class BotConfig(
      */
     val extensions: Set<Artifact> = emptySet(),
     val proxy: ProxyConfig = ProxyConfig(type = ProxyType.NO_PROXY),
-    val baseApiUrl: String = ApiConstants.BASE_URL
-)
+    val baseApiUrl: String = defaultTelegramApiUrl
+) {
+    fun getBaseApiTelegramUrl(): TelegramUrl {
+        if (this.baseApiUrl == defaultTelegramApiUrl) {
+            return TelegramUrl.DEFAULT_URL
+        } else {
+            URI.create(baseApiUrl).let {
+                return TelegramUrl.builder()
+                    .host(it.host)
+                    .port(it.port)
+                    .schema(it.scheme)
+                    .build()
+            }
+        }
+    }
+}
 
 /**
  * 代理类型.

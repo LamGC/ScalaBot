@@ -2,8 +2,8 @@ package net.lamgc.scalabot.simple;
 
 import net.lamgc.scalabot.extension.BotExtensionCreateOptions;
 import net.lamgc.scalabot.extension.BotExtensionFactory;
-import org.telegram.abilitybots.api.bot.BaseAbilityBot;
-import org.telegram.abilitybots.api.util.AbilityExtension;
+import org.telegram.telegrambots.abilitybots.api.bot.BaseAbilityBot;
+import org.telegram.telegrambots.abilitybots.api.util.AbilityExtension;
 
 import java.io.File;
 

@@ -7,8 +7,8 @@ import net.lamgc.scalabot.util.toHexString
 import org.mapdb.DB
 import org.mapdb.DBException
 import org.mapdb.DBMaker
-import org.telegram.abilitybots.api.db.DBContext
-import org.telegram.abilitybots.api.db.MapDBContext
+import org.telegram.telegrambots.abilitybots.api.db.DBContext
+import org.telegram.telegrambots.abilitybots.api.db.MapDBContext
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -157,7 +157,6 @@ private abstract class FileDbAdapter(
         val oldFile = oldDbAdapter.getBotDbFile(botAccount)
         val newFile = getBotDbFile(botAccount)
         try {
-            @Suppress("UnstableApiUsage")
             Files.copy(oldFile, newFile)
         } catch (e: Exception) {
             if (newFile.exists()) {

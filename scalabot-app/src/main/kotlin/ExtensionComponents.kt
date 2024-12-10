@@ -5,7 +5,7 @@ import net.lamgc.scalabot.extension.BotExtensionCreateOptions
 import net.lamgc.scalabot.extension.BotExtensionFactory
 import net.lamgc.scalabot.util.getPriority
 import org.eclipse.aether.artifact.Artifact
-import org.telegram.abilitybots.api.util.AbilityExtension
+import org.telegram.telegrambots.abilitybots.api.util.AbilityExtension
 import java.io.File
 import java.io.FileNotFoundException
 import java.net.URL
@@ -126,6 +126,7 @@ internal class ExtensionLoader(
                     factory.createExtensionInstance(
                         bot, getExtensionDataFolder(extensionArtifact),
                         BotExtensionCreateOptions(
+                            bot.accountId,
                             bot.botConfig.proxy.copy()
                         )
                     )
@@ -158,7 +159,7 @@ internal class ExtensionLoader(
      * 搜索指定构件坐标的依赖包.
      *
      * 搜索扩展包将根据搜索器优先级从高到低依次搜索, 当某一个优先级的搜索器搜到扩展包后将停止搜索.
-     * 可以根据不同优先级的搜索器, 配置扩展包的主用与备用文件.
+     * 可以根据不同优先级的搜索器, 配置扩展包的主用和备用文件.
      *
      * @return 返回各个搜索器返回的搜索结果.
      */

@@ -48,6 +48,7 @@ public final class net/lamgc/scalabot/config/BotConfig {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccount ()Lnet/lamgc/scalabot/config/BotAccount;
 	public final fun getAutoUpdateCommandList ()Z
+	public final fun getBaseApiTelegramUrl ()Lorg/telegram/telegrambots/meta/TelegramUrl;
 	public final fun getBaseApiUrl ()Ljava/lang/String;
 	public final fun getDisableBuiltInAbility ()Z
 	public final fun getEnabled ()Z
@@ -55,6 +56,10 @@ public final class net/lamgc/scalabot/config/BotConfig {
 	public final fun getProxy ()Lnet/lamgc/scalabot/config/ProxyConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/lamgc/scalabot/config/ConfigsKt {
+	public static final fun getDefaultTelegramApiUrl ()Ljava/lang/String;
 }
 
 public final class net/lamgc/scalabot/config/MavenRepositoryConfig {

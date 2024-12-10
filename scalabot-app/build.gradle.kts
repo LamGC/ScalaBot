@@ -22,6 +22,7 @@ dependencies {
     implementation("org.eclipse.aether:aether-transport-http:$aetherVersion")
     implementation("org.eclipse.aether:aether-connector-basic:$aetherVersion")
     implementation("org.apache.maven:maven-aether-provider:3.3.9")
+    implementation("org.codehaus.plexus:plexus-utils:3.5.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.23")
@@ -29,8 +30,9 @@ dependencies {
 
     implementation("org.jdom:jdom2:2.0.6.1")
 
-    implementation("org.telegram:telegrambots-abilities:6.9.7.1")
-    implementation("org.telegram:telegrambots:6.9.7.1")
+    implementation("org.telegram:telegrambots-abilities:8.0.0")
+    implementation("org.telegram:telegrambots-longpolling:8.0.0")
+    implementation("org.telegram:telegrambots-client:8.0.0")
 
     implementation("io.prometheus:simpleclient:0.16.0")
     implementation("io.prometheus:simpleclient_httpserver:0.16.0")
@@ -46,7 +48,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "17"
 }
 
 application {

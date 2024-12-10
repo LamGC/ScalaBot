@@ -3,16 +3,16 @@ plugins {
     jacoco
     `maven-publish`
     signing
-    id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 dependencies {
     implementation("commons-codec:commons-codec:1.16.1")
-    api("org.telegram:telegrambots-abilities:6.9.7.1")
+    api("org.telegram:telegrambots-abilities:8.0.0")
     api(project(":scalabot-meta"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.telegram:telegrambots-client:8.0.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -25,8 +25,8 @@ tasks.withType<Javadoc> {
 java {
     withJavadocJar()
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.test {

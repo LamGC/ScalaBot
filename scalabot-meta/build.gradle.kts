@@ -12,7 +12,7 @@ dependencies {
     api("org.eclipse.aether:aether-api:$aetherVersion")
     implementation("org.eclipse.aether:aether-util:$aetherVersion")
 
-    implementation("org.telegram:telegrambots-meta:6.9.7.1")
+    implementation("org.telegram:telegrambots-meta:8.0.0")
 
     api("com.google.code.gson:gson:2.10.1")
 
@@ -26,15 +26,15 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
 java {
     withJavadocJar()
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {

@@ -13,7 +13,6 @@ import org.eclipse.aether.repository.Proxy
 import org.eclipse.aether.repository.RemoteRepository
 import org.eclipse.aether.repository.RepositoryPolicy
 import org.slf4j.event.Level
-import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -24,13 +23,13 @@ import kotlin.reflect.KProperty
 
 private val log = KotlinLogging.logger { }
 
-internal fun ProxyType.toTelegramBotsType(): DefaultBotOptions.ProxyType {
+internal fun ProxyType.toJavaProxyType(): java.net.Proxy.Type? {
     return when (this) {
-        ProxyType.NO_PROXY -> DefaultBotOptions.ProxyType.NO_PROXY
-        ProxyType.HTTP -> DefaultBotOptions.ProxyType.HTTP
-        ProxyType.HTTPS -> DefaultBotOptions.ProxyType.HTTP
-        ProxyType.SOCKS4 -> DefaultBotOptions.ProxyType.SOCKS4
-        ProxyType.SOCKS5 -> DefaultBotOptions.ProxyType.SOCKS5
+        ProxyType.NO_PROXY -> null
+        ProxyType.HTTP -> java.net.Proxy.Type.HTTP
+        ProxyType.HTTPS -> java.net.Proxy.Type.HTTP
+        ProxyType.SOCKS4 -> java.net.Proxy.Type.SOCKS
+        ProxyType.SOCKS5 -> java.net.Proxy.Type.SOCKS
     }
 }
 
@@ -310,7 +309,7 @@ internal fun initialFiles(): Boolean {
     val configFilesNotInitialized = !AppPaths.CONFIG_APPLICATION.file.exists()
             && !AppPaths.CONFIG_BOT.file.exists()
 
-    for (path in AppPaths.values()) {
+    for (path in AppPaths.entries) {
         path.initial()
     }
 

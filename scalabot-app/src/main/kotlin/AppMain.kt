@@ -6,15 +6,17 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.lamgc.scalabot.config.*
 import net.lamgc.scalabot.util.registerShutdownHook
+import okhttp3.OkHttpClient
 import org.eclipse.aether.repository.LocalRepository
-import org.telegram.telegrambots.bots.DefaultBotOptions
-import org.telegram.telegrambots.meta.TelegramBotsApi
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
+import org.telegram.telegrambots.longpolling.BotSession
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
 import org.telegram.telegrambots.meta.api.methods.GetMe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException
-import org.telegram.telegrambots.meta.generics.BotSession
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.io.File
 import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
 import kotlin.io.path.createDirectories
@@ -74,7 +76,7 @@ internal class Launcher(
         private val log = KotlinLogging.logger { }
     }
 
-    private val botApi = TelegramBotsApi(DefaultBotSession::class.java)
+    private val botApi = TelegramBotsLongPollingApplication()
     private val botSessionMap = mutableMapOf<ScalaBot, BotSession>()
     private val mavenLocalRepository = getMavenLocalRepository()
 
@@ -144,6 +146,10 @@ internal class Launcher(
                 }
             }
         }
+
+        botApi.start()
+        botApi.registerShutdownHook()
+
         return if (launchedCounts != 0) {
             log.info { "已启动 $launchedCounts 个机器人." }
             true
@@ -171,17 +177,17 @@ internal class Launcher(
                 ProxyConfig(type = ProxyType.NO_PROXY)
             }
 
-        val botOption = DefaultBotOptions().apply {
-            if (proxyConfig.type != ProxyType.NO_PROXY) {
-                proxyType = proxyConfig.type.toTelegramBotsType()
-                proxyHost = config.proxy.host
-                proxyPort = config.proxy.port
-                log.debug { "机器人 `${botConfig.account.name}` 已启用代理配置: $proxyConfig" }
-            }
+        val okhttpClientBuilder = OkHttpClient.Builder()
 
-            baseUrl = botConfig.baseApiUrl
+        if (proxyConfig.type != ProxyType.NO_PROXY) {
+            val proxyType = proxyConfig.type.toJavaProxyType()
+            val proxyAddress = InetSocketAddress.createUnresolved(proxyConfig.host, proxyConfig.port)
+            okhttpClientBuilder.proxy(Proxy(proxyType, proxyAddress))
         }
+
         val account = botConfig.account
+        val telegramClient =
+            OkHttpTelegramClient(okhttpClientBuilder.build(), account.token, botConfig.getBaseApiTelegramUrl())
 
         val remoteRepositories = config.mavenRepositories
             .map { it.toRemoteRepository(proxyConfig) }
@@ -203,15 +209,15 @@ internal class Launcher(
 
         val bot = ScalaBot(
             BotDBMaker.getBotDbInstance(account),
-            botOption,
+            telegramClient,
             extensionPackageFinders,
             botConfig
         )
 
-        val botUser = bot.execute(GetMe())
+        val botUser = bot.telegramClient.execute(GetMe())
         log.debug { "已验证 Bot Token 有效性, Bot Username: ${botUser.userName}" }
 
-        botSessionMap[bot] = botApi.registerBot(bot)
+        botSessionMap[bot] = botApi.registerBot(botConfig.account.token, bot)
         log.info { "机器人 `${bot.botUsername}` 已启动." }
 
         if (botConfig.autoUpdateCommandList) {

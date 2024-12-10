@@ -53,7 +53,7 @@ internal class ProxyTypeSerializerTest {
 
     @Test
     fun `serialize test`() {
-        for (type in ProxyType.values()) {
+        for (type in ProxyType.entries) {
             assertEquals(
                 JsonPrimitive(type.name), ProxyTypeSerializer.serialize(type, null, null),
                 "ProxyType 序列化结果与预期不符."
@@ -79,7 +79,7 @@ internal class ProxyTypeSerializerTest {
             ProxyTypeSerializer.deserialize(JsonNull.INSTANCE, null, null)
         )
 
-        for (type in ProxyType.values()) {
+        for (type in ProxyType.entries) {
             assertEquals(
                 type, ProxyTypeSerializer.deserialize(JsonPrimitive(type.name), null, null),
                 "ProxyType 反序列化结果与预期不符."

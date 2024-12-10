@@ -10,9 +10,9 @@ import net.lamgc.scalabot.config.ProxyConfig
 import net.lamgc.scalabot.config.ProxyType
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
-import org.telegram.telegrambots.bots.DefaultBotOptions
 import java.io.File
 import java.io.IOException
+import java.net.Proxy
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,7 +23,7 @@ internal class AppPathsTest {
 
     @Test
     fun `Consistency check`() {
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertEquals(
                 File(path.path).canonicalPath,
                 path.file.canonicalPath,
@@ -226,17 +226,17 @@ internal class AppPathsTest {
     @Test
     fun `ProxyType_toTelegramBotsType test`() {
         val expectTypeMapping = mapOf(
-            ProxyType.NO_PROXY to DefaultBotOptions.ProxyType.NO_PROXY,
-            ProxyType.SOCKS5 to DefaultBotOptions.ProxyType.SOCKS5,
-            ProxyType.SOCKS4 to DefaultBotOptions.ProxyType.SOCKS4,
-            ProxyType.HTTP to DefaultBotOptions.ProxyType.HTTP,
-            ProxyType.HTTPS to DefaultBotOptions.ProxyType.HTTP
+            ProxyType.NO_PROXY to null,
+            ProxyType.SOCKS5 to Proxy.Type.SOCKS,
+            ProxyType.SOCKS4 to Proxy.Type.SOCKS,
+            ProxyType.HTTP to Proxy.Type.HTTP,
+            ProxyType.HTTPS to Proxy.Type.HTTP
         )
 
-        for (proxyType in ProxyType.values()) {
+        for (proxyType in ProxyType.entries) {
             assertEquals(
                 expectTypeMapping[proxyType],
-                proxyType.toTelegramBotsType(),
+                proxyType.toJavaProxyType(),
                 "ProxyType 转换失败."
             )
         }
@@ -251,7 +251,7 @@ internal class AppPathsTest {
             ProxyType.HTTP,
             ProxyType.HTTPS
         )
-        for (proxyType in ProxyType.values()) {
+        for (proxyType in ProxyType.entries) {
             val proxyConfig = ProxyConfig(proxyType, host, port)
             val aetherProxy = proxyConfig.toAetherProxy()
             if (expectNotNullProxyType.contains(proxyType)) {
@@ -337,7 +337,7 @@ internal class AppPathsTest {
 
         assertTrue(initialFiles(), "方法未能提醒用户编辑初始配置文件.")
 
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertTrue(path.file.exists(), "文件未初始化成功: ${path.path}")
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")
@@ -347,7 +347,7 @@ internal class AppPathsTest {
 
         assertFalse(initialFiles(), "方法试图在配置已初始化的情况下提醒用户编辑初始配置文件.")
 
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertTrue(path.file.exists(), "文件未初始化成功: ${path.path}")
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")
@@ -358,7 +358,7 @@ internal class AppPathsTest {
         assertTrue(AppPaths.CONFIG_APPLICATION.file.delete(), "config.json 删除失败.")
         assertFalse(initialFiles(), "方法试图在部分配置已初始化的情况下提醒用户编辑初始配置文件.")
 
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertTrue(path.file.exists(), "文件未初始化成功: ${path.path}")
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")
@@ -369,7 +369,7 @@ internal class AppPathsTest {
         assertTrue(AppPaths.CONFIG_BOT.file.delete(), "bot.json 删除失败.")
         assertFalse(initialFiles(), "方法试图在部分配置已初始化的情况下提醒用户编辑初始配置文件.")
 
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertTrue(path.file.exists(), "文件未初始化成功: ${path.path}")
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")
@@ -384,7 +384,7 @@ internal class AppPathsTest {
             "在主要配置文件(config.json 和 bot.json)不存在的情况下初始化文件后, 方法未能提醒用户编辑初始配置文件."
         )
 
-        for (path in AppPaths.values()) {
+        for (path in AppPaths.entries) {
             assertTrue(path.file.exists(), "文件未初始化成功: ${path.path}")
             if (path.file.isFile) {
                 assertNotEquals(0, path.file.length(), "文件未初始化成功(大小为 0): ${path.path}")

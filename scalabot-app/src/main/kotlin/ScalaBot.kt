@@ -6,43 +6,42 @@ import io.prometheus.client.Summary
 import mu.KotlinLogging
 import net.lamgc.scalabot.config.BotConfig
 import org.eclipse.aether.artifact.Artifact
-import org.telegram.abilitybots.api.bot.AbilityBot
-import org.telegram.abilitybots.api.db.DBContext
-import org.telegram.abilitybots.api.objects.Ability
-import org.telegram.abilitybots.api.toggle.BareboneToggle
-import org.telegram.abilitybots.api.toggle.DefaultToggle
-import org.telegram.telegrambots.bots.DefaultBotOptions
+import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot
+import org.telegram.telegrambots.abilitybots.api.db.DBContext
+import org.telegram.telegrambots.abilitybots.api.objects.Ability
+import org.telegram.telegrambots.abilitybots.api.toggle.BareboneToggle
+import org.telegram.telegrambots.abilitybots.api.toggle.DefaultToggle
 import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand
+import org.telegram.telegrambots.meta.generics.TelegramClient
 
 /**
  * 可扩展 Bot.
- * @property creatorId 机器人所有人的 Telegram 用户 Id. 可通过联系部分机器人来获取该信息.
+ * @property creatorId 机器人所有人的 Telegram 用户 ID. 可通过联系部分机器人来获取该信息.
  * (e.g. [@userinfobot](http://t.me/userinfobot))
  * @param db 机器人数据库对象. 用于状态机等用途.
- * @param options AbilityBot 设置对象.
  * @property extensions 扩展坐标集合.
  */
+@Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
 internal class ScalaBot(
     db: DBContext,
-    options: DefaultBotOptions,
+    client: TelegramClient,
     extensionFinders: Set<ExtensionPackageFinder>,
     val botConfig: BotConfig,
-    private val creatorId: Long = botConfig.account.creatorId,
     val accountId: Long = botConfig.account.id,
+    private val creatorId: Long = botConfig.account.creatorId,
     val extensions: Set<Artifact> = botConfig.extensions
 ) :
     AbilityBot(
-        botConfig.account.token,
+        client,
         botConfig.account.name,
         db,
         if (botConfig.disableBuiltInAbility)
             BareboneToggle()
         else
-            DefaultToggle(),
-        options
+            DefaultToggle()
     ) {
 
     private val extensionLoader = ExtensionLoader(
@@ -67,13 +66,13 @@ internal class ScalaBot(
 
     override fun creatorId(): Long = creatorId
 
-    override fun onUpdateReceived(update: Update?) {
+    override fun consume(update: Update?) {
         botUpdateCounter.labels(botUsername, accountIdString).inc()
         botUpdateGauge.labels(botUsername, accountIdString).inc()
 
         val timer = updateProcessTime.labels(botUsername, accountIdString).startTimer()
         try {
-            super.onUpdateReceived(update)
+            super.consume(update)
         } catch (e: Exception) {
             exceptionHandlingCounter.labels(botUsername, accountIdString).inc()
             throw e
@@ -92,11 +91,11 @@ internal class ScalaBot(
      * @return 更新成功返回 `true`.
      */
     fun updateCommandList(): Boolean {
-        if (abilities() == null) {
+        if (abilities == null) {
             throw IllegalStateException("Abilities has not been initialized.")
         }
 
-        val botCommands = abilities().values.map {
+        val botCommands = abilities.values.map {
             val abilityInfo = if (it.info() == null || it.info().trim().isEmpty()) {
                 log.warn { "[Bot $botUsername] Ability `${it.name()}` 没有说明信息." }
                 "(The command has no description)"
@@ -112,18 +111,15 @@ internal class ScalaBot(
             return true
         }
 
-        val setMyCommands = SetMyCommands()
-        setMyCommands.commands = botCommands
-        return execute(DeleteMyCommands()) && execute(setMyCommands)
+        val setMyCommands = SetMyCommands.builder()
+            .commands(botCommands)
+            .build()
+        return telegramClient.execute(DeleteMyCommands()) && telegramClient.execute(setMyCommands)
     }
 
     override fun onRegister() {
         super.onRegister()
         onlineBotGauge.inc()
-    }
-
-    override fun onClosing() {
-        onlineBotGauge.dec()
     }
 
     companion object {
