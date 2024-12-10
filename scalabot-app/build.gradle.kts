@@ -25,7 +25,7 @@ dependencies {
     implementation("org.codehaus.plexus:plexus-utils:3.5.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.23")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("org.jdom:jdom2:2.0.6.1")
