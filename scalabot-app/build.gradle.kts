@@ -39,7 +39,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_httpserver:0.16.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.1")
 }
 
