@@ -26,6 +26,7 @@ import org.jdom2.input.SAXBuilder
 import org.jdom2.xpath.XPathFactory
 import java.io.File
 import java.io.InputStream
+import java.net.URI
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.*
@@ -396,7 +397,6 @@ internal class MavenRepositoryExtensionFinder(
         /**
          * Maven 中央仓库 Url.
          */
-        @Suppress("MemberVisibilityCanBePrivate")
         const val MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2/"
 
         /**
@@ -466,17 +466,19 @@ internal class MavenRepositoryExtensionFinder(
                     throw IllegalArgumentException("Unsupported FoundExtensionPackage type: $foundExtensionPackage")
                 }
 
-                val urls = mutableSetOf<URL>()
+                val urls = mutableSetOf<URI>()
                 for (dependency in foundExtensionPackage.dependencies) {
                     val dependencyFile = dependency.file ?: continue
-                    urls.add(dependencyFile.toURI().toURL())
+                    urls.add(dependencyFile.toURI())
                 }
 
                 // 将依赖的 ClassLoader 与 ExtensionPackage 的 ClassLoader 分开
                 // 这么做可以防范依赖中隐藏的 SPI 注册, 避免安全隐患.
 
                 val dependenciesUrlArray = urls.toTypedArray()
-                val dependenciesClassLoader = URLClassLoader(dependenciesUrlArray)
+                val dependenciesClassLoader = URLClassLoader(
+                    dependenciesUrlArray.map { it.toURL() }.toTypedArray()
+                )
 
                 return ExtensionClassLoader(
                     arrayOf(foundExtensionPackage.getPackageFile().toURI().toURL()),
