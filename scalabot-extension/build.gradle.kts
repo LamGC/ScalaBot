@@ -10,7 +10,7 @@ dependencies {
     api("org.telegram:telegrambots-abilities:8.0.0")
     api(project(":scalabot-meta"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
     testImplementation("org.mockito:mockito-core:5.11.0")
     testImplementation("org.telegram:telegrambots-client:8.0.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
