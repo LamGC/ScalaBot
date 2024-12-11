@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation("commons-codec:commons-codec:1.16.1")
+    implementation("commons-codec:commons-codec:1.17.1")
     api("org.telegram:telegrambots-abilities:8.0.0")
     api(project(":scalabot-meta"))
 
