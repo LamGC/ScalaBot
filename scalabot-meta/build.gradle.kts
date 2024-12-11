@@ -60,17 +60,6 @@ publishing {
                 password = project.properties["repo.credentials.self-git.password"].toString()
             }
         }
-        val kukuRepoUrl = if (project.version.toString().endsWith("-SNAPSHOT", ignoreCase = true)) {
-            "https://nexus.kuku.me/repository/maven-snapshots/"
-        } else {
-            "https://nexus.kuku.me/repository/maven-releases/"
-        }
-        maven(kukuRepoUrl) {
-            credentials {
-                username = project.properties["repo.credentials.kuku-repo.username"].toString()
-                password = project.properties["repo.credentials.kuku-repo.password"].toString()
-            }
-        }
     }
 
     publications {
