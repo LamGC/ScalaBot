@@ -13,6 +13,12 @@ public class BotExtensionCreateOptions {
     private final long botAccountId;
     private final ProxyConfig proxy;
 
+    /**
+     * 构造新的 BotExtensionCreateOptions.
+     *
+     * @param botAccountId 创建扩展的 Bot 账户 Id.
+     * @param proxy        Bot 所使用的代理配置.
+     */
     public BotExtensionCreateOptions(long botAccountId, ProxyConfig proxy) {
         this.botAccountId = botAccountId;
         this.proxy = proxy;

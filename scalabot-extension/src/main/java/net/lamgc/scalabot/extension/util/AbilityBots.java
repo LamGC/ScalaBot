@@ -4,6 +4,9 @@ import org.telegram.telegrambots.abilitybots.api.bot.BaseAbilityBot;
 
 import java.util.Map;
 
+/**
+ * 一些开发扩展中可以用到的工具类.
+ */
 public final class AbilityBots {
 
     private AbilityBots() {
