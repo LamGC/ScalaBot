@@ -5,7 +5,7 @@ plugins {
 dependencies {
     compileOnly(project(":scalabot-extension"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
