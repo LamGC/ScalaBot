@@ -11,7 +11,7 @@ dependencies {
     api(project(":scalabot-meta"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.telegram:telegrambots-client:8.0.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
